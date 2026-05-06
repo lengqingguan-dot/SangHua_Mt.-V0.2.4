@@ -306,7 +306,7 @@ let westRoomSpan = document.getElementById('west-room');
 // }
 
 // function clearOutput() {
-//     outputDiv.innerHTML = '';
+//     UI.clearOutput();
 // }
 
 function print(msg) {
@@ -333,7 +333,7 @@ function updateMinimap() {
     const room = gameState.world[currentLoc];
     if (!room) return;
 
-    roomNameDisplay.textContent = room.name;
+    UI.elements.roomNameDisplay.textContent = room.name;
 
     const centerRoomNameSpan = document.getElementById('current-room-name-on-map');
     if (centerRoomNameSpan) {
@@ -351,10 +351,10 @@ function updateMinimap() {
     };
 
     const directions = [
-        { dir: 'north', cell: mapNorth, span: northRoomSpan },
-        { dir: 'south', cell: mapSouth, span: southRoomSpan },
-        { dir: 'east', cell: mapEast, span: eastRoomSpan },
-        { dir: 'west', cell: mapWest, span: westRoomSpan }
+        { dir: 'north', cell: UI.elements.mapNorth, span: UI.elements.northRoomSpan },
+        { dir: 'south', cell: UI.elements.mapSouth, span: UI.elements.southRoomSpan },
+        { dir: 'east', cell: UI.elements.mapEast, span: UI.elements.eastRoomSpan },
+        { dir: 'west', cell: UI.elements.mapWest, span: UI.elements.westRoomSpan }
     ];
 
     directions.forEach(({ dir, cell, span }) => {
@@ -471,24 +471,14 @@ let waitingForName = false;
 let _storyNextCallback = null; // 点击Next时执行的回调
 
 function showNextBtn(callback) {
-    _storyNextCallback = callback;
-    const btn = document.getElementById('story-next-btn');
-    if (btn) btn.style.display = 'inline-block';
+    UI.toggleNextBtn(true, callback);
 }
 
 function hideNextBtn() {
-    _storyNextCallback = null;
-    const btn = document.getElementById('story-next-btn');
-    if (btn) btn.style.display = 'none';
+    UI.toggleNextBtn(false);
 }
 
-function onStoryNextClick() {
-    if (typeof _storyNextCallback === 'function') {
-        const cb = _storyNextCallback;
-        _storyNextCallback = null; // 防止重复点击
-        cb();
-    }
-}
+function onStoryNextClick() {}
 
 // 根据文本字数计算剧情延时（毫秒）—— 已弃用，保留备用
 function storyDelay(text, rate) {
@@ -541,11 +531,11 @@ function playIntroAnimation() {
             
             // 设置等待名字输入状态
             waitingForName = true;
-            cmdInput.placeholder = "输入你的名字后回车...";
-            cmdInput.focus();
+            UI.elements.cmdInput.placeholder = "输入你的名字后回车...";
+            UI.elements.cmdInput.focus();
             
             // 隐藏遮罩，允许用户在指令栏输入
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
         }
     }
     
@@ -566,7 +556,7 @@ function processNameInput(name) {
     
     // 恢复正常指令模式
     waitingForName = false;
-    cmdInput.placeholder = "输入命令 (如 look, n, i)...";
+    UI.elements.cmdInput.placeholder = "输入命令 (如 look, n, i)...";
     
     // 正式进入游戏
     const room = gameState.world[gameState.player.location];
@@ -761,13 +751,13 @@ function closeCurrentPanel() {
     } else if (currentPanel === 'detail') {
         // 从详情页返回
         if (detailContent) {
-            outputDiv.innerHTML = detailContent;
+            UI.setOutputHtml(detailContent);
     
         }
     } else if (currentPanel === 'ground_item') {
         // 从地面物品详情页返回
         if (groundItemReturnTarget) {
-            outputDiv.innerHTML = groundItemReturnTarget;
+            UI.setOutputHtml(groundItemReturnTarget);
     
         }
     } else if (currentPanel === 'npc_detail') {
@@ -1061,7 +1051,7 @@ async function loadGame() {
         // 读取存档后不再显示开场动画
         gameState.firstTimeEntered = false;
         waitingForName = false;
-        cmdInput.placeholder = "输入命令 (如 look, n, i)...";
+        UI.elements.cmdInput.placeholder = "输入命令 (如 look, n, i)...";
         clearOutput();
         print("📀 记忆复苏，你回到了桑华山的矿道中……");
         look();
@@ -1123,7 +1113,7 @@ function resetGame() {
         };
         clearOutput();
         waitingForName = false;
-        cmdInput.placeholder = "输入命令 (如 look, n, i)...";
+        UI.elements.cmdInput.placeholder = "输入命令 (如 look, n, i)...";
         print("⚒️ 桑华山的阴冷再次包裹了你。你必须逃出去，然后复仇。");
         look();
         updateMinimap();
@@ -1132,8 +1122,8 @@ function resetGame() {
 
 // -------------------- 界面交互 --------------------
 function sendCommand() {
-    const input = cmdInput.value;
-    cmdInput.value = '';
+    const input = UI.elements.cmdInput.value;
+    UI.elements.cmdInput.value = '';
     
     // 如果正在等待名字输入
     if (waitingForName) {
@@ -1144,10 +1134,12 @@ function sendCommand() {
     processCommand(input);
 }
 
-cmdInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        sendCommand();
-    }
+window.addEventListener('DOMContentLoaded', () => {
+    UI.elements.cmdInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendCommand();
+        }
+    });
 });
 
 // ==================== 物品系统辅助函数 ====================
@@ -1437,7 +1429,7 @@ function useItemFromDetail(itemId) {
                 setTimeout(showNextRoadLine, roadStory[lineIndex - 1] === "" ? 500 : 1300);
             } else {
                 // 剧情结束，移除遮罩
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
                 
                 // 标记马路场景已进入
                 gameState.gameFlags.roadEntered = true;
@@ -1576,7 +1568,7 @@ function readItemFromDetail(itemId) {
                 print("<br>");
                 print(`<span style="color: #888;">────────────────</span>`);
                 print(`<span style="color: #aaa; cursor: pointer;" onclick="showInventoryPanel()">↩️ 返回物品栏</span>`);
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
             }
         }
         showNextLine();
@@ -1606,7 +1598,7 @@ function readItemFromDetail(itemId) {
                 print(`<span style="color: #ff4444;">═══════════════════════════</span>`);
                 print(`<span style="color: #888;">────────────────</span>`);
                 print(`<span style="color: #aaa; cursor: pointer;" onclick="showInventoryPanel()">↩️ 返回物品栏</span>`);
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
             }
         }
         showNextOrderLine();
@@ -2164,7 +2156,7 @@ function showStatusPanel() {
 
 // 清空输出区
 function clearOutputWindow() {
-    outputDiv.innerHTML = '';
+    UI.clearOutput();
     print("✨ 输出区已清空。");
     currentPanel = null;
 }
@@ -2277,16 +2269,15 @@ function updateSceneInfo() {
 // 向详情栏输出内容
 function printToDetail(content) {
     
-    if (detailPanel) {
+    if (UI.elements.detailPanel) {
         UI.printToDetail(content);
-        detailPanel.scrollTop = detailPanel.scrollHeight;
     }
 }
 
 // 清空详情栏
 function clearDetailPanel() {
     
-    if (detailPanel) {
+    if (UI.elements.detailPanel) {
         UI.clearDetail();
     }
 }
@@ -2392,7 +2383,7 @@ function showGroundItemInfo(itemId) {
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
         
-        if (detailPanel) {
+        if (UI.elements.detailPanel) {
             UI.setDetail(html);
         }
         currentPanel = 'ground_item';
@@ -2404,7 +2395,7 @@ function showGroundItemInfo(itemId) {
         
         currentDetailItem = itemId;
         
-        if (detailPanel) {
+        if (UI.elements.detailPanel) {
             UI.setDetail(html);
         }
         currentPanel = 'ground_item';
@@ -2417,7 +2408,7 @@ function showGroundItemInfo(itemId) {
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
         
-        if (detailPanel) {
+        if (UI.elements.detailPanel) {
             UI.setDetail(html);
         }
         currentPanel = 'ground_item';
@@ -2430,7 +2421,7 @@ function showGroundItemInfo(itemId) {
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
         
-        if (detailPanel) {
+        if (UI.elements.detailPanel) {
             UI.setDetail(html);
         }
         currentPanel = 'ground_item';
@@ -2443,7 +2434,7 @@ function showGroundItemInfo(itemId) {
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
         
-        if (detailPanel) {
+        if (UI.elements.detailPanel) {
             UI.setDetail(html);
         }
         currentPanel = 'ground_item';
@@ -2456,7 +2447,7 @@ function showGroundItemInfo(itemId) {
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
         
-        if (detailPanel) {
+        if (UI.elements.detailPanel) {
             UI.setDetail(html);
         }
         currentPanel = 'ground_item';
@@ -2469,7 +2460,7 @@ function showGroundItemInfo(itemId) {
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
         
-        if (detailPanel) {
+        if (UI.elements.detailPanel) {
             UI.setDetail(html);
         }
         currentPanel = 'ground_item';
@@ -2482,7 +2473,7 @@ function showGroundItemInfo(itemId) {
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
         
-        if (detailPanel) {
+        if (UI.elements.detailPanel) {
             UI.setDetail(html);
         }
         currentPanel = 'ground_item';
@@ -2495,7 +2486,7 @@ function showGroundItemInfo(itemId) {
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
         
-        if (detailPanel) {
+        if (UI.elements.detailPanel) {
             UI.setDetail(html);
         }
         currentPanel = 'ground_item';
@@ -2508,7 +2499,7 @@ function showGroundItemInfo(itemId) {
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
         
-        if (detailPanel) {
+        if (UI.elements.detailPanel) {
             UI.setDetail(html);
         }
         currentPanel = 'ground_item';
@@ -2521,7 +2512,7 @@ function showGroundItemInfo(itemId) {
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
         
-        if (detailPanel) {
+        if (UI.elements.detailPanel) {
             UI.setDetail(html);
         }
         currentPanel = 'ground_item';
@@ -2534,7 +2525,7 @@ function showGroundItemInfo(itemId) {
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
         
-        if (detailPanel) {
+        if (UI.elements.detailPanel) {
             UI.setDetail(html);
         }
         currentPanel = 'ground_item';
@@ -2591,7 +2582,7 @@ function showGroundItemInfo(itemId) {
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
         
-        if (detailPanel) {
+        if (UI.elements.detailPanel) {
             UI.setDetail(html);
         }
         currentPanel = 'ground_item';
@@ -2632,7 +2623,7 @@ function showGroundItemInfo(itemId) {
     
     // 更新详情栏
     
-    if (detailPanel) {
+    if (UI.elements.detailPanel) {
         UI.setDetail(html);
     }
     
@@ -2710,7 +2701,7 @@ function openIronLockWithKey(lockId) {
             print("");
             print(`<span style="color: #aaffaa;">铁锁被打开了！矿坑暴露在月光下...</span>`);
             
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
             updateSceneInfo();
         }
     }
@@ -2839,7 +2830,7 @@ function breakLock(lockId) {
                 print(`<span style="color: #aaffaa;">矿坑已经出现，你可以选择跳下...</span>`);
                 
                 // 关闭遮罩并更新场景
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
                 updateSceneInfo();
             }
         }
@@ -3142,7 +3133,7 @@ function triggerEnding() {
             print("");
             
             // 移除遮罩
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
             
             // 在结尾房间添加"卡伦镇"可交互物品
             const endingRoom = gameState.world["mountain_path_14"];
@@ -3607,7 +3598,7 @@ function useStove(stoveId) {
     
     // 更新详情栏
     
-    if (detailPanel) {
+    if (UI.elements.detailPanel) {
         UI.setDetail(html);
     }
     currentPanel = 'cooking_menu';
@@ -3741,7 +3732,7 @@ function useWorkbench(workbenchId) {
     html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="clearDetailPanel()">↩️ 返回</div>`;
     
     
-    if (detailPanel) {
+    if (UI.elements.detailPanel) {
         UI.setDetail(html);
     }
     currentPanel = 'workbench_menu';
@@ -3804,7 +3795,7 @@ function showWorkbenchCategory(category) {
     html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="useWorkbench('workbench')">↩️ 返回上一级</div>`;
     
     
-    if (detailPanel) {
+    if (UI.elements.detailPanel) {
         UI.setDetail(html);
     }
     currentPanel = 'workbench_category';
@@ -4010,7 +4001,7 @@ function showCustomCookingMode() {
     
     // 更新详情栏
     
-    if (detailPanel) {
+    if (UI.elements.detailPanel) {
         UI.setDetail(html);
     }
     currentPanel = 'custom_cooking';
@@ -4203,7 +4194,7 @@ function showCookingMenuByType(type) {
     
     // 更新详情栏
     
-    if (detailPanel) {
+    if (UI.elements.detailPanel) {
         UI.setDetail(html);
     }
     currentPanel = 'cooking_menu_detail';
@@ -4439,7 +4430,7 @@ function jumpIntoPit(pitId) {
         print(`<span style="color: #aaffaa;">你来到了四号矿道出口...</span>`);
         
         // 关闭遮罩并更新场景
-        if (overlay) overlay.classList.remove('active');
+        UI.setOverlay(false);
         look();
         updateMinimap();
         updateSceneInfo();
@@ -4495,7 +4486,7 @@ function useLadder(ladderId) {
                 print(`<span style="color: #aaffaa;">你来到了四号矿井口...</span>`);
                 
                 // 关闭遮罩并更新场景
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
                 look();
                 updateMinimap();
                 updateSceneInfo();
@@ -4529,7 +4520,7 @@ function useLadder(ladderId) {
                 print(`<span style="color: #aaffaa;">你来到了四号矿道出口...</span>`);
                 
                 // 关闭遮罩并更新场景
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
                 look();
                 updateMinimap();
                 updateSceneInfo();
@@ -4699,7 +4690,7 @@ function useRemovedLadderFromInventory() {
             print(`<span style="color: #aaffaa;">你来到了四号矿井口...</span>`);
             
             // 关闭遮罩并更新场景
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
             look();
             updateMinimap();
             updateSceneInfo();
@@ -4733,7 +4724,7 @@ function useRemovedLadderFromInventory() {
             print(`<span style="color: #aaffaa;">你来到了四号矿道出口...</span>`);
             
             // 关闭遮罩并更新场景
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
             look();
             updateMinimap();
             updateSceneInfo();
@@ -4773,7 +4764,7 @@ function useLimb(itemId) {
             } else {
                 hideNextBtn();
                 // 全部显示完毕后关闭遮罩
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
                 
                 // 处理使用后销毁并生成新物品
                 if (item.onUseDestroy) {
@@ -4882,7 +4873,7 @@ function useMilker(milkerId) {
     
     // 更新详情栏
     
-    if (detailPanel) {
+    if (UI.elements.detailPanel) {
         UI.setDetail(html);
     }
     currentPanel = 'milking_menu';
@@ -5041,7 +5032,7 @@ function useMilkerForSemen(milkerId) {
     
     // 更新详情栏
     
-    if (detailPanel) {
+    if (UI.elements.detailPanel) {
         UI.setDetail(html);
     }
     currentPanel = 'semening_menu';
@@ -5159,7 +5150,7 @@ function useCorpse(itemId) {
         } else {
             hideNextBtn();
             // 全部显示完毕后关闭遮罩
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
             print("");
             print(`<span style="color: #888;">互动结束...</span>`);
         }
@@ -5212,7 +5203,7 @@ function useCorpseOnGround(itemId) {
         } else {
             hideNextBtn();
             // 全部显示完毕后关闭遮罩
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
             print("");
             print(`<span style="color: #888;">互动结束...</span>`);
         }
@@ -5794,11 +5785,11 @@ function confirmDismember(corpseName, limbTemplates) {
             
             if (source === 'inventory') {
                 print(`<br><span style="color: #888;">肢解完成，选中的部位已放入行囊。</span>`);
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
                 showInventoryPanel();
             } else {
                 print(`<br><span style="color: #888;">肢解完成，选中的部位掉落在地上。</span>`);
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
                 updateSceneInfo();
             }
         }
@@ -5980,7 +5971,7 @@ function showNPCInfo(npcId) {
     
     // 更新详情栏
     
-    if (detailPanel) {
+    if (UI.elements.detailPanel) {
         UI.setDetail(html);
     }
     
@@ -6034,7 +6025,7 @@ function talkToNPCAction(npcId) {
         } else {
             hideNextBtn();
             // 对话结束，隐藏遮罩
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
         }
     }
     
@@ -6105,7 +6096,7 @@ function useSkill(skillId) {
     
     // 重新显示技能按钮，更新技力显示
     
-    if (detailPanel) {
+    if (UI.elements.detailPanel) {
         let skillsHtml = '<h3>技能</h3>';
         if (gameState.player.skills && gameState.player.skills.length > 0) {
             skillsHtml += '<div class="skill-buttons">';
@@ -6164,7 +6155,7 @@ function handleWestTunnelStory(roomId) {
                     index++;
                     setTimeout(showNextLine, 1300);
                 } else {
-                    if (overlay) overlay.classList.remove('active');
+                    UI.setOverlay(false);
                     print("");
                     print(`<span style="color: #ffaa66;">不安感笼罩着你，或许应该原路返回...</span>`);
                 }
@@ -6189,7 +6180,7 @@ function handleWestTunnelStory(roomId) {
                     index++;
                     setTimeout(showNextLine, 1300);
                 } else {
-                    if (overlay) overlay.classList.remove('active');
+                    UI.setOverlay(false);
                     print("");
                     print(`<span style="color: #ff6666;">恐惧如潮水般涌来：回去！回去！</span>`);
                 }
@@ -6216,7 +6207,7 @@ function handleWestTunnelStory(roomId) {
                     index++;
                     setTimeout(showNextLine, 1300);
                 } else {
-                    if (overlay) overlay.classList.remove('active');
+                    UI.setOverlay(false);
                     print("");
                     print(`<span style="color: #ff6666;">理智几近崩溃，你勉强保持着清醒...</span>`);
                     print(`<span style="color: #aaffaa;">地上有一颗散发着血色光芒的宝石...</span>`);
@@ -6313,7 +6304,7 @@ function startMultiBattle(npcIds) {
     
     // 显示技能按钮
     
-    if (detailPanel) {
+    if (UI.elements.detailPanel) {
         let skillsHtml = '<h3>技能</h3>';
         if (gameState.player.skills && gameState.player.skills.length > 0) {
             skillsHtml += '<div class="skill-buttons">';
@@ -6428,7 +6419,7 @@ function startNewRound() {
     
     // 显示技能按钮
     
-    if (detailPanel) {
+    if (UI.elements.detailPanel) {
         let skillsHtml = '<h3>技能</h3>';
         if (gameState.player.skills && gameState.player.skills.length > 0) {
             skillsHtml += '<div class="skill-buttons">';
@@ -6547,7 +6538,7 @@ function executePlayerTurn() {
     
     // 显示技能按钮
     
-    if (detailPanel) {
+    if (UI.elements.detailPanel) {
         let skillsHtml = '<h3>技能</h3>';
         if (gameState.player.skills && gameState.player.skills.length > 0) {
             skillsHtml += '<div class="skill-buttons">';
@@ -6740,7 +6731,7 @@ function battleEnd(playerWon) {
     
     // 清空技能面板
     
-    if (detailPanel) {
+    if (UI.elements.detailPanel) {
         UI.clearDetail();
     }
     currentPanel = null;
@@ -7045,7 +7036,7 @@ function assaultNPC(npcId) {
         const story = npc.assaultStory;
         if (!story || story.length === 0) {
             print(`<span style="color: #888;">侵犯结束，没有什么特别的事情发生。</span>`);
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
             return;
         }
         
@@ -7061,7 +7052,7 @@ function assaultNPC(npcId) {
             } else {
                 hideNextBtn();
                 // 全部显示完毕后关闭遮罩
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
                 print("");
                 print(`<span style="color: #ff66aa;">侵犯结束...</span>`);
                 
@@ -7158,7 +7149,7 @@ function initializeGame() {
     
     // 重新聚焦输入框
     if (typeof cmdInput !== 'undefined') {
-        cmdInput.focus();
+        UI.elements.cmdInput.focus();
     }
 }
 
@@ -7258,7 +7249,7 @@ function sweepLeafPile() {
         print(`<span style="color: #aaffaa;">落叶被扫开了，露出一个隐蔽的地道入口！</span>`);
         print(`<span style="color: #aaffaa;">═══════════════════════════</span>`);
         
-        if (overlay) overlay.classList.remove('active');
+        UI.setOverlay(false);
         updateSceneInfo();
         updateMinimap();
     }, 1500);
@@ -7293,7 +7284,7 @@ function enterTunnel() {
         print("");
         print(`<span style="color: #aaffaa;">你来到了一间隐蔽的地下室...</span>`);
         
-        if (overlay) overlay.classList.remove('active');
+        UI.setOverlay(false);
         look();
         updateMinimap();
         updateSceneInfo();
@@ -7372,7 +7363,7 @@ function useTeleportCircle(itemId) {
         html += centerLine();
         html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="clearDetailPanel()">↩️ 返回</div>`;
         
-        if (detailPanel) {
+        if (UI.elements.detailPanel) {
             UI.setDetail(html);
         }
         currentPanel = 'teleport_menu';
@@ -7387,7 +7378,7 @@ function useTeleportCircle(itemId) {
         html += centerLine();
         html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="clearDetailPanel()">↩️ 返回</div>`;
         
-        if (detailPanel) {
+        if (UI.elements.detailPanel) {
             UI.setDetail(html);
         }
         currentPanel = 'teleport_menu';
@@ -7415,7 +7406,7 @@ function teleportToMod(modRoomId) {
         print(`<span style="color: #aaffaa;">你来到了mod世界！</span>`);
         print(`<span style="color: #6688ff;">═══════════════════════════</span>`);
         
-        if (overlay) overlay.classList.remove('active');
+        UI.setOverlay(false);
         look();
         updateMinimap();
         updateSceneInfo();
@@ -7447,7 +7438,7 @@ function teleportToBasement() {
         print(`<span style="color: #aaffaa;">你回到了地下室！</span>`);
         print(`<span style="color: #6688ff;">═══════════════════════════</span>`);
         
-        if (overlay) overlay.classList.remove('active');
+        UI.setOverlay(false);
         look();
         updateMinimap();
         updateSceneInfo();
@@ -7465,6 +7456,6 @@ window.onload = () => {
         // 如果没有主菜单，则正常启动游戏
         look();
         updateMinimap();
-        cmdInput.focus();
+        UI.elements.cmdInput.focus();
     }
 };
