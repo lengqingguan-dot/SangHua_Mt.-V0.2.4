@@ -739,7 +739,7 @@ function moveByButton(direction) {
 
 // 关闭当前面板，回到主界面
 function closeCurrentPanel() {
-    const detailPanel = document.getElementById('detail-panel');
+    
     
     if (currentPanel === 'inventory') {
         if (mainContent) {
@@ -758,7 +758,7 @@ function closeCurrentPanel() {
         }
     } else if (currentPanel === 'quests') {
         // 恢复详情栏默认内容
-        detailPanel.innerHTML = '<span style="color: #888;">点击物品或NPC查看详情...</span>';
+        UI.clearDetail();
     } else if (currentPanel === 'detail') {
         // 从详情页返回
         if (detailContent) {
@@ -791,7 +791,7 @@ function showStatus() {
 
 // -------------------- 显示任务面板 --------------------
 function showQuestsPanel() {
-    const detailPanel = document.getElementById('detail-panel');
+    
     let questsHtml = '';
     
     questsHtml += makeTitle('任务日志') + '<br>';
@@ -835,7 +835,7 @@ function showQuestsPanel() {
     }
     
     // 显示任务内容到详情栏
-    detailPanel.innerHTML = questsHtml;
+    UI.setDetail(questHtml);
     
     // 设置当前面板状态
     currentPanel = 'quests';
@@ -1178,7 +1178,7 @@ function examineItemFromPanel(itemId) {
         return;
     }
     
-    const detailPanel = document.getElementById('detail-panel');
+    
     let html = makeTitle('物品详情');
     html += `名称：${item.name}\n`;
     html += `类型：${getItemTypeName(item.type)}\n`;
@@ -1251,7 +1251,7 @@ function examineItemFromPanel(itemId) {
     const returnAction = previousPanelType === 'equipment' ? 'showEquipmentPanel()' : 'showInventoryPanel()';
     html += `<div><span style="color: #aaa; cursor: pointer;" onclick="${returnAction}">↩️ 返回</span></div>`;
     
-    detailPanel.innerHTML = html;
+    UI.setDetail(html);
     currentPanel = 'item_detail';
 }
 
@@ -1263,7 +1263,7 @@ function examineEquippedItem(slotKey) {
         return;
     }
     
-    const detailPanel = document.getElementById('detail-panel');
+    
     let html = makeTitle('装备详情');
     html += `名称：${item.name}\n`;
     html += `类型：${getItemTypeName(item.type)}\n`;
@@ -1286,7 +1286,7 @@ function examineEquippedItem(slotKey) {
     html += `<div><span style="color: #ffaa66; text-decoration: underline; cursor: pointer;" onclick="unequipItemFromDetail('${slotKey}')">⬇️ 卸下</span></div>`;
     html += `<div><span style="color: #aaa; cursor: pointer;" onclick="showEquipmentPanel()">↩️ 返回</span></div>`;
     
-    detailPanel.innerHTML = html;
+    UI.setDetail(html);
     currentPanel = 'equipped_detail';
 }
 
@@ -1824,7 +1824,7 @@ function showInventoryPanel() {
         currentPanel = null;
     } else {
         // 打开物品栏
-        const detailPanel = document.getElementById('detail-panel');
+        
         let html = makeTitle('行囊物品');
         
         // 添加分类菜单（居中）
@@ -1866,7 +1866,7 @@ function showInventoryPanel() {
         html += centerLine();
         html += `<div style="text-align: center;"><span style="color: #aaa; cursor: pointer;" onclick="showInventoryPanel()">↩️ 关闭</span></div>`;
         
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
         currentPanel = 'inventory';
     }
 }
@@ -1885,7 +1885,7 @@ function generateInventoryCategoryMenu() {
 
 // 显示物品分类
 function showInventoryCategory(category) {
-    const detailPanel = document.getElementById('detail-panel');
+    
     const categoryName = category === 'consumable' ? '消耗品' : category === 'important' ? '重要道具' : category === 'limb' ? '肢体' : '杂物';
     let html = makeTitle(`行囊物品 - ${categoryName}`);
     
@@ -1946,14 +1946,14 @@ function showInventoryCategory(category) {
     html += centerLine();
     html += `<div style="text-align: center;"><span style="color: #aaa; cursor: pointer;" onclick="showInventoryPanel()">↩️ 返回物品栏</span></div>`;
     
-    detailPanel.innerHTML = html;
+    UI.setDetail(html);
     currentPanel = 'inventory';
 }
 
 // 显示全部物品
 function showInventoryAll() {
     // 直接显示全部物品，不关闭当前面板
-    const detailPanel = document.getElementById('detail-panel');
+    
     let html = makeTitle('行囊物品');
     
     // 添加分类菜单（居中）
@@ -1996,7 +1996,7 @@ function showInventoryAll() {
     html += centerLine();
     html += `<div style="text-align: center;"><span style="color: #aaa; cursor: pointer;" onclick="showInventoryPanel()">↩️ 关闭</span></div>`;
     
-    detailPanel.innerHTML = html;
+    UI.setDetail(html);
     currentPanel = 'inventory';
 }
 
@@ -2008,7 +2008,7 @@ function showEquipmentPanel() {
         currentPanel = null;
     } else {
         // 打开装备栏
-        const detailPanel = document.getElementById('detail-panel');
+        
         let html = makeTitle('当前装备');
         
         const slots = [
@@ -2049,7 +2049,7 @@ function showEquipmentPanel() {
         html += centerLine();
         html += `<div style="text-align: center;"><span style="color: #aaa; cursor: pointer;" onclick="showEquipmentPanel()">↩️ 关闭</span></div>`;
         
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
         currentPanel = 'equipment';
     }
 }
@@ -2062,7 +2062,7 @@ function showSkillsPanel() {
         currentPanel = null;
     } else {
         // 打开技能栏
-        const detailPanel = document.getElementById('detail-panel');
+        
         let html = makeTitle('技能总览');
         
         const playerSkills = gameState.player.skills || [];
@@ -2079,7 +2079,7 @@ function showSkillsPanel() {
         html += centerLine();
         html += `<div style="text-align: center;"><span style="color: #aaa; cursor: pointer;" onclick="showSkillsPanel()">↩️ 关闭</span></div>`;
         
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
         currentPanel = 'skills';
     }
 }
@@ -2092,7 +2092,7 @@ function showSkillDetail(skillId) {
         return;
     }
     
-    const detailPanel = document.getElementById('detail-panel');
+    
     let html = makeTitle('技能详情');
     html += `名称：${skill.name}\n`;
     html += `消耗：${skill.cost} SP\n`;
@@ -2100,7 +2100,7 @@ function showSkillDetail(skillId) {
     html += centerLine();
     html += `<div style="text-align: center;"><span style="color: #aaffaa; text-decoration: underline; cursor: pointer;" onclick="showSkillsPanel()">↩️ 返回技能栏</span></div>`;
     
-    detailPanel.innerHTML = html;
+    UI.setDetail(html);
     currentPanel = 'skill_detail';
 }
 
@@ -2112,7 +2112,7 @@ function showStatusPanel() {
         currentPanel = null;
     } else {
         // 打开状态栏
-        const detailPanel = document.getElementById('detail-panel');
+        
         const p = gameState.player;
         
         // 计算总属性（使用统一函数）
@@ -2161,7 +2161,7 @@ function showStatusPanel() {
         html += centerLine();
         html += `<div style="text-align: center;"><span style="color: #aaa; cursor: pointer;" onclick="showStatusPanel()">↩️ 关闭</span></div>`;
         
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
         currentPanel = 'status';
     }
 }
@@ -2280,18 +2280,18 @@ function updateSceneInfo() {
 
 // 向详情栏输出内容
 function printToDetail(content) {
-    const detailPanel = document.getElementById('detail-panel');
+    
     if (detailPanel) {
-        detailPanel.innerHTML += content;
+        UI.printToDetail(content);
         detailPanel.scrollTop = detailPanel.scrollHeight;
     }
 }
 
 // 清空详情栏
 function clearDetailPanel() {
-    const detailPanel = document.getElementById('detail-panel');
+    
     if (detailPanel) {
-        detailPanel.innerHTML = '<span style="color: #888;">点击物品或NPC查看详情...</span>';
+        UI.clearDetail();
     }
 }
 
@@ -2395,9 +2395,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
+        
         if (detailPanel) {
-            detailPanel.innerHTML = html;
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return; // 炉灶不需要继续下面的通用处理
@@ -2407,9 +2407,9 @@ function showGroundItemInfo(itemId) {
         html += `<div><span style="color: #aaa; cursor: pointer;" onclick="clearDetailPanel()">↩️ 返回</span></div>`;
         
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
+        
         if (detailPanel) {
-            detailPanel.innerHTML = html;
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return; // 工作台不需要继续下面的通用处理
@@ -2420,9 +2420,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
+        
         if (detailPanel) {
-            detailPanel.innerHTML = html;
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return; // 榨奶器不需要继续下面的通用处理
@@ -2433,9 +2433,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
+        
         if (detailPanel) {
-            detailPanel.innerHTML = html;
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return; // 雷管不需要继续下面的通用处理
@@ -2446,9 +2446,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
+        
         if (detailPanel) {
-            detailPanel.innerHTML = html;
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return; // 侧门不需要继续下面的通用处理
@@ -2459,9 +2459,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
+        
         if (detailPanel) {
-            detailPanel.innerHTML = html;
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return; // 雕像不需要继续下面的通用处理
@@ -2472,9 +2472,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
+        
         if (detailPanel) {
-            detailPanel.innerHTML = html;
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return; // 伯爵宅邸大门不需要继续下面的通用处理
@@ -2485,9 +2485,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
+        
         if (detailPanel) {
-            detailPanel.innerHTML = html;
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return;
@@ -2498,9 +2498,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
+        
         if (detailPanel) {
-            detailPanel.innerHTML = html;
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return;
@@ -2511,9 +2511,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
+        
         if (detailPanel) {
-            detailPanel.innerHTML = html;
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return;
@@ -2524,9 +2524,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
+        
         if (detailPanel) {
-            detailPanel.innerHTML = html;
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return;
@@ -2537,9 +2537,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
+        
         if (detailPanel) {
-            detailPanel.innerHTML = html;
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return;
@@ -2594,9 +2594,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
+        
         if (detailPanel) {
-            detailPanel.innerHTML = html;
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return; // 炉灶不需要继续下面的通用处理
@@ -2635,9 +2635,9 @@ function showGroundItemInfo(itemId) {
     currentDetailItem = itemId;
     
     // 更新详情栏
-    const detailPanel = document.getElementById('detail-panel');
+    
     if (detailPanel) {
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
     }
     
     currentPanel = 'ground_item';
@@ -3613,9 +3613,9 @@ function useStove(stoveId) {
     window.cookingIngredients = ingredientsByType;
     
     // 更新详情栏
-    const detailPanel = document.getElementById('detail-panel');
+    
     if (detailPanel) {
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
     }
     currentPanel = 'cooking_menu';
 }
@@ -3747,9 +3747,9 @@ function useWorkbench(workbenchId) {
     html += centerLine();
     html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="clearDetailPanel()">↩️ 返回</div>`;
     
-    const detailPanel = document.getElementById('detail-panel');
+    
     if (detailPanel) {
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
     }
     currentPanel = 'workbench_menu';
 }
@@ -3810,9 +3810,9 @@ function showWorkbenchCategory(category) {
     html += `<div style="border-top: 1px solid #444; margin: 10px 0;"></div>`;
     html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="useWorkbench('workbench')">↩️ 返回上一级</div>`;
     
-    const detailPanel = document.getElementById('detail-panel');
+    
     if (detailPanel) {
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
     }
     currentPanel = 'workbench_category';
 }
@@ -4016,9 +4016,9 @@ function showCustomCookingMode() {
     html += `</div>`;
     
     // 更新详情栏
-    const detailPanel = document.getElementById('detail-panel');
+    
     if (detailPanel) {
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
     }
     currentPanel = 'custom_cooking';
 }
@@ -4209,9 +4209,9 @@ function showCookingMenuByType(type) {
     html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="useStove('stove')">↩️ 返回上一级</div>`;
     
     // 更新详情栏
-    const detailPanel = document.getElementById('detail-panel');
+    
     if (detailPanel) {
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
     }
     currentPanel = 'cooking_menu_detail';
 }
@@ -4892,9 +4892,9 @@ function useMilker(milkerId) {
     html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="clearDetailPanel()">↩️ 返回</div>`;
     
     // 更新详情栏
-    const detailPanel = document.getElementById('detail-panel');
+    
     if (detailPanel) {
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
     }
     currentPanel = 'milking_menu';
 }
@@ -5051,9 +5051,9 @@ function useMilkerForSemen(milkerId) {
     html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="clearDetailPanel()">↩️ 返回</div>`;
     
     // 更新详情栏
-    const detailPanel = document.getElementById('detail-panel');
+    
     if (detailPanel) {
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
     }
     currentPanel = 'semening_menu';
 }
@@ -5588,7 +5588,7 @@ function dismemberCorpseFromInventory(corpseId) {
 // 显示肢解选择界面
 function showDismemberPanel(corpseName, limbTemplates, corpseObj = null, source = 'inventory') {
     console.log('showDismemberPanel called', corpseName, corpseObj, source);
-    const detailPanel = document.getElementById('detail-panel');
+    
     let html = '';
     const dismemberedLimbs = corpseObj && corpseObj.dismemberedLimbs ? corpseObj.dismemberedLimbs : [];
     
@@ -5637,7 +5637,7 @@ function showDismemberPanel(corpseName, limbTemplates, corpseObj = null, source 
     html += `<span id="confirm-dismember-btn" style="color: #ff6b6b; cursor: pointer; font-weight: bold;">🔪 确认肢解</span>`;
     html += `</div>`;
     
-    detailPanel.innerHTML = html;
+    UI.setDetail(html);
     
     // 添加点击事件监听器
     document.getElementById('confirm-dismember-btn').addEventListener('click', function() {
@@ -5993,9 +5993,9 @@ function showNPCInfo(npcId) {
     currentDetailNPC = npcId;
     
     // 更新详情栏
-    const detailPanel = document.getElementById('detail-panel');
+    
     if (detailPanel) {
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
     }
     
     currentPanel = 'npc_detail';
@@ -6119,7 +6119,7 @@ function useSkill(skillId) {
     skill.effect();
     
     // 重新显示技能按钮，更新技力显示
-    const detailPanel = document.getElementById('detail-panel');
+    
     if (detailPanel) {
         let skillsHtml = '<h3>技能</h3>';
         if (gameState.player.skills && gameState.player.skills.length > 0) {
@@ -6143,7 +6143,7 @@ function useSkill(skillId) {
         } else {
             skillsHtml += '<p>暂无技能</p>';
         }
-        detailPanel.innerHTML = skillsHtml;
+        UI.setDetail(skillsHtml);
     }
     
     // 显示当前玩家状态
@@ -6329,7 +6329,7 @@ function startMultiBattle(npcIds) {
     print("────────────────────────────────");
     
     // 显示技能按钮
-    const detailPanel = document.getElementById('detail-panel');
+    
     if (detailPanel) {
         let skillsHtml = '<h3>技能</h3>';
         if (gameState.player.skills && gameState.player.skills.length > 0) {
@@ -6350,7 +6350,7 @@ function startMultiBattle(npcIds) {
         } else {
             skillsHtml += '<p>暂无技能</p>';
         }
-        detailPanel.innerHTML = skillsHtml;
+        UI.setDetail(skillsHtml);
     }
     
     // 初始化战斗状态
@@ -6444,7 +6444,7 @@ function startNewRound() {
     print("");
     
     // 显示技能按钮
-    const detailPanel = document.getElementById('detail-panel');
+    
     if (detailPanel) {
         let skillsHtml = '<h3>技能</h3>';
         if (gameState.player.skills && gameState.player.skills.length > 0) {
@@ -6468,7 +6468,7 @@ function startNewRound() {
         } else {
             skillsHtml += '<p>暂无技能</p>';
         }
-        detailPanel.innerHTML = skillsHtml;
+        UI.setDetail(skillsHtml);
     }
     
     // 开始执行行动
@@ -6563,7 +6563,7 @@ function executePlayerTurn() {
     print("");
     
     // 显示技能按钮
-    const detailPanel = document.getElementById('detail-panel');
+    
     if (detailPanel) {
         let skillsHtml = '<h3>技能</h3>';
         if (gameState.player.skills && gameState.player.skills.length > 0) {
@@ -6587,7 +6587,7 @@ function executePlayerTurn() {
         } else {
             skillsHtml += '<p>暂无技能</p>';
         }
-        detailPanel.innerHTML = skillsHtml;
+        UI.setDetail(skillsHtml);
     }
     
     // 执行下一个行动
@@ -6757,9 +6757,9 @@ function battleEnd(playerWon) {
     if (overlay) overlay.classList.remove('active');
     
     // 清空技能面板
-    const detailPanel = document.getElementById('detail-panel');
+    
     if (detailPanel) {
-        detailPanel.innerHTML = '<span style="color: #888;">点击物品或NPC查看详情...</span>';
+        UI.clearDetail();
     }
     currentPanel = null;
 }
@@ -7353,7 +7353,7 @@ function useTeleportCircle(itemId) {
         print(`<span style="color: #6688ff;">传送阵感应到了以下维度的连接：</span>`);
         print("");
         
-        const detailPanel = document.getElementById('detail-panel');
+        
         let html = '';
         html += makeTitle('🌀 传送阵');
         html += `<div style="color: #6688ff; margin-bottom: 10px;">传送阵的符文闪烁着光芒，连接着以下mod世界：</div>`;
@@ -7394,12 +7394,12 @@ function useTeleportCircle(itemId) {
         html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="clearDetailPanel()">↩️ 返回</div>`;
         
         if (detailPanel) {
-            detailPanel.innerHTML = html;
+            UI.setDetail(html);
         }
         currentPanel = 'teleport_menu';
     } else if (isModWorld) {
         // mod世界传送阵 - 返回地下室
-        const detailPanel = document.getElementById('detail-panel');
+        
         let html = '';
         html += makeTitle('🌀 传送阵');
         html += `<div style="color: #6688ff; margin-bottom: 10px;">传送阵的符文闪烁着光芒，似乎可以将你传送回地下室...</div>`;
@@ -7409,7 +7409,7 @@ function useTeleportCircle(itemId) {
         html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="clearDetailPanel()">↩️ 返回</div>`;
         
         if (detailPanel) {
-            detailPanel.innerHTML = html;
+            UI.setDetail(html);
         }
         currentPanel = 'teleport_menu';
     }
