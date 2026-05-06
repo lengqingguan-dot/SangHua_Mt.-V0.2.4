@@ -514,8 +514,7 @@ function playIntroAnimation() {
     ];
     
     // 显示遮罩，封锁所有交互
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     clearOutput();
     let lineIndex = 0;
@@ -691,8 +690,8 @@ function move(direction) {
         
         if (hostileNPCs.length > 0) {
             // 立即显示遮罩，锁死所有按钮防止玩家逃跑
-            const overlay = document.getElementById('block-overlay');
-            if (overlay) overlay.classList.add('active');
+            
+            UI.setOverlay(true);
             
             setTimeout(() => {
                 print("");
@@ -1386,8 +1385,7 @@ function useItemFromDetail(itemId) {
         print("");
         
         // 显示遮罩，封锁所有交互
-        const overlay = document.getElementById('block-overlay');
-        if (overlay) overlay.classList.add('active');
+        UI.setOverlay(true);
         
         // 传送到马路房间
         gameState.player.location = 'road';
@@ -1565,8 +1563,7 @@ function readItemFromDetail(itemId) {
         print("<br>");
         
         // 显示遮罩，封锁所有交互
-        const overlay = document.getElementById('block-overlay');
-        if (overlay) overlay.classList.add('active');
+        UI.setOverlay(true);
         
         let lineIndex = 0;
         function showNextLine() {
@@ -1592,8 +1589,7 @@ function readItemFromDetail(itemId) {
         print("<br>");
         
         // 显示遮罩，封锁所有交互
-        const overlay = document.getElementById('block-overlay');
-        if (overlay) overlay.classList.add('active');
+        UI.setOverlay(true);
         
         let lineIndex = 0;
         function showNextOrderLine() {
@@ -2670,8 +2666,7 @@ function openIronLockWithKey(lockId) {
     print("");
     
     // 显示遮罩
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     const storyLines = [
         "钥匙在锁孔中转动，发出清脆的咔嗒声。",
@@ -2794,8 +2789,7 @@ function breakLock(lockId) {
         print("");
         
         // 显示遮罩，延时剧情
-        const overlay = document.getElementById('block-overlay');
-        if (overlay) overlay.classList.add('active');
+        UI.setOverlay(true);
         
         // 替换铁锁为破开的铁锁
         const lockIndex = room.items.indexOf(lockId);
@@ -3089,8 +3083,7 @@ function triggerEnding() {
     print("");
     
     // 显示遮罩，封锁所有交互
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     // 结局剧情内容
     const endingStory = [
@@ -4412,8 +4405,7 @@ function jumpIntoPit(pitId) {
     print("");
     
     // 显示遮罩，封锁交互
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     setTimeout(() => {
         print(`<span class="story-text">身体在黑暗中急速下坠...</span>`);
@@ -4476,8 +4468,7 @@ function useLadder(ladderId) {
         }
         
         // 显示遮罩
-        const overlay = document.getElementById('block-overlay');
-        if (overlay) overlay.classList.add('active');
+        UI.setOverlay(true);
         
         // 从地下到地面
         if (currentLoc === 'tunnel_exit_4') {
@@ -4678,8 +4669,7 @@ function useRemovedLadderFromInventory() {
     }
     
     // 显示遮罩
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     // 从地下到地面
     if (currentLoc === 'tunnel_exit_4') {
@@ -4770,8 +4760,7 @@ function useLimb(itemId) {
     // 如果有剧情内容，延时逐行亮黄色输出
     if (item.story && item.story.length > 0) {
         // 显示遮罩，封锁所有交互
-        const overlay = document.getElementById('block-overlay');
-        if (overlay) overlay.classList.add('active');
+        UI.setOverlay(true);
         
         let lineIndex = 0;
         function showNextLine() {
@@ -5156,8 +5145,7 @@ function useCorpse(itemId) {
     }
     
     // 显示遮罩，封锁所有交互
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     // 逐行输出尸体剧情（点击Next驱动）
     let lineIndex = 0;
@@ -5210,8 +5198,7 @@ function useCorpseOnGround(itemId) {
     }
     
     // 显示遮罩，封锁所有交互
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     // 逐行输出尸体剧情（点击Next驱动）
     let lineIndex = 0;
@@ -5707,8 +5694,7 @@ function confirmDismember(corpseName, limbTemplates) {
     print("");
     
     // 显示遮罩，封锁所有交互
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     let limbIndex = 0;
     
@@ -6014,8 +6000,7 @@ function talkToNPCAction(npcId) {
     currentPanel = null;
     
     // 显示遮罩，封锁所有交互
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     // 判断是否是第一次对话
     const isFirstTime = !gameState.talkedNPCs[npcId];
@@ -6157,11 +6142,10 @@ function useSkill(skillId) {
 function handleWestTunnelStory(roomId) {
     // 西侧矿道剧情房间列表 - 进入时立即锁死所有按键，防止玩家冲太快
     const storyRooms = ['tunnel_4_west_4', 'tunnel_4_west_5', 'tunnel_4_west_6', 'tunnel_4_west_7'];
-    const overlay = document.getElementById('block-overlay');
     
     if (storyRooms.includes(roomId)) {
-        // 立即显示遮罩，锁死所有按键
-        if (overlay) overlay.classList.add('active');
+        // 立即显示遮罩，锁死所有按键（改用 UI 对象封装的方法）
+        UI.setOverlay(true);
     }
     
     // 西侧矿道4 - 剧情模式，提示玩家返回
@@ -6284,8 +6268,7 @@ function startMultiBattle(npcIds) {
     if (!npcIds || npcIds.length === 0) return;
     
     // 显示遮罩
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     // 先显示主界面内容
     if (mainContent) {
@@ -6753,8 +6736,7 @@ function battleEnd(playerWon) {
     }
     
     // 隐藏遮罩
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.remove('active');
+    UI.setOverlay(false);
     
     // 清空技能面板
     
@@ -7057,8 +7039,7 @@ function assaultNPC(npcId) {
         print("");
         
         // 显示遮罩，封锁所有交互
-        const overlay = document.getElementById('block-overlay');
-        if (overlay) overlay.classList.add('active');
+        UI.setOverlay(true);
         
         // 获取NPC的侵犯剧情（数据源：character.js 中的 assaultStory 字段）
         const story = npc.assaultStory;
@@ -7251,8 +7232,7 @@ function sweepLeafPile() {
     print("");
     
     // 显示遮罩
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     print(`<span style="color: #aaffaa;">═══════════════════════════</span>`);
     print(`<span style="color: #aaffaa;">你弯下腰，用力将厚厚的落叶堆推向两旁...</span>`);
@@ -7300,8 +7280,7 @@ function enterTunnel() {
     print("");
     
     // 显示遮罩
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     print(`<span style="color: #aaffaa;">═══════════════════════════</span>`);
     print(`<span style="color: #aaffaa;">你小心翼翼地钻进了地道...</span>`);
@@ -7422,8 +7401,7 @@ function teleportToMod(modRoomId) {
     print("");
     
     // 显示遮罩
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     print(`<span style="color: #6688ff;">═══════════════════════════</span>`);
     print(`<span style="color: #6688ff;">你踏入传送阵，符文爆发出耀眼的蓝色光芒...</span>`);
@@ -7451,8 +7429,7 @@ function teleportToBasement() {
     print("");
     
     // 显示遮罩
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     print(`<span style="color: #6688ff;">═══════════════════════════</span>`);
     print(`<span style="color: #6688ff;">你踏入传送阵，符文爆发出耀眼的蓝色光芒...</span>`);
