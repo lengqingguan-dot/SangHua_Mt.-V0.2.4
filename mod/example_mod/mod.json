@@ -1,0 +1,13 @@
+{
+    "id": "example_mod",
+    "name": "示例模组 - 桑华山村庄",
+    "version": "1.0.0",
+    "author": "模组作者",
+    "description": "在矿场附近添加了一个小村庄，包含杂货铺、古井和几个NPC村民。",
+    "enabled": true,
+    "files": [
+        "mod_world.js",
+        "mod_characters.js",
+        "mod_items.js"
+    ]
+}

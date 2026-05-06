@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>夜出桑华山 · 矿场逃亡</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            background: #0b0e14;
+            color: #c3d1e6;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        h1, h2 {
+            color: #e6d5a8;
+            text-shadow: 2px 2px 0 #1a1f2a;
+            margin-top: 0;
+        }
+        /* 主菜单样式 */
+        #main-menu {
+            position: relative;
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(rgba(11, 14, 20, 0.85), rgba(11, 14, 20, 0.95)), 
+                        url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4PSIwIiB5PSIwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSgzMCkiPjxsaW5lIHgxPSIwIiB5PSIwIiB4Mj0iNDAiIHkyPSI0MCIgc3Ryb2tlPSIjMjMyYTMxIiBzdHJva2Utd2lkdGg9IjAuNSIvPjxwYXRoIGQ9Ik0wIDBoNDB2NDBoLTQweiIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuKSIvPjwvc3ZnPg==');
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(106, 122, 138, 0.15);
+            margin: 40px auto;
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+        }
+        #main-menu::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(230, 213, 168, 0.1) 0%, transparent 70%);
+            border-radius: 12px;
+            pointer-events: none;
+        }
+        #main-menu h1 {
+            font-size: 3.5rem;
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 20px rgba(230, 213, 168, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.8);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        @keyframes titleGlow {
+            0% { text-shadow: 0 0 10px rgba(230, 213, 168, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.8); }
+            100% { text-shadow: 0 0 20px rgba(230, 213, 168, 0.8), 2px 2px 4px rgba(0, 0, 0, 0.8); }
+        }
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        .menu-buttons button {
+            background: linear-gradient(145deg, #1e2a3a, #16202d);
+            color: #e6d5a8;
+            border: 2px solid #6a7a8a;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        .menu-buttons button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(230, 213, 168, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .menu-buttons button:hover {
+            background: linear-gradient(145deg, #2e3e52, #1e2a3a);
+            border-color: #aabac8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(106, 122, 138, 0.3);
+        }
+        .menu-buttons button:hover::before {
+            left: 100%;
+        }
+        .menu-buttons button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(106, 122, 138, 0.2);
+        }
+        
+        /* 技能按钮样式 */
+        .skill-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .skill-button {
+            background: linear-gradient(145deg, #1e2a3a, #16202d);
+            color: #e6d5a8;
+            border: 1px solid #6a7a8a;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+        .skill-button:hover {
+            background: linear-gradient(145deg, #28384a, #1e2a3a);
+            border-color: #e6d5a8;
+        }
+        .skill-button:disabled {
+            background: #16202d;
+            color: #6a7a8a;
+            border-color: #334155;
+            cursor: not-allowed;
+        }
+        .skill-name {
+            display: inline;
+            font-weight: bold;
+        }
+        .skill-cost {
+            display: inline;
+            font-size: 0.75rem;
+            color: #ff6666;
+            margin-left: 8px;
+        }
+        .skill-desc {
+            display: none;
+        }
+        
+        /* 游戏容器样式 */
+        .game-container {
+            display: flex;
+            gap: 15px;
+            align-items: stretch;
+        }
+
+        .left-panel {
+            flex: 1;
+            min-width: 210px;
+            background: #0f141c;
+            border: 1px solid #3e4d5e;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .center-panel {
+            flex: 4;
+            min-width: 520px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;  /* 内容顶部对齐 */
+            height: 700px;                 /* 固定总高度，两个面板共享 */
+        }
+
+        /* 详情栏样式 */
+        #detail-panel {
+            background: #0a1018;
+            border: 1px solid #3e5568;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            min-height: 180px;
+            max-height: 300px;
+            flex: 0 0 auto;               /* 默认高度，有内容时撑开 */
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        #detail-panel .detail-actions {
+            margin-top: 10px;
+            border-top: 1px dashed #4a5a6a;
+            padding-top: 10px;
+        }
+
+        .right-panel {
+            flex: 1.2;
+            min-width: 250px;
+            background: #0f141c;
+            border: 1px solid #3e4d5e;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .panel-title {
+            color: #b7a97a;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #4a5a6a;
+            padding-bottom: 5px;
+        }
+
+        .scene-content {
+            color: #c0d0e0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* 剧情文字 - 亮红色 */
+        .story-text {
+            color: #ff6666;
+        }
+
+        /* 场景描述 - 亮白色 */
+        .scene-desc {
+            color: #ffffff;
+        }
+
+        /* 输出区样式 - 自动填充剩余空间 */
+        #output {
+            background: #03060a;
+            padding: 15px;
+            flex: 1;                     /* 自动占据剩余空间 */
+            min-height: 0;               /* 关键：允许 flex 项缩小 */
+            overflow-y: auto;
+            border: 1px solid #3a4a6a;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            font-size: 15px;
+            line-height: 1.5;
+            box-shadow: inset 0 0 10px #00000055;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .save-load {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .scene-info-box {
+            background: #0a1018;
+            border: 1px solid #3e5568;
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin: 10px 0;
+            color: #c0d0e0;
+            font-size: 14px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .action-buttons button {
+            flex: 1;
+            background: #1a2632;
+            border: 1px solid #4a6a7a;
+            color: #d4dcc4;
+            padding: 8px 0;
+        }
+        #input-line {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        #cmd-input {
+            flex: 1;
+            background: #03060a;
+            border: 1px solid #3a4a6a;
+            color: #c3d1e6;
+            padding: 10px;
+            font-family: inherit;
+            font-size: 15px;
+        }
+        button {
+            background: #1e2a3a;
+            color: #e6d5a8;
+            border: 1px solid #6a7a8a;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.1s ease;
+        }
+        button:hover {
+            background: #2e3e52;
+            border-color: #aabac8;
+        }
+        .save-load {
+            display: flex;
+            gap: 8px;
+        }
+        /* 小地图样式 */
+        .minimap {
+            text-align: center;
+            width: 220px;
+            margin: 0 auto;
+            flex-shrink: 0;
+        }
+        .map-grid {
+            display: grid;
+            grid-template-columns: 60px 60px 60px;
+            gap: 8px;
+            margin: 15px auto;
+            justify-content: center;
+        }
+        .map-cell {
+            background: #0a1018;
+            border: 1px solid #3e5568;
+            padding: 8px 5px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #bdd4e0;
+            transition: all 0.1s ease;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+        }
+        .map-cell.clickable {
+            cursor: pointer;
+            border-color: #8aa0b5;
+        }
+        .map-cell.clickable:hover {
+            background: #16222e;
+            border-color: #c0d4e6;
+        }
+        .map-cell.empty {
+            opacity: 0.3;
+            pointer-events: none;   /* 禁止点击 */
+            background: #0a1018;
+            border-color: #2a3a4a;
+        }
+        .map-cell.clickable {
+            cursor: pointer;
+        }
+        .current-room-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #e6d5a8;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #5a6a7a;
+            padding-bottom: 5px;
+        }
+        .story-note {
+            font-style: italic;
+            color: #9aabbb;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+        /* 剧情播放时的遮罩 */
+        #block-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: 999;
+            display: none;
+        }
+        #block-overlay.active ~ h1,
+        #block-overlay.active ~ .game-container button:not(.skill-button),
+        #block-overlay.active ~ .game-container .map-cell,
+        #block-overlay.active ~ .game-container input,
+        #block-overlay.active ~ .game-container .left-panel {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        #block-overlay.active ~ .game-container .left-panel .scene-content span {
+            pointer-events: none;
+        }
+
+        /* 剧情Next按钮 */
+        #story-next-btn {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 60px;
+            background: #2a3a4a;
+            color: #e6d5a8;
+            border: 2px solid #7a9aae;
+            padding: 10px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+        }
+        #story-next-btn:hover {
+            background: #3a5a6a;
+            border-color: #c0d4e6;
+        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            #main-menu {
+                padding: 20px;
+                margin: 10px;
+            }
+            #main-menu h1 {
+                font-size: 2.5rem;
+            }
+            .menu-buttons {
+                max-width: 250px;
+            }
+            .menu-buttons button {
+                padding: 12px 16px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="block-overlay"></div>
+    <!-- 剧情Next按钮（放在body层级，避免被overflow和遮罩影响） -->
+    <button id="story-next-btn" onclick="onStoryNextClick()">▶ Next</button>
+    <div id="main-menu">
+        <h1>夜出桑华山</h1>
+        <div class="menu-buttons">
+            <button onclick="startGame()">🎮 开始游戏</button>
+            <button onclick="loadGameFromMenu()">📚 读取存档</button>
+            <button onclick="exitGame()">🚪 退出游戏</button>
+        </div>
+    </div>
+    <div id="game-container" class="game-container" style="display:none;">
+        <!-- 第一列：周围可见 -->
+        <div class="left-panel">
+            <div class="panel-title">📍 周围可见</div>
+            <div id="scene-items-list" class="scene-content">— 暂无 —</div>
+        </div>
+
+        <!-- 第二列：主输出区（包含命令输入和按钮） -->
+        <div class="center-panel">
+            <!-- 详情栏 -->
+            <div id="detail-panel">
+                <span style="color: #888;">点击物品或NPC查看详情...</span>
+            </div>
+            
+            <div id="output">载入中…<br>
+            </div>
+            
+            <!-- 功能按钮组 -->
+            <div class="action-buttons">
+                <button id="btn-inventory" onclick="showInventoryPanel()">🎒 物品</button>
+                <button id="btn-equipment" onclick="showEquipmentPanel()">⚔️ 装备</button>
+                <button id="btn-status" onclick="showStatusPanel()">📊 状态</button>
+                <button id="btn-quests" onclick="showQuestsPanel()">📜 任务</button>
+                <button id="btn-skills" onclick="showSkillsPanel()">✨ 技能</button>
+            </div>
+            
+            <div id="input-line">
+                <input type="text" id="cmd-input" placeholder="输入命令 (如 look, n, i)..." autofocus>
+                <button onclick="sendCommand()">⏎ 发送</button>
+            </div>
+            <div class="save-load">
+                <button onclick="saveGame()">💾 保存进度</button>
+                <button onclick="loadGame()">📂 读取进度</button>
+                <button onclick="resetGame()">🔄 重头再来</button>
+                <button onclick="backToMainMenu()">🏠 返回主菜单</button>
+                <button onclick="clearOutputWindow()">🧹 清空输出</button>
+            </div>
+        </div>
+
+        <!-- 第三列：小地图 -->
+        <div class="right-panel">
+            <div class="minimap">
+                <div class="current-room-name" id="room-name-display">二号矿井深处</div>
+                <div>🧭 周围地形（点击前往）</div>
+                <div class="map-grid">
+                    <!-- 第一行：空、北、空 -->
+                    <div></div>
+                    <div class="map-cell" id="map-north">
+                        <div style="font-size:12px; opacity:0.8;">⬆️ 北</div>
+                        <div id="north-room">-</div>
+                    </div>
+                    <div></div>
+
+                    <!-- 第二行：西、当前、东 -->
+                    <div class="map-cell" id="map-west">
+                        <div style="font-size:12px; opacity:0.8;">⬅️ 西</div>
+                        <div id="west-room">-</div>
+                    </div>
+                    <div class="map-cell" style="background:#1a2a3a; border-color:#7a9aae;">
+                        <div style="font-size:12px;">📍 当前</div>
+                        <div id="current-room-name-on-map">矿井深处</div>
+                    </div>
+                    <div class="map-cell" id="map-east">
+                        <div style="font-size:12px; opacity:0.8;">➡️ 东</div>
+                        <div id="east-room">-</div>
+                    </div>
+
+                    <!-- 第三行：空、南、空 -->
+                    <div></div>
+                    <div class="map-cell" id="map-south">
+                        <div style="font-size:12px; opacity:0.8;">⬇️ 南</div>
+                        <div id="south-room">-</div>
+                    </div>
+                    <div></div>
+                </div>
+                <div class="story-note">
+                    “桑华山的石矿之下，正下着血与仇的隐秘暴雨。”
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="items.js"></script>
+    <script src="world_0.js"></script>
+    <script src="world_1.js"></script>
+    <script src="world.js"></script>
+    <script src="character.js"></script>
+    <script src="modLoader.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
