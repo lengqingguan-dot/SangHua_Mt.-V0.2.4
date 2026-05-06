@@ -281,6 +281,8 @@ let npcDialogueReturnTarget = '';
 let currentDetailItem = null;
 let currentDetailNPC = null;
 
+
+/*
 // -------------------- DOM 元素 --------------------
 const outputDiv = document.getElementById('output');
 const cmdInput = document.getElementById('cmd-input');
@@ -296,17 +298,35 @@ let northRoomSpan = document.getElementById('north-room');
 let southRoomSpan = document.getElementById('south-room');
 let eastRoomSpan = document.getElementById('east-room');
 let westRoomSpan = document.getElementById('west-room');
-
+*/
 
 // -------------------- 辅助函数：输出文本 --------------------
+// function print(msg) {
+//     outputDiv.innerHTML += msg + '<br>';
+//     outputDiv.scrollTop = outputDiv.scrollHeight;
+// }
+
+// function clearOutput() {
+//     outputDiv.innerHTML = '';
+// }
+
 function print(msg) {
-    outputDiv.innerHTML += msg + '<br>';
-    outputDiv.scrollTop = outputDiv.scrollHeight;
+    UI.print(msg);
 }
 
 function clearOutput() {
-    outputDiv.innerHTML = '';
+    UI.clearOutput();
 }
+
+// 修改原有的向详情栏输出函数
+function printToDetail(content) {
+    UI.printToDetail(content);
+}
+
+function clearDetailPanel() {
+    UI.clearDetail();
+}
+
 
 // -------------------- 更新小地图 --------------------
 function updateMinimap() {
