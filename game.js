@@ -1001,38 +1001,25 @@ async function loadGame() {
             }
         }
         
-        // 重新注册所有地面上的尸体到ITEM_TEMPLATES
+        // 重新注册所有地面上的尸体到ITEM_TEMPLATES（使用createCorpse统一逻辑）
         for (const roomId in gameState.world) {
             const room = gameState.world[roomId];
             if (room && room.items) {
                 room.items.forEach(itemId => {
                     if (itemId.includes('corpse') && !ITEM_TEMPLATES[itemId]) {
-                        // 根据尸体ID生成对应的尸体模板
-                        let corpseTemplate = null;
-                        if (itemId.includes('liana')) {
-                            corpseTemplate = ITEM_TEMPLATES['corpse_liana'];
-                        } else if (itemId.includes('cecilia')) {
-                            corpseTemplate = ITEM_TEMPLATES['cecilia_corpse'];
-                        } else if (itemId.includes('sophie')) {
-                            corpseTemplate = ITEM_TEMPLATES['sophie_corpse'];
-                        } else if (itemId.includes('elena')) {
-                            corpseTemplate = ITEM_TEMPLATES['elena_corpse'];
-                        } else if (itemId.includes('serena')) {
-                            corpseTemplate = ITEM_TEMPLATES['serena_corpse'];
+                        // 从itemId中提取npcId：corpse_{npcId}_{timestamp}_{index}
+                        const parts = itemId.split('_');
+                        // 跳过"corpse"前缀，提取npcId（可能包含下划线，如mad_supervisor）
+                        let npcId = null;
+                        for (const key in CHARACTER_TEMPLATES) {
+                            if (itemId.includes(key)) {
+                                npcId = key;
+                                break;
+                            }
                         }
-                        
-                        if (corpseTemplate) {
-                            const corpse = {
-                                id: itemId,
-                                name: corpseTemplate.name,
-                                type: "misc",
-                                desc: corpseTemplate.desc,
-                                loot: [], // 清空loot，因为可能已经被搜刮过
-                                dismemberable: true,
-                                usable: true,
-                                customAction: true,
-                                corpseStory: corpseTemplate.corpseStory
-                            };
+                        if (npcId) {
+                            const corpse = createCorpse(npcId, []);
+                            corpse.id = itemId;
                             ITEM_TEMPLATES[itemId] = corpse;
                         }
                     }

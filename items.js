@@ -2189,20 +2189,6 @@ const ITEM_TEMPLATES = {
         ]
     },
 
-    // ========== 模组角色：异世界少女的尸体 ==========
-    village_maiden_corpse: {
-        id: "village_maiden_corpse",
-        name: "异世界少女的尸体",
-        type: "misc",
-        desc: "一位异世界少女的尸体倒在血泊中，面容安详，仿佛只是睡着了。她穿着与这个世界格格不入的奇异服饰，身上没有任何伤口。可以拾取后在背包中搜刮。",
-        usable: true,
-        customAction: true,
-        dismemberable: true,
-        corpseStory: [
-            "【占位符：异世界少女尸体互动剧情尚未开发】"
-        ]
-    },
-
     // ========== 料理（腿部） ==========
     aisha_leg_steak: {
         id: "aisha_leg_steak",
@@ -3167,39 +3153,50 @@ const CORPSE_TEMPLATE_MAP = {
     sophie: 'sophie_corpse',
     elena: 'elena_corpse',
     aisha: 'aisha_corpse',
-    village_maiden: 'village_maiden_corpse'
+    mine_supervisor: null,        // 无预设模板，使用通用尸体+CHARACTER_TEMPLATES中文名
+    apprentice_knight: null,      // 无预设模板，使用通用尸体+CHARACTER_TEMPLATES中文名
+    mad_miner: null,              // 无预设模板，使用通用尸体+CHARACTER_TEMPLATES中文名
+    mad_supervisor: null          // 无预设模板，使用通用尸体+CHARACTER_TEMPLATES中文名
 };
 
-// 根据 NPC ID 创建尸体对象
-// npcId: NPC的ID，drops: 掉落物品ID数组，extraProps: 额外属性（如自定义name/desc/corpseStory）
-function createCorpse(npcId, drops = [], extraProps = {}) {
-    // 优先使用映射表，否则使用默认命名规则
-    const corpseTemplateId = CORPSE_TEMPLATE_MAP[npcId] || `${npcId}_corpse`;
-    const template = ITEM_TEMPLATES[corpseTemplateId];
+    // 根据 NPC ID 创建尸体对象
+    // npcId: NPC的ID，drops: 掉落物品ID数组，extraProps: 额外属性（如自定义name/desc/corpseStory）
+    function createCorpse(npcId, drops = [], extraProps = {}) {
+        // 优先使用映射表，映射值为null表示没有预设模板，将使用通用尸体
+        const mappedTemplateId = CORPSE_TEMPLATE_MAP[npcId];
+        // 如果映射表中有明确的模板ID（非null），则使用；否则尝试默认命名规则
+        const corpseTemplateId = mappedTemplateId !== undefined ? mappedTemplateId : `${npcId}_corpse`;
+        // corpseTemplateId为null表示没有预设模板，直接走通用尸体逻辑
+        const template = corpseTemplateId ? ITEM_TEMPLATES[corpseTemplateId] : null;
 
-    if (!template) {
-        // 没有预设模板时，创建通用尸体
+        // 从CHARACTER_TEMPLATES获取中文名称
+        const charTemplate = (typeof CHARACTER_TEMPLATES !== 'undefined') ? CHARACTER_TEMPLATES[npcId] : null;
+        const chineseName = charTemplate ? charTemplate.name : null;
+
+        if (!template) {
+            // 没有预设模板时，创建通用尸体，优先使用CHARACTER_TEMPLATES中的中文名
+            const corpseName = extraProps.name || (chineseName ? `${chineseName}的尸体` : `${npcId}的尸体`);
+            return {
+                id: `corpse_${npcId}_${Date.now()}`,
+                name: corpseName,
+                type: "misc",
+                desc: extraProps.desc || (charTemplate ? `${charTemplate.desc || '一具倒在血泊中的尸体'}可以拾取后在背包中搜刮。` : "一具倒在血泊中的尸体，可以拾取后在背包中搜刮。"),
+                loot: [...drops]
+            };
+        }
+
         return {
             id: `corpse_${npcId}_${Date.now()}`,
-            name: extraProps.name || `${npcId}的尸体`,
+            name: extraProps.name || template.name,
             type: "misc",
-            desc: extraProps.desc || "一具倒在血泊中的尸体，可以拾取后在背包中搜刮。",
-            loot: [...drops]
+            desc: extraProps.desc || template.desc,
+            loot: [...drops],
+            dismemberable: template.dismemberable || false,
+            usable: true,
+            customAction: true,
+            corpseStory: extraProps.corpseStory || template.corpseStory || []
         };
     }
-
-    return {
-        id: `corpse_${npcId}_${Date.now()}`,
-        name: extraProps.name || template.name,
-        type: "misc",
-        desc: extraProps.desc || template.desc,
-        loot: [...drops],
-        dismemberable: template.dismemberable || false,
-        usable: true,
-        customAction: true,
-        corpseStory: extraProps.corpseStory || template.corpseStory || []
-    };
-}
 
 // 批量创建物品
 function createItemsFromTemplates(templateIds) {
