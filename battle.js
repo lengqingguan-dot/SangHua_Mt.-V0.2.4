@@ -1,415 +1,532 @@
-// 视图层 
 
-const BattleUI = {
-    logBattleStart: () => {
-        print("");
-        print(`═══════ ⚔️ 战斗开始 ═══════`);
-    },
-    
-    logEnemyInfo: (index, name, hp, atk, def, agi) => {
-        print(`<span style="color: #ffaaaa;">敌人${index + 1}: ${name} (HP:${hp} ATK:${atk} DEF:${def} AGI:${agi})</span>`);
-    },
-    
-    logPlayerStatus: (hp, maxHp, sp, maxSp, atk, def, agi) => {
-        print(`<span style="color: #aaffaa;">你 (HP:${hp}/${maxHp} SP:${sp}/${maxSp} ATK:${atk} DEF:${def} AGI:${agi})</span>`);
-    },
+// 1. 战斗状态
+let battleState = {
+    inBattle: false,
+    enemies: [],  // 多个敌人 [{npcId, currentHp, maxHp, agi, atk, def, name}, ...]
+    currentTurnIndex: 0,  // 当前行动者的索引
+    turnOrder: [],  // 行动顺序 ['player' 或 enemy索引]
+    round: 0,
+    hatredUsed: false,  // 仇恨技能是否已在本次战斗中使用
+    originalPlayerStats: null  // 战斗开始时玩家的原始属性
+};
 
-    logDivider: () => {
-        print("────────────────────────────────");
-    },
-    
-    logRound: (round) => {
-        print(`<span style="color: #ffdd44;">═══════════════════════════</span>`);
-        print(`<span style="color: #ffdd44;">【第${round}回合】</span>`);
-    },
-    
-    logTurnOrder: (orderNames) => {
-        print(`<span style="color: #888;">行动顺序: ${orderNames.join(' → ')}</span>`);
-        print("");
-    },
-    
-    logTurnStart: (name, isPlayer) => {
-        const color = isPlayer ? "#aaffaa" : "#ffaaaa";
-        print(`<span style="color: ${color};">→ ${name} 的回合</span>`);
-    },
-    
-    logAction: (attackerName, targetName) => {
-        print(`${attackerName} 选择攻击 ${targetName}！`);
-    },
-    
-    logDodge: (targetName, isPlayerTurn) => {
-        print(`${isPlayerTurn ? '你的攻击被 ' + targetName + ' 闪避了' : targetName + ' 的攻击被你闪避了'}！`);
-    },
-    
-    logDamage: (attackerName, targetName, damage) => {
-        print(`${attackerName} 对 ${targetName} 造成 <span style="color: #ff6666;">${damage}</span> 点伤害！`);
-    },
-    
-    logDeath: (name, isPlayer) => {
-        const color = isPlayer ? "#ff6666" : "#ff8888";
-        print(`<span style="color: ${color};">${name} ${isPlayer ? '倒下了...' : '倒下了！'}</span>`);
-    },
-    
-    logEnemyHp: (name, hp, maxHp) => {
-        print(`<span style="color: #ff8888;">${name} HP: ${hp}/${maxHp}</span>`);
-    },
+// 默认战斗状态，用于重置游戏
+const DEFAULT_BATTLE_STATE = JSON.parse(JSON.stringify(battleState));
 
-    logSkillUse: (skillName, effectDesc) => {
-        print(`<span style="color: #ff6666;">你释放了技能「${skillName}」！</span>`);
-        print(`<span style="color: #ff6666;">${effectDesc}</span>`);
-    },
-    
-    logMessage: (msg, color = "#888") => {
-        print(`<span style="color: ${color};">${msg}</span>`);
-    },
-    
-    renderSkills: (skillsData, currentSp, maxSp, callbackName) => {
-        if (!UI.elements.detailPanel) return;
-        
-        let html = '<h3>技能</h3>';
-        if (skillsData && skillsData.length > 0) {
-            html += '<div class="skill-buttons">';
-            skillsData.forEach(s => {
-                const disabled = currentSp < s.cost ? 'disabled' : '';
-                html += `
-                    <button class="skill-button ${disabled}" onclick="${callbackName}('${s.id}')" ${disabled}>
-                        <span class="skill-name">${s.name}</span>
-                        <span class="skill-cost">SP: ${s.cost} (${currentSp}/${maxSp})</span>
-                        <span class="skill-desc">${s.description}</span>
-                    </button>
-                `;
-            });
-            html += '</div>';
-        } else {
-            html += '<p>暂无技能</p>';
+// 当前战斗中的敌人实例（用于快速查找）
+let currentBattleEnemies = {};
+
+// 2. 技能定义
+const skills = {
+    hatred: {
+        name: "仇恨",
+        description: "释放后本场战斗攻击力翻倍，灵巧降低至0，防御降低50%（本场战斗只能使用一次）",
+        cost: 10,  // 消耗10技力
+        effect: function() {
+            // 检查是否已在本次战斗中使用过
+            if (battleState.hatredUsed) {
+                print(`<span style="color: #ffaaaa;">仇恨技能已经在本场战斗中使用过了！</span>`);
+                // 退还技力
+                gameState.player.sp += this.cost;
+                return false;
+            }
+            
+            // 标记为已使用
+            battleState.hatredUsed = true;
+            
+            // 攻击力翻倍
+            gameState.player.atk *= 2;
+            // 灵巧降低至0
+            gameState.player.agi = 0;
+            // 防御降低50%
+            gameState.player.def *= 0.5;
+            
+            print(`<span style="color: #ff6666;">你释放了技能「仇恨」！</span>`);
+            print(`<span style="color: #ff6666;">你的攻击力翻倍，灵巧降低至0，防御降低50%！</span>`);
+            return true;
         }
-        UI.setDetail(html);
-    },
-
-    clearSkills: () => {
-        if (UI.elements.detailPanel) UI.clearDetail();
     }
 };
 
+// 3. 战斗函数
+function useSkill(skillId) {
+    if (!battleState.inBattle) {
+        print(`<span style="color: #ffaaaa;">战斗外无法使用技能！</span>`);
+        return;
+    }
+    
+    const skill = skills[skillId];
+    if (!skill) {
+        print(`<span style="color: #ffaaaa;">技能不存在！</span>`);
+        return;
+    }
+    
+    const currentSp = gameState.player.sp || 0;
+    if (currentSp < skill.cost) {
+        print(`<span style="color: #ffaaaa;">技力不足！</span>`);
+        return;
+    }
+    
+    // 消耗技力
+    gameState.player.sp = Math.floor(currentSp - skill.cost);
+    
+    // 执行技能效果
+    skill.effect();
+    
+    // 重新显示技能按钮，更新技力显示
+    if (UI.elements.detailPanel) {
+        let skillsHtml = '<h3>技能</h3>';
+        if (gameState.player.skills && gameState.player.skills.length > 0) {
+            skillsHtml += '<div class="skill-buttons">';
+            gameState.player.skills.forEach(sId => {
+                const s = skills[sId];
+                if (s) {
+                    const skillCurrentSp = gameState.player.sp || 0;
+                    const skillMaxSp = gameState.player.maxSp || 0;
+                    const disabled = skillCurrentSp < s.cost ? 'disabled' : '';
+                    skillsHtml += `
+                        <button class="skill-button ${disabled}" onclick="useSkill('${sId}')" ${disabled}>
+                            <span class="skill-name">${s.name}</span>
+                            <span class="skill-cost">SP: ${s.cost} (${skillCurrentSp}/${skillMaxSp})</span>
+                            <span class="skill-desc">${s.description}</span>
+                        </button>
+                    `;
+                }
+            });
+            skillsHtml += '</div>';
+        } else {
+            skillsHtml += '<p>暂无技能</p>';
+        }
+        UI.setDetail(skillsHtml);
+    }
+    
+    // 显示当前玩家状态
+    const updatedSp = gameState.player.sp || 0;
+    const maxSp = gameState.player.maxSp || 0;
+    print(`<span style="color: #aaffaa;">你的 HP: ${gameState.player.hp}/${gameState.player.maxHp} SP: ${updatedSp}/${maxSp}</span>`);
+    print("");
+}
 
-// 逻辑层 
-
-const BattleSystem = {
-    state: {
-        inBattle: false,
-        enemies: [],
-        round: 0,
+function startMultiBattle(npcIds) {
+    if (!npcIds || npcIds.length === 0) return;
+    
+    // 显示遮罩
+    UI.setOverlay(true);
+    
+    // 先显示主界面内容
+    if (typeof mainContent !== 'undefined' && mainContent) {
+        UI.setOutputHtml(mainContent);
+    }
+    
+    print("");
+    print(`═══════ ⚔️ 战斗开始 ═══════`);
+    
+    // 初始化敌人数据
+    const enemies = [];
+    npcIds.forEach((npcId, index) => {
+        const npc = getCharacterInfo(npcId);
+        if (npc && npc.canFight) {
+            // 为每个敌人创建独立实例（即使有相同ID）
+            const enemyInstance = {
+                index: index,
+                npcId: npcId,
+                name: npc.name,
+                currentHp: npc.hp,
+                maxHp: npc.hp,
+                atk: npc.atk,
+                def: npc.def,
+                agi: getCharacterAgility(npc),
+                drops: npc.drops ? [...npc.drops] : [],
+                exp: npc.exp || 0
+            };
+            enemies.push(enemyInstance);
+            
+            // 显示敌人信息
+            print(`<span style="color: #ffaaaa;">敌人${index + 1}: ${npc.name} (HP:${npc.hp} ATK:${npc.atk} DEF:${npc.def} AGI:${enemyInstance.agi})</span>`);
+        }
+    });
+    
+    // 回满技力
+    gameState.player.sp = Math.floor(gameState.player.maxSp || 10);
+    const currentSp = gameState.player.sp || 0;
+    const maxSp = gameState.player.maxSp || 10;
+    print(`<span style="color: #aaffaa;">你 (HP:${gameState.player.hp}/${gameState.player.maxHp} SP:${currentSp}/${maxSp} ATK:${getCharacterAttack(gameState.player)} DEF:${getCharacterDefense(gameState.player)} AGI:${getCharacterAgility(gameState.player)})</span>`);
+    print("────────────────────────────────");
+    
+    // 显示技能按钮
+    if (UI.elements.detailPanel) {
+        let skillsHtml = '<h3>技能</h3>';
+        if (gameState.player.skills && gameState.player.skills.length > 0) {
+            skillsHtml += '<div class="skill-buttons">';
+            gameState.player.skills.forEach(skillId => {
+                const skill = skills[skillId];
+                if (skill) {
+                    skillsHtml += `
+                        <button class="skill-button" onclick="useSkill('${skillId}')">
+                            <span class="skill-name">${skill.name}</span>
+                            <span class="skill-cost">SP: ${skill.cost}</span>
+                            <span class="skill-desc">${skill.description}</span>
+                        </button>
+                    `;
+                }
+            });
+            skillsHtml += '</div>';
+        } else {
+            skillsHtml += '<p>暂无技能</p>';
+        }
+        UI.setDetail(skillsHtml);
+    }
+    
+    // 初始化战斗状态
+    battleState = {
+        inBattle: true,
+        enemies: enemies,
+        round: 1,
         currentTurnIndex: 0,
-        turnOrder: [],
-        activeEffects: {}, // 预留：Buff/Debuff 状态机
-        originalPlayerStats: null
-    },
-
-    // 预留的硬编码技能库（未来应迁移至 JSON）
-    skillsDict: {
-        hatred: {
-            id: "hatred",
-            name: "仇恨",
-            description: "释放后本场战斗攻击力翻倍，灵巧降低至0，防御降低50%（本场战斗只能使用一次）",
-            cost: 10,
-            effect: (system) => {
-                if (system.state.activeEffects.hatred) {
-                    BattleUI.logMessage("仇恨技能已经在本场战斗中使用过了！", "#ffaaaa");
-                    return false;
-                }
-                system.state.activeEffects.hatred = true;
-                gameState.player.atk *= 2;
-                gameState.player.agi = 0;
-                gameState.player.def *= 0.5;
-                BattleUI.logSkillUse("仇恨", "你的攻击力翻倍，灵巧降低至0，防御降低50%！");
-                return true;
-            }
+        turnOrder: [],  
+        hatredUsed: false,  
+        originalPlayerStats: {  
+            atk: gameState.player.atk,
+            def: gameState.player.def,
+            agi: gameState.player.agi
         }
-    },
+    };
+    
+    // 计算行动顺序并开始第一回合
+    setTimeout(() => {
+        startNewRound();
+    }, 800);
+}
 
-    start: function(npcIds) {
-        if (!npcIds || npcIds.length === 0) return;
-        
-        UI.setOverlay(true);
-        if (typeof mainContent !== 'undefined' && mainContent) UI.setOutputHtml(mainContent);
-        
-        BattleUI.logBattleStart();
-        
-        this.state = {
-            inBattle: true,
-            enemies: [],
-            round: 1,
-            currentTurnIndex: 0,
-            turnOrder: [],
-            activeEffects: {},
-            originalPlayerStats: {
-                atk: gameState.player.atk,
-                def: gameState.player.def,
-                agi: gameState.player.agi
-            }
-        };
-
-        npcIds.forEach((npcId, index) => {
-            const npc = getCharacterInfo(npcId);
-            if (npc && npc.canFight) {
-                const enemyInstance = {
-                    index: index,
-                    npcId: npcId,
-                    name: npc.name,
-                    currentHp: npc.hp,
-                    maxHp: npc.hp,
-                    atk: npc.atk,
-                    def: npc.def,
-                    agi: getCharacterAgility(npc),
-                    drops: npc.drops ? [...npc.drops] : [],
-                    exp: npc.exp || 0
-                };
-                this.state.enemies.push(enemyInstance);
-                BattleUI.logEnemyInfo(index, npc.name, npc.hp, npc.atk, npc.def, enemyInstance.agi);
-            }
-        });
-
-        // 重置玩家SP
-        gameState.player.sp = Math.floor(gameState.player.maxSp || 10);
-        
-        BattleUI.logPlayerStatus(gameState.player.hp, gameState.player.maxHp, gameState.player.sp, gameState.player.maxSp, getCharacterAttack(gameState.player), getCharacterDefense(gameState.player), getCharacterAgility(gameState.player));
-        BattleUI.logDivider();
-        this.updateSkillPanel();
-
-        setTimeout(() => this.startRound(), 800);
-    },
-
-    startRound: function() {
-        if (!this.state.inBattle) return;
-        if (this.checkBattleEnd()) return;
-
-        BattleUI.logRound(this.state.round);
-        this.state.turnOrder = this.calculateTurnOrder();
-        this.state.currentTurnIndex = 0;
-
-        const orderNames = this.state.turnOrder.map(t => t === 'player' ? '你' : this.state.enemies[t].name);
-        BattleUI.logTurnOrder(orderNames);
-        this.updateSkillPanel();
-
-        setTimeout(() => this.executeNextTurn(), 600);
-    },
-
-    executeNextTurn: function() {
-        if (!this.state.inBattle) return;
-        if (this.checkBattleEnd()) return;
-
-        if (this.state.currentTurnIndex >= this.state.turnOrder.length) {
-            this.state.round++;
-            setTimeout(() => this.startRound(), 800);
-            return;
+function calculateTurnOrder() {
+    const playerAgi = getCharacterAgility(gameState.player);
+    
+    const participants = [];
+    participants.push({ type: 'player', agi: playerAgi });
+    
+    battleState.enemies.forEach((enemy, index) => {
+        if (enemy.currentHp > 0) {
+            participants.push({ type: 'enemy', index: index, agi: enemy.agi });
         }
-
-        const currentTarget = this.state.turnOrder[this.state.currentTurnIndex++];
-        if (currentTarget === 'player') {
-            this.executePlayerTurn();
-        } else {
-            this.executeEnemyTurn(currentTarget);
+    });
+    
+    participants.sort((a, b) => {
+        if (a.agi !== b.agi) {
+            return b.agi - a.agi;  
         }
-    },
-
-    executePlayerTurn: function() {
-        if (this.checkBattleEnd()) return;
-
-        const aliveEnemies = this.state.enemies.filter(e => e.currentHp > 0);
-        const targetEnemy = aliveEnemies[0]; // TODO: 预留玩家选定目标接口
-        
-        BattleUI.logTurnStart("你", true);
-        BattleUI.logAction("你", targetEnemy.name);
-
-        const playerAtk = getCharacterAttack(gameState.player);
-        if (tryDodge(targetEnemy.agi)) {
-            BattleUI.logDodge(targetEnemy.name, true);
-        } else {
-            const damage = calculateDamage(playerAtk, targetEnemy.def);
-            targetEnemy.currentHp = Math.max(0, targetEnemy.currentHp - damage);
-            BattleUI.logDamage("你", targetEnemy.name, damage);
+        if (a.type === 'player' && b.type === 'enemy') {
+            return -1;  
         }
-
-        if (targetEnemy.currentHp <= 0) {
-            BattleUI.logDeath(targetEnemy.name, false);
-        } else {
-            BattleUI.logEnemyHp(targetEnemy.name, targetEnemy.currentHp, targetEnemy.maxHp);
+        if (a.type === 'enemy' && b.type === 'player') {
+            return 1;  
         }
+        return Math.random() - 0.5;
+    });
+    
+    return participants.map(p => p.type === 'player' ? 'player' : p.index);
+}
 
-        BattleUI.logPlayerStatus(gameState.player.hp, gameState.player.maxHp, gameState.player.sp, gameState.player.maxSp, playerAtk, getCharacterDefense(gameState.player), getCharacterAgility(gameState.player));
-        print("");
-        this.updateSkillPanel();
-
-        setTimeout(() => this.executeNextTurn(), 1200);
-    },
-
-    executeEnemyTurn: function(enemyIndex) {
-        const enemy = this.state.enemies[enemyIndex];
-        if (!enemy || enemy.currentHp <= 0 || this.checkBattleEnd()) return;
-
-        BattleUI.logTurnStart(enemy.name, false);
-        BattleUI.logAction(enemy.name, "你");
-
-        const playerAgi = getCharacterAgility(gameState.player);
-        const playerDef = getCharacterDefense(gameState.player);
-
-        if (tryDodge(playerAgi)) {
-            BattleUI.logDodge(enemy.name, false);
-        } else {
-            const damage = calculateDamage(enemy.atk, playerDef);
-            gameState.player.hp = Math.max(0, gameState.player.hp - damage);
-            BattleUI.logDamage(enemy.name, "你", damage);
-        }
-
-        if (gameState.player.hp <= 0) {
-            BattleUI.logDeath("你", true);
-            setTimeout(() => this.end(false), 1000);
-            return;
-        }
-
-        BattleUI.logPlayerStatus(gameState.player.hp, gameState.player.maxHp, gameState.player.sp, gameState.player.maxSp, getCharacterAttack(gameState.player), playerDef, playerAgi);
-        print("");
-
-        setTimeout(() => this.executeNextTurn(), 1200);
-    },
-
-    useSkill: function(skillId) {
-        if (!this.state.inBattle) return BattleUI.logMessage("战斗外无法使用技能！", "#ffaaaa");
-        
-        const skill = this.skillsDict[skillId];
-        if (!skill) return BattleUI.logMessage("技能不存在！", "#ffaaaa");
-        
-        if (gameState.player.sp < skill.cost) return BattleUI.logMessage("技力不足！", "#ffaaaa");
-        
-        // 扣蓝
-        gameState.player.sp = Math.floor(gameState.player.sp - skill.cost);
-        
-        // 执行技能逻辑（如果失败则返还蓝量）
-        const success = skill.effect(this);
-        if (!success) {
-            gameState.player.sp += skill.cost;
-        }
-        
-        this.updateSkillPanel();
-        BattleUI.logPlayerStatus(gameState.player.hp, gameState.player.maxHp, gameState.player.sp, gameState.player.maxSp, getCharacterAttack(gameState.player), getCharacterDefense(gameState.player), getCharacterAgility(gameState.player));
-        print("");
-    },
-
-    calculateTurnOrder: function() {
-        const participants = [{ type: 'player', agi: getCharacterAgility(gameState.player) }];
-        this.state.enemies.forEach((enemy, index) => {
-            if (enemy.currentHp > 0) participants.push({ type: 'enemy', index: index, agi: enemy.agi });
-        });
-        
-        participants.sort((a, b) => {
-            if (a.agi !== b.agi) return b.agi - a.agi;
-            if (a.type === 'player' && b.type === 'enemy') return -1;
-            if (a.type === 'enemy' && b.type === 'player') return 1;
-            return Math.random() - 0.5;
-        });
-        return participants.map(p => p.type === 'player' ? 'player' : p.index);
-    },
-
-    checkBattleEnd: function() {
-        if (gameState.player.hp <= 0) {
-            this.end(false);
-            return true;
-        }
-        const aliveEnemies = this.state.enemies.filter(e => e.currentHp > 0);
-        if (aliveEnemies.length === 0) {
-            this.end(true);
-            return true;
-        }
-        return false;
-    },
-
-    end: function(playerWon) {
-        this.state.inBattle = false;
-        
-        // 状态清理：还原战斗时修改的属性
-        if (this.state.originalPlayerStats) {
-            gameState.player.atk = this.state.originalPlayerStats.atk;
-            gameState.player.def = this.state.originalPlayerStats.def;
-            gameState.player.agi = this.state.originalPlayerStats.agi;
-        }
-        
-        print(`<span style="color: #ffdd44;">═══════════════════════════</span>`);
-        
-        if (playerWon) {
-            BattleUI.logMessage("【胜利！】你击败了所有敌人！", "#aaffaa");
-            
-            let totalExp = 0;
-            const room = gameState.world[gameState.player.location];
-            
-            this.state.enemies.forEach((enemy, index) => {
-                // 特殊剧情Boss硬编码：瑟蕾娜（未来应通过NPC配置化实现死亡事件）
-                if (enemy.npcId === 'serena') {
-                    BattleUI.logMessage('"既然如此，就送你个宝贝。"', "#cc66ff");
-                    BattleUI.logMessage('瑟蕾娜的身躯化为一团淡紫色的雾气，在空中消散。', "#cc66ff");
-                    BattleUI.logMessage('地面上只留下了一个闪闪发亮的宝石。', "#cc66ff");
-                    if (enemy.drops && room) {
-                        enemy.drops.forEach((dropId, dropIndex) => {
-                            const dropItem = createItemFromTemplate(dropId);
-                            if (dropItem) {
-                                const dropItemId = `drop_${dropId}_${Date.now()}_${dropIndex}`;
-                                dropItem.id = dropItemId;
-                                ITEM_TEMPLATES[dropItemId] = dropItem;
-                                if (!room.items) room.items = [];
-                                room.items.push(dropItemId);
-                            }
-                        });
-                    }
-                } else {
-                    // 常规尸体掉落
-                    const corpseId = `corpse_${enemy.npcId}_${Date.now()}_${index}`;
-                    const corpse = createCorpse(enemy.npcId, enemy.drops || []);
-                    corpse.id = corpseId;
-                    
-                    if (room) {
-                        if (!room.items) room.items = [];
-                        room.items.push(corpseId);
-                    }
-                    ITEM_TEMPLATES[corpseId] = corpse;
-                    BattleUI.logMessage(`${enemy.name}的尸体倒在地上...`, "#888");
-                }
-                
-                totalExp += enemy.exp;
-                
-                // 从房间移除NPC
-                if (room && room.npcs) {
-                    const idx = room.npcs.indexOf(enemy.npcId);
-                    if (idx > -1) room.npcs.splice(idx, 1);
+function startNewRound() {
+    if (!battleState.inBattle) return;
+    
+    const aliveEnemies = battleState.enemies.filter(e => e.currentHp > 0);
+    if (aliveEnemies.length === 0) {
+        battleEnd(true);
+        return;
+    }
+    
+    if (gameState.player.hp <= 0) {
+        battleEnd(false);
+        return;
+    }
+    
+    print(`<span style="color: #ffdd44;">═══════════════════════════</span>`);
+    print(`<span style="color: #ffdd44;">【第${battleState.round}回合】</span>`);
+    
+    battleState.turnOrder = calculateTurnOrder();
+    battleState.currentTurnIndex = 0;
+    
+    const orderNames = battleState.turnOrder.map(target => {
+        if (target === 'player') return '你';
+        return battleState.enemies[target].name;
+    });
+    print(`<span style="color: #888;">行动顺序: ${orderNames.join(' → ')}</span>`);
+    print("");
+    
+    if (UI.elements.detailPanel) {
+        let skillsHtml = '<h3>技能</h3>';
+        if (gameState.player.skills && gameState.player.skills.length > 0) {
+            skillsHtml += '<div class="skill-buttons">';
+            gameState.player.skills.forEach(skillId => {
+                const skill = skills[skillId];
+                if (skill) {
+                    const skillCurrentSp = gameState.player.sp || 0;
+                    const skillMaxSp = gameState.player.maxSp || 0;
+                    const disabled = skillCurrentSp < skill.cost ? 'disabled' : '';
+                    skillsHtml += `
+                        <button class="skill-button ${disabled}" onclick="useSkill('${skillId}')" ${disabled}>
+                            <span class="skill-name">${skill.name}</span>
+                            <span class="skill-cost">SP: ${skill.cost} (${skillCurrentSp}/${skillMaxSp})</span>
+                            <span class="skill-desc">${skill.description}</span>
+                        </button>
+                    `;
                 }
             });
+            skillsHtml += '</div>';
+        } else {
+            skillsHtml += '<p>暂无技能</p>';
+        }
+        UI.setDetail(skillsHtml);
+    }
+    
+    setTimeout(() => {
+        executeNextTurn();
+    }, 600);
+}
+
+function executeNextTurn() {
+    if (!battleState.inBattle) return;
+    
+    const aliveEnemies = battleState.enemies.filter(e => e.currentHp > 0);
+    if (aliveEnemies.length === 0) {
+        battleEnd(true);
+        return;
+    }
+    if (gameState.player.hp <= 0) {
+        battleEnd(false);
+        return;
+    }
+    
+    if (battleState.currentTurnIndex >= battleState.turnOrder.length) {
+        battleState.round++;
+        setTimeout(() => {
+            startNewRound();
+        }, 800);
+        return;
+    }
+    
+    const currentTarget = battleState.turnOrder[battleState.currentTurnIndex];
+    battleState.currentTurnIndex++;
+    
+    if (currentTarget === 'player') {
+        executePlayerTurn();
+    } else {
+        executeEnemyTurn(currentTarget);
+    }
+}
+
+function executePlayerTurn() {
+    if (!battleState.inBattle) return;
+    
+    if (gameState.player.hp <= 0) {
+        battleEnd(false);
+        return;
+    }
+    
+    const aliveEnemies = battleState.enemies.filter(e => e.currentHp > 0);
+    if (aliveEnemies.length === 0) {
+        battleEnd(true);
+        return;
+    }
+    
+    const targetEnemy = aliveEnemies[0];
+    const playerAtk = getCharacterAttack(gameState.player);
+    const enemyDef = targetEnemy.def;
+    const enemyAgi = targetEnemy.agi;
+    
+    print(`<span style="color: #aaffaa;">→ 你的回合</span>`);
+    print(`你选择攻击 ${targetEnemy.name}！`);
+    
+    if (tryDodge(enemyAgi)) {
+        print(`你的攻击被 ${targetEnemy.name} 闪避了！`);
+    } else {
+        const damage = calculateDamage(playerAtk, enemyDef);
+        targetEnemy.currentHp = Math.max(0, targetEnemy.currentHp - damage);
+        print(`你对 ${targetEnemy.name} 造成 <span style="color: #ff6666;">${damage}</span> 点伤害！`);
+    }
+    
+    if (targetEnemy.currentHp <= 0) {
+        print(`<span style="color: #ff8888;">${targetEnemy.name} 倒下了！</span>`);
+    } else {
+        print(`<span style="color: #ff8888;">${targetEnemy.name} HP: ${targetEnemy.currentHp}/${targetEnemy.maxHp}</span>`);
+    }
+    
+    const currentSp = gameState.player.sp || 0;
+    const maxSp = gameState.player.maxSp || 0;
+    print(`<span style="color: #aaffaa;">你的 HP: ${gameState.player.hp}/${gameState.player.maxHp} SP: ${currentSp}/${maxSp}</span>`);
+    print("");
+    
+    if (UI.elements.detailPanel) {
+        let skillsHtml = '<h3>技能</h3>';
+        if (gameState.player.skills && gameState.player.skills.length > 0) {
+            skillsHtml += '<div class="skill-buttons">';
+            gameState.player.skills.forEach(skillId => {
+                const skill = skills[skillId];
+                if (skill) {
+                    const skillCurrentSp = gameState.player.sp || 0;
+                    const skillMaxSp = gameState.player.maxSp || 0;
+                    const disabled = skillCurrentSp < skill.cost ? 'disabled' : '';
+                    skillsHtml += `
+                        <button class="skill-button ${disabled}" onclick="useSkill('${skillId}')" ${disabled}>
+                            <span class="skill-name">${skill.name}</span>
+                            <span class="skill-cost">SP: ${skill.cost} (${skillCurrentSp}/${skillMaxSp})</span>
+                            <span class="skill-desc">${skill.description}</span>
+                        </button>
+                    `;
+                }
+            });
+            skillsHtml += '</div>';
+        } else {
+            skillsHtml += '<p>暂无技能</p>';
+        }
+        UI.setDetail(skillsHtml);
+    }
+    
+    setTimeout(() => {
+        executeNextTurn();
+    }, 1200);
+}
+
+function executeEnemyTurn(enemyIndex) {
+    if (!battleState.inBattle) return;
+    
+    const enemy = battleState.enemies[enemyIndex];
+    
+    if (!enemy || enemy.currentHp <= 0) {
+        executeNextTurn();
+        return;
+    }
+    
+    if (gameState.player.hp <= 0) {
+        battleEnd(false);
+        return;
+    }
+    
+    const playerDef = getCharacterDefense(gameState.player);
+    const playerAgi = getCharacterAgility(gameState.player);
+    
+    print(`<span style="color: #ffaaaa;">→ ${enemy.name} 的回合</span>`);
+    print(`${enemy.name} 向你发起攻击！`);
+    
+    if (tryDodge(playerAgi)) {
+        print(`${enemy.name} 的攻击被你闪避了！`);
+    } else {
+        const damage = calculateDamage(enemy.atk, playerDef);
+        gameState.player.hp = Math.max(0, gameState.player.hp - damage);
+        print(`${enemy.name} 对你造成 <span style="color: #ff6666;">${damage}</span> 点伤害！`);
+    }
+    
+    if (gameState.player.hp <= 0) {
+        print(`<span style="color: #ff6666;">你倒下了...</span>`);
+        setTimeout(() => battleEnd(false), 1000);
+        return;
+    }
+    
+    const currentSp = gameState.player.sp || 0;
+    const maxSp = gameState.player.maxSp || 0;
+    print(`<span style="color: #aaffaa;">你的 HP: ${gameState.player.hp}/${gameState.player.maxHp} SP: ${currentSp}/${maxSp}</span>`);
+    print("");
+    
+    setTimeout(() => {
+        executeNextTurn();
+    }, 1200);
+}
+
+function startBattle(npcId) {
+    startMultiBattle([npcId]);
+}
+
+function battleEnd(playerWon) {
+    battleState.inBattle = false;
+    
+    if (battleState.originalPlayerStats) {
+        gameState.player.atk = battleState.originalPlayerStats.atk;
+        gameState.player.def = battleState.originalPlayerStats.def;
+        gameState.player.agi = battleState.originalPlayerStats.agi;
+        battleState.originalPlayerStats = null;
+    }
+    
+    print(`<span style="color: #ffdd44;">═══════════════════════════</span>`);
+    
+    if (playerWon) {
+        print(`<span style="color: #aaffaa;">【胜利！】你击败了所有敌人！</span>`);
+        
+        const room = gameState.world[gameState.player.location];
+        let totalExp = 0;
+        const defeatedEnemies = [];
+        
+        battleState.enemies.forEach((enemy, index) => {
+            const npc = getCharacterInfo(enemy.npcId);
+            if (!npc) return;
             
-            // 结算经验
-            if (totalExp > 0) {
-                print("");
-                BattleUI.logMessage(`获得 ${totalExp} 点经验值！`, "#ffdd44");
-                gameState.player.exp += totalExp;
-                if(typeof checkLevelUp === 'function') checkLevelUp();
+            defeatedEnemies.push(enemy.npcId);
+            
+            if (enemy.npcId === 'serena') {
+                print(`<span style="color: #cc66ff;">"既然如此，就送你个宝贝。"</span>`);
+                print(`<span style="color: #cc66ff;">瑟蕾娜的身躯化为一团淡紫色的雾气，在空中消散。</span>`);
+                print(`<span style="color: #cc66ff;">地面上只留下了一个闪闪发亮的宝石。</span>`);
+                if (enemy.drops && enemy.drops.length > 0 && room) {
+                    enemy.drops.forEach((dropId, dropIndex) => {
+                        const dropItem = createItemFromTemplate(dropId);
+                        if (dropItem) {
+                            const dropItemId = `drop_${dropId}_${Date.now()}_${dropIndex}`;
+                            dropItem.id = dropItemId;
+                            ITEM_TEMPLATES[dropItemId] = dropItem;
+                            if (!room.items) room.items = [];
+                            room.items.push(dropItemId);
+                        }
+                    });
+                }
+                totalExp += enemy.exp;
+                return; 
             }
             
-            if(typeof updateSceneInfo === 'function') updateSceneInfo();
-        } else {
-            BattleUI.logMessage("【失败...】你被击败了。", "#ff6666");
-            BattleUI.logMessage("（游戏将重新开始...）", "#aaa");
-            setTimeout(() => location.reload(), 2000);
+            const drops = enemy.drops ? [...enemy.drops] : [];
+            const corpseId = `corpse_${enemy.npcId}_${Date.now()}_${index}`;
+            const corpse = createCorpse(enemy.npcId, drops);
+            corpse.id = corpseId; 
+            
+            if (room) {
+                if (!room.items) room.items = [];
+                room.items.push(corpseId);
+            }
+            
+            ITEM_TEMPLATES[corpseId] = corpse;
+            
+            print(`<span style="color: #888;">${enemy.name}的尸体倒在地上...</span>`);
+            
+            totalExp += enemy.exp;
+        });
+        
+        if (totalExp > 0) {
+            print("");
+            print(`<span style="color: #ffdd44;">获得 ${totalExp} 点经验值！</span>`);
+            gameState.player.exp += totalExp;
+            checkLevelUp();
         }
         
-        UI.setOverlay(false);
-        BattleUI.clearSkills();
-    },
-
-    updateSkillPanel: function() {
-        const playerSkillsData = (gameState.player.skills || []).map(id => this.skillsDict[id]).filter(Boolean);
-        BattleUI.renderSkills(playerSkillsData, gameState.player.sp || 0, gameState.player.maxSp || 0, 'useSkill');
+        if (room && room.npcs) {
+            defeatedEnemies.forEach(npcId => {
+                const index = room.npcs.indexOf(npcId);
+                if (index > -1) {
+                    room.npcs.splice(index, 1);
+                }
+            });
+        }
+        
+        updateSceneInfo();
+    } else {
+        print(`<span style="color: #ff6666;">【失败...】你被击败了。</span>`);
+        print(`<span style="color: #aaa;">（游戏将重新开始...）</span>`);
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
     }
-};
-
-// ============================================================
-// 全局桥接函数 (保持对 game.js 的兼容)
-// ============================================================
-function startBattle(npcId) { BattleSystem.start([npcId]); }
-function startMultiBattle(npcIds) { BattleSystem.start(npcIds); }
-function useSkill(skillId) { BattleSystem.useSkill(skillId); }
+    
+    UI.setOverlay(false);
+    
+    if (UI.elements.detailPanel) {
+        UI.clearDetail();
+    }
+    currentPanel = null;
+}
