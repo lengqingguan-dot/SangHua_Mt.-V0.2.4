@@ -121,13 +121,13 @@ const ROOM_ID_MAP = {
     109: 'mountain_path_2',         // 山路2
     110: 'mountain_path_3',         // 山路3
     111: 'mountain_path_4',         // 山路4
-    112: 'mansion_gate',            // 伯爵宅邸大门
+    112: 'mansion_gate',            // 男爵宅邸大门
     113: 'fence_gate',              // 围栏门
     114: 'garden_center',           // 花园中心
     114: 'garden_south',            // 花园南侧
     115: 'garden_north',            // 花园北侧
     116: 'greenhouse',              // 温室
-    117: 'mansion_back_door',       // 伯爵宅邸后门
+    117: 'mansion_back_door',       // 男爵宅邸后门
     118: 'corridor_center',         // 一层走廊中心
     119: 'corridor_west',           // 一层走廊西侧
     120: 'corridor_west_2',         // 一层走廊西侧第二间
@@ -151,14 +151,57 @@ const ROOM_ID_MAP = {
     136: 'bathroom',                // 卫生间
     137: 'storage_room',            // 储藏室
     138: 'terrace',                 // 露台
-    139: 'countess_bedroom',        // 伯爵夫人卧室
-    140: 'daughter_bedroom',        // 伯爵女儿卧室
+    139: 'baroness_bedroom',        // 男爵夫人卧室
+    140: 'daughter_bedroom',        // 男爵女儿卧室
     141: 'study',                   // 书房
     142: 'third_floor_center',      // 三层走廊中心
-    143: 'count_bedroom',           // 伯爵卧室
+    143: 'baron_bedroom',           // 男爵卧室
     144: 'third_floor_north',       // 三层走廊北侧
     145: 'attic',                   // 阁楼
-    146: 'tutor_bedroom'             // 家庭教师卧室
+    146: 'tutor_bedroom',            // 家庭教师卧室
+    // ========== 卡伦镇区域（world_1.js）==========
+    147: 'road',                     // 马路（起点）
+    148: 'road_north_1',             // 马路北1
+    149: 'road_north_2',             // 马路北2
+    150: 'road_north_3',             // 马路北3
+    151: 'road_north_4',             // 马路北4
+    152: 'karen_town_gate',          // 卡伦镇大门
+    153: 'town_road_center',         // 镇内十字路口
+    154: 'town_road_n1',             // 镇内北街道1
+    155: 'town_road_n2',             // 镇内北街道2
+    156: 'town_road_n3',             // 镇内北街道3
+    157: 'baron_mansion_gate',       // 男爵城堡大门
+    158: 'town_road_w1',             // 镇内西街道1
+    159: 'town_road_w2',             // 镇内西街道2
+    160: 'town_road_w3',             // 镇内西街道3
+    161: 'town_road_e1',             // 镇内东街道1
+    162: 'town_road_e2',             // 镇内东街道2
+    163: 'town_road_e3',             // 镇内东街道3
+    164: 'residence_w1',             // 民房（西侧w1北）
+    165: 'bakery',                   // 面包店（西侧w2北）
+    166: 'residence_w3',             // 民房（西侧w3北）
+    // ========== 西侧延伸 & 东侧延伸 ==========
+    167: 'town_road_w4',             // 镇内西街道4
+    168: 'town_road_w5',             // 镇内西街道5
+    169: 'karen_town_side_gate',     // 卡伦镇侧门
+    170: 'town_road_e2_north',       // 东街道2北侧
+    171: 'town_road_e3_north',       // 东街道3北侧
+    // ========== w4北侧街道 & 侧门西侧小路 & 教堂 ==========
+    172: 'town_road_w4_n1',          // w4北街道1
+    173: 'town_road_w4_n2',          // w4北街道2
+    174: 'town_road_w4_n3',          // w4北街道3
+    175: 'side_path_1',              // 侧门西侧小路1
+    176: 'side_path_2',              // 侧门西侧小路2
+    177: 'side_path_3',              // 侧门西侧小路3
+    178: 'church_gate',              // 教堂大门
+    // ========== 教堂院子 & 墓地 ==========
+    179: 'church_courtyard_1',       // 院子1（教堂南）
+    180: 'church_courtyard_1_w1',    // 院子1西侧1
+    181: 'church_courtyard_1_w2',    // 院子1西侧2（西北角）
+    182: 'church_courtyard_2',       // 院子2（院子1南）
+    183: 'church_courtyard_2_w1',    // 院子2西侧1
+    184: 'church_courtyard_2_w2',    // 院子2西侧2
+    185: 'cemetery'                  // 墓地
 };
 
 // 获取房间编号对应的房间ID
@@ -620,15 +663,15 @@ function move(direction) {
         // 骑士已死且有钥匙 - 可以通过
     }
 
-    // 检查伯爵宅邸大门：需要钥匙才能进入
+    // 检查男爵宅邸大门：需要钥匙才能进入
     if (targetRoomId === 'mansion_gate') {
         const hasMansionKey = gameState.player.inventory.some(item => item && item.id === 'mansion_key');
         if (!hasMansionKey) {
             print("");
             print(`<span style="color: #ffaa66;">═══════════════════════════</span>`);
-            print(`<span style="color: #ffaa66;">伯爵宅邸的大门紧闭着。</span>`);
+            print(`<span style="color: #ffaa66;">男爵宅邸的大门紧闭着。</span>`);
             print(`<span style="color: #888;">沉重的橡木大门上挂着一把巨大的铁锁。</span>`);
-            print(`<span style="color: #666;">（你需要伯爵宅邸钥匙才能进入...）</span>`);
+            print(`<span style="color: #666;">（你需要男爵宅邸钥匙才能进入...）</span>`);
             print(`<span style="color: #ffaa66;">═══════════════════════════</span>`);
             return;
         }
@@ -1002,19 +1045,9 @@ async function loadGame() {
             if (room && room.items) {
                 room.items.forEach(itemId => {
                     if (itemId.includes('corpse') && !ITEM_TEMPLATES[itemId]) {
-                        // 根据尸体ID生成对应的尸体模板
-                        let corpseTemplate = null;
-                        if (itemId.includes('liana')) {
-                            corpseTemplate = ITEM_TEMPLATES['corpse_liana'];
-                        } else if (itemId.includes('cecilia')) {
-                            corpseTemplate = ITEM_TEMPLATES['cecilia_corpse'];
-                        } else if (itemId.includes('sophie')) {
-                            corpseTemplate = ITEM_TEMPLATES['sophie_corpse'];
-                        } else if (itemId.includes('elena')) {
-                            corpseTemplate = ITEM_TEMPLATES['elena_corpse'];
-                        } else if (itemId.includes('serena')) {
-                            corpseTemplate = ITEM_TEMPLATES['serena_corpse'];
-                        }
+                        // 根据尸体ID中的关键词查找对应的尸体模板
+                        // 新增角色只需在 items.js 的 CORPSE_TEMPLATE_MAP 中添加映射即可
+                        let corpseTemplate = getCorpseTemplateByItemId(itemId);
                         
                         if (corpseTemplate) {
                             const corpse = {
@@ -2440,7 +2473,7 @@ function showGroundItemInfo(itemId) {
         currentPanel = 'ground_item';
         return; // 雕像不需要继续下面的通用处理
     } else if (itemId === 'mansion_gate_door') {
-        // 伯爵宅邸大门：使用钥匙进入
+        // 男爵宅邸大门：使用钥匙进入
         html += `<div><span style="color: #cc9966; text-decoration: underline; cursor: pointer;" onclick="useMansionGate('${itemId}')">🚪 使用钥匙开门</span></div>`;
         html += `<div><span style="color: #aaa; cursor: pointer;" onclick="clearDetailPanel()">↩️ 返回</span></div>`;
         
@@ -2451,7 +2484,7 @@ function showGroundItemInfo(itemId) {
             UI.setDetail(html);
         }
         currentPanel = 'ground_item';
-        return; // 伯爵宅邸大门不需要继续下面的通用处理
+        return; // 男爵宅邸大门不需要继续下面的通用处理
     } else if (itemId === 'wooden_hut') {
         // 木屋：点击进入
         html += `<div><span style="color: #cc9966; text-decoration: underline; cursor: pointer;" onclick="enterWoodenHut('${itemId}')">🏠 进入木屋</span></div>`;
@@ -2948,7 +2981,7 @@ function breakMediumDoor(doorId) {
         // 根据当前房间添加对应的东侧出口
         if (room.exits) {
             if (gameState.player.location === 'second_floor_1') {
-                // 伯爵女儿东侧走廊 - 通往隐藏房间
+                // 男爵女儿东侧走廊 - 通往隐藏房间
                 room.exits.east = 'hidden_room_cecilia';
                 // 创建隐藏房间（如果不存在）
                 if (!gameState.world['hidden_room_cecilia']) {
@@ -2964,20 +2997,20 @@ function breakMediumDoor(doorId) {
                 print(`<span style="color: #aaffaa;">你成功破坏了房门，发现了一个隐藏房间！</span>`);
                 print(`<span style="color: #aaffaa;">═══════════════════════════</span>`);
             } else if (gameState.player.location === 'second_floor_3') {
-                // 伯爵夫人东侧走廊 - 通往秘密储藏室
+                // 男爵夫人东侧走廊 - 通往秘密储藏室
                 room.exits.east = 'secret_storage';
                 // 创建秘密储藏室（如果不存在）
                 if (!gameState.world['secret_storage']) {
                     gameState.world['secret_storage'] = {
                         name: "秘密储藏室",
-                        desc: "一间隐秘的储藏室，货架上摆放着各种珍贵的物品。\n看来伯爵夫人把不少好东西都藏在了这里。\n西侧回到走廊。",
+                        desc: "一间隐秘的储藏室，货架上摆放着各种珍贵的物品。\n看来男爵夫人把不少好东西都藏在了这里。\n西侧回到走廊。",
                         exits: { west: 'second_floor_3' },
                         items: ['healing_potion', 'healing_potion', 'coin', 'coin', 'coin'],
                         npcs: []
                     };
                 }
                 print(`<span style="color: #aaffaa;">═══════════════════════════</span>`);
-                print(`<span style="color: #aaffaa;">你成功破坏了房门，发现了伯爵夫人的秘密储藏室！</span>`);
+                print(`<span style="color: #aaffaa;">你成功破坏了房门，发现了男爵夫人的秘密储藏室！</span>`);
                 print(`<span style="color: #aaffaa;">═══════════════════════════</span>`);
             }
         }
@@ -3412,7 +3445,7 @@ function useSideGate(gateId) {
     updateSceneInfo();
 }
 
-// 使用伯爵宅邸大门
+// 使用男爵宅邸大门
 function useMansionGate(gateId) {
     const room = gameState.world[gameState.player.location];
     if (!room || !room.items || !room.items.includes(gateId)) {
@@ -3420,14 +3453,14 @@ function useMansionGate(gateId) {
         return;
     }
     
-    // 检查玩家是否有伯爵宅邸钥匙
+    // 检查玩家是否有男爵宅邸钥匙
     const hasKey = gameState.player.inventory.some(item => item && item.id === 'mansion_key');
     
     if (!hasKey) {
         print("");
         print(`<span style="color: #ffaa66;">═══════════════════════════</span>`);
         print(`<span style="color: #ffaa66;">大门被牢牢锁住。</span>`);
-        print(`<span style="color: #888;">你需要伯爵宅邸钥匙才能打开这扇门。</span>`);
+        print(`<span style="color: #888;">你需要男爵宅邸钥匙才能打开这扇门。</span>`);
         print(`<span style="color: #ffaa66;">═══════════════════════════</span>`);
         return;
     }
@@ -3438,7 +3471,7 @@ function useMansionGate(gateId) {
     print("");
     
     print(`<span style="color: #aaffaa;">═══════════════════════════</span>`);
-    print(`<span style="color: #aaffaa;">你使用伯爵宅邸钥匙打开了沉重的大门...</span>`);
+    print(`<span style="color: #aaffaa;">你使用男爵宅邸钥匙打开了沉重的大门...</span>`);
     print(`<span style="color: #888;">沉重的橡木门缓缓开启，露出宅邸内部的庭院。</span>`);
     print(`<span style="color: #aaffaa;">═══════════════════════════</span>`);
     print("");
@@ -5385,7 +5418,7 @@ function pickupAllItems() {
             else if (itemId === 'wardrobe') {
                 itemsToKeep.push(itemId);
             }
-            // 伯爵宅邸大门不可拾取
+            // 男爵宅邸大门不可拾取
             else if (itemId === 'mansion_gate_door') {
                 itemsToKeep.push(itemId);
             }
@@ -6378,6 +6411,7 @@ async function startGame() {
         await ModLoader.loadAllMods();
         ModLoader.applyToCharacters();
         ModLoader.applyToItems();
+        ModLoader.applyToCorpseMap();
     }
     
     // 重新初始化游戏
@@ -6390,6 +6424,7 @@ async function loadGameFromMenu() {
         await ModLoader.loadAllMods();
         ModLoader.applyToCharacters();
         ModLoader.applyToItems();
+        ModLoader.applyToCorpseMap();
     }
     
     if (await loadGame()) {
