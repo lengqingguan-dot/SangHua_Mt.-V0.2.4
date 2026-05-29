@@ -121,13 +121,13 @@ const ROOM_ID_MAP = {
     109: 'mountain_path_2',         // 山路2
     110: 'mountain_path_3',         // 山路3
     111: 'mountain_path_4',         // 山路4
-    112: 'mansion_gate',            // 伯爵宅邸大门
+    112: 'mansion_gate',            // 男爵宅邸大门
     113: 'fence_gate',              // 围栏门
     114: 'garden_center',           // 花园中心
     114: 'garden_south',            // 花园南侧
     115: 'garden_north',            // 花园北侧
     116: 'greenhouse',              // 温室
-    117: 'mansion_back_door',       // 伯爵宅邸后门
+    117: 'mansion_back_door',       // 男爵宅邸后门
     118: 'corridor_center',         // 一层走廊中心
     119: 'corridor_west',           // 一层走廊西侧
     120: 'corridor_west_2',         // 一层走廊西侧第二间
@@ -151,14 +151,57 @@ const ROOM_ID_MAP = {
     136: 'bathroom',                // 卫生间
     137: 'storage_room',            // 储藏室
     138: 'terrace',                 // 露台
-    139: 'countess_bedroom',        // 伯爵夫人卧室
-    140: 'daughter_bedroom',        // 伯爵女儿卧室
+    139: 'baroness_bedroom',        // 男爵夫人卧室
+    140: 'daughter_bedroom',        // 男爵女儿卧室
     141: 'study',                   // 书房
     142: 'third_floor_center',      // 三层走廊中心
-    143: 'count_bedroom',           // 伯爵卧室
+    143: 'baron_bedroom',           // 男爵卧室
     144: 'third_floor_north',       // 三层走廊北侧
     145: 'attic',                   // 阁楼
-    146: 'tutor_bedroom'             // 家庭教师卧室
+    146: 'tutor_bedroom',            // 家庭教师卧室
+    // ========== 卡伦镇区域（world_1.js）==========
+    147: 'road',                     // 马路（起点）
+    148: 'road_north_1',             // 马路北1
+    149: 'road_north_2',             // 马路北2
+    150: 'road_north_3',             // 马路北3
+    151: 'road_north_4',             // 马路北4
+    152: 'karen_town_gate',          // 卡伦镇大门
+    153: 'town_road_center',         // 镇内十字路口
+    154: 'town_road_n1',             // 镇内北街道1
+    155: 'town_road_n2',             // 镇内北街道2
+    156: 'town_road_n3',             // 镇内北街道3
+    157: 'baron_mansion_gate',       // 男爵城堡大门
+    158: 'town_road_w1',             // 镇内西街道1
+    159: 'town_road_w2',             // 镇内西街道2
+    160: 'town_road_w3',             // 镇内西街道3
+    161: 'town_road_e1',             // 镇内东街道1
+    162: 'town_road_e2',             // 镇内东街道2
+    163: 'town_road_e3',             // 镇内东街道3
+    164: 'residence_w1',             // 民房（西侧w1北）
+    165: 'bakery',                   // 面包店（西侧w2北）
+    166: 'residence_w3',             // 民房（西侧w3北）
+    // ========== 西侧延伸 & 东侧延伸 ==========
+    167: 'town_road_w4',             // 镇内西街道4
+    168: 'town_road_w5',             // 镇内西街道5
+    169: 'karen_town_side_gate',     // 卡伦镇侧门
+    170: 'town_road_e2_north',       // 东街道2北侧
+    171: 'town_road_e3_north',       // 东街道3北侧
+    // ========== w4北侧街道 & 侧门西侧小路 & 教堂 ==========
+    172: 'town_road_w4_n1',          // w4北街道1
+    173: 'town_road_w4_n2',          // w4北街道2
+    174: 'town_road_w4_n3',          // w4北街道3
+    175: 'side_path_1',              // 侧门西侧小路1
+    176: 'side_path_2',              // 侧门西侧小路2
+    177: 'side_path_3',              // 侧门西侧小路3
+    178: 'church_gate',              // 教堂大门
+    // ========== 教堂院子 & 墓地 ==========
+    179: 'church_courtyard_1',       // 院子1（教堂南）
+    180: 'church_courtyard_1_w1',    // 院子1西侧1
+    181: 'church_courtyard_1_w2',    // 院子1西侧2（西北角）
+    182: 'church_courtyard_2',       // 院子2（院子1南）
+    183: 'church_courtyard_2_w1',    // 院子2西侧1
+    184: 'church_courtyard_2_w2',    // 院子2西侧2
+    185: 'cemetery'                  // 墓地
 };
 
 // 获取房间编号对应的房间ID
@@ -245,19 +288,6 @@ function getDefaultGameState() {
 // 初始游戏状态
 let gameState = getDefaultGameState();
 
-// 战斗状态
-let battleState = {
-    inBattle: false,
-    enemies: [],  // 多个敌人 [{npcId, currentHp, maxHp, agi, atk, def, name}, ...]
-    currentTurnIndex: 0,  // 当前行动者的索引
-    turnOrder: [],  // 行动顺序 ['player' 或 enemy索引]
-    round: 0,
-    hatredUsed: false,  // 仇恨技能是否已在本次战斗中使用
-    originalPlayerStats: null  // 战斗开始时玩家的原始属性
-};
-
-// 默认战斗状态，用于重置游戏
-const DEFAULT_BATTLE_STATE = JSON.parse(JSON.stringify(battleState));
 
 // -------------------- 面板状态管理 --------------------
 // 始终保存主游戏输出内容（look、move等命令的输出）
@@ -281,6 +311,8 @@ let npcDialogueReturnTarget = '';
 let currentDetailItem = null;
 let currentDetailNPC = null;
 
+
+/*
 // -------------------- DOM 元素 --------------------
 const outputDiv = document.getElementById('output');
 const cmdInput = document.getElementById('cmd-input');
@@ -296,17 +328,34 @@ let northRoomSpan = document.getElementById('north-room');
 let southRoomSpan = document.getElementById('south-room');
 let eastRoomSpan = document.getElementById('east-room');
 let westRoomSpan = document.getElementById('west-room');
-
+*/
 
 // -------------------- 辅助函数：输出文本 --------------------
+// function print(msg) {
+//     outputDiv.innerHTML += msg + '<br>';
+// }
+
+// function clearOutput() {
+//     UI.clearOutput();
+// }
+
 function print(msg) {
-    outputDiv.innerHTML += msg + '<br>';
-    outputDiv.scrollTop = outputDiv.scrollHeight;
+    UI.print(msg);
 }
 
 function clearOutput() {
-    outputDiv.innerHTML = '';
+    UI.clearOutput();
 }
+
+// 修改原有的向详情栏输出函数
+function printToDetail(content) {
+    UI.printToDetail(content);
+}
+
+function clearDetailPanel() {
+    UI.clearDetail();
+}
+
 
 // -------------------- 更新小地图 --------------------
 function updateMinimap() {
@@ -314,7 +363,7 @@ function updateMinimap() {
     const room = gameState.world[currentLoc];
     if (!room) return;
 
-    roomNameDisplay.textContent = room.name;
+    UI.elements.roomNameDisplay.textContent = room.name;
 
     const centerRoomNameSpan = document.getElementById('current-room-name-on-map');
     if (centerRoomNameSpan) {
@@ -332,10 +381,10 @@ function updateMinimap() {
     };
 
     const directions = [
-        { dir: 'north', cell: mapNorth, span: northRoomSpan },
-        { dir: 'south', cell: mapSouth, span: southRoomSpan },
-        { dir: 'east', cell: mapEast, span: eastRoomSpan },
-        { dir: 'west', cell: mapWest, span: westRoomSpan }
+        { dir: 'north', cell: UI.elements.mapNorth, span: UI.elements.northRoomSpan },
+        { dir: 'south', cell: UI.elements.mapSouth, span: UI.elements.southRoomSpan },
+        { dir: 'east', cell: UI.elements.mapEast, span: UI.elements.eastRoomSpan },
+        { dir: 'west', cell: UI.elements.mapWest, span: UI.elements.westRoomSpan }
     ];
 
     directions.forEach(({ dir, cell, span }) => {
@@ -420,7 +469,7 @@ function showRoomInfo(room) {
     }
     
     // 更新主内容缓存
-    mainContent = outputDiv.innerHTML;
+    mainContent = UI.getOutputHtml();
     
     // 检测血色宝石：如果玩家进入训练场且装备了血色宝石，莉娅娜会攻击
     if (loc === 'training_ground' && room.npcs && room.npcs.includes('liana')) {
@@ -452,24 +501,14 @@ let waitingForName = false;
 let _storyNextCallback = null; // 点击Next时执行的回调
 
 function showNextBtn(callback) {
-    _storyNextCallback = callback;
-    const btn = document.getElementById('story-next-btn');
-    if (btn) btn.style.display = 'inline-block';
+    UI.toggleNextBtn(true, callback);
 }
 
 function hideNextBtn() {
-    _storyNextCallback = null;
-    const btn = document.getElementById('story-next-btn');
-    if (btn) btn.style.display = 'none';
+    UI.toggleNextBtn(false);
 }
 
-function onStoryNextClick() {
-    if (typeof _storyNextCallback === 'function') {
-        const cb = _storyNextCallback;
-        _storyNextCallback = null; // 防止重复点击
-        cb();
-    }
-}
+function onStoryNextClick() {}
 
 // 根据文本字数计算剧情延时（毫秒）—— 已弃用，保留备用
 function storyDelay(text, rate) {
@@ -495,8 +534,7 @@ function playIntroAnimation() {
     ];
     
     // 显示遮罩，封锁所有交互
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     clearOutput();
     let lineIndex = 0;
@@ -523,11 +561,11 @@ function playIntroAnimation() {
             
             // 设置等待名字输入状态
             waitingForName = true;
-            cmdInput.placeholder = "输入你的名字后回车...";
-            cmdInput.focus();
+            UI.elements.cmdInput.placeholder = "输入你的名字后回车...";
+            UI.elements.cmdInput.focus();
             
             // 隐藏遮罩，允许用户在指令栏输入
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
         }
     }
     
@@ -548,7 +586,7 @@ function processNameInput(name) {
     
     // 恢复正常指令模式
     waitingForName = false;
-    cmdInput.placeholder = "输入命令 (如 look, n, i)...";
+    UI.elements.cmdInput.placeholder = "输入命令 (如 look, n, i)...";
     
     // 正式进入游戏
     const room = gameState.world[gameState.player.location];
@@ -625,15 +663,15 @@ function move(direction) {
         // 骑士已死且有钥匙 - 可以通过
     }
 
-    // 检查伯爵宅邸大门：需要钥匙才能进入
+    // 检查男爵宅邸大门：需要钥匙才能进入
     if (targetRoomId === 'mansion_gate') {
         const hasMansionKey = gameState.player.inventory.some(item => item && item.id === 'mansion_key');
         if (!hasMansionKey) {
             print("");
             print(`<span style="color: #ffaa66;">═══════════════════════════</span>`);
-            print(`<span style="color: #ffaa66;">伯爵宅邸的大门紧闭着。</span>`);
+            print(`<span style="color: #ffaa66;">男爵宅邸的大门紧闭着。</span>`);
             print(`<span style="color: #888;">沉重的橡木大门上挂着一把巨大的铁锁。</span>`);
-            print(`<span style="color: #666;">（你需要伯爵宅邸钥匙才能进入...）</span>`);
+            print(`<span style="color: #666;">（你需要男爵宅邸钥匙才能进入...）</span>`);
             print(`<span style="color: #ffaa66;">═══════════════════════════</span>`);
             return;
         }
@@ -672,8 +710,8 @@ function move(direction) {
         
         if (hostileNPCs.length > 0) {
             // 立即显示遮罩，锁死所有按钮防止玩家逃跑
-            const overlay = document.getElementById('block-overlay');
-            if (overlay) overlay.classList.add('active');
+            
+            UI.setOverlay(true);
             
             setTimeout(() => {
                 print("");
@@ -720,43 +758,43 @@ function moveByButton(direction) {
 
 // 关闭当前面板，回到主界面
 function closeCurrentPanel() {
-    const detailPanel = document.getElementById('detail-panel');
+    
     
     if (currentPanel === 'inventory') {
         if (mainContent) {
-            outputDiv.innerHTML = mainContent;
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+            UI.setOutputHtml(mainContent);
+    
         }
     } else if (currentPanel === 'equipment') {
         if (mainContent) {
-            outputDiv.innerHTML = mainContent;
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+            UI.setOutputHtml(mainContent);
+    
         }
     } else if (currentPanel === 'status') {
         if (mainContent) {
-            outputDiv.innerHTML = mainContent;
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+            UI.setOutputHtml(mainContent);
+    
         }
     } else if (currentPanel === 'quests') {
         // 恢复详情栏默认内容
-        detailPanel.innerHTML = '<span style="color: #888;">点击物品或NPC查看详情...</span>';
+        UI.clearDetail();
     } else if (currentPanel === 'detail') {
         // 从详情页返回
         if (detailContent) {
-            outputDiv.innerHTML = detailContent;
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+            UI.setOutputHtml(detailContent);
+    
         }
     } else if (currentPanel === 'ground_item') {
         // 从地面物品详情页返回
         if (groundItemReturnTarget) {
-            outputDiv.innerHTML = groundItemReturnTarget;
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+            UI.setOutputHtml(groundItemReturnTarget);
+    
         }
     } else if (currentPanel === 'npc_detail') {
         // 从NPC详情页返回
         if (mainContent) {
-            outputDiv.innerHTML = mainContent;
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+            UI.setOutputHtml(mainContent);
+    
         }
     }
     currentPanel = null;
@@ -772,7 +810,7 @@ function showStatus() {
 
 // -------------------- 显示任务面板 --------------------
 function showQuestsPanel() {
-    const detailPanel = document.getElementById('detail-panel');
+    
     let questsHtml = '';
     
     questsHtml += makeTitle('任务日志') + '<br>';
@@ -812,11 +850,11 @@ function showQuestsPanel() {
     
     // 保存当前输出内容
     if (currentPanel === null) {
-        mainContent = outputDiv.innerHTML;
+        mainContent = UI.getOutputHtml();
     }
     
     // 显示任务内容到详情栏
-    detailPanel.innerHTML = questsHtml;
+    UI.setDetail(questHtml);
     
     // 设置当前面板状态
     currentPanel = 'quests';
@@ -1030,7 +1068,7 @@ async function loadGame() {
         // 读取存档后不再显示开场动画
         gameState.firstTimeEntered = false;
         waitingForName = false;
-        cmdInput.placeholder = "输入命令 (如 look, n, i)...";
+        UI.elements.cmdInput.placeholder = "输入命令 (如 look, n, i)...";
         clearOutput();
         print("📀 记忆复苏，你回到了桑华山的矿道中……");
         look();
@@ -1092,7 +1130,7 @@ function resetGame() {
         };
         clearOutput();
         waitingForName = false;
-        cmdInput.placeholder = "输入命令 (如 look, n, i)...";
+        UI.elements.cmdInput.placeholder = "输入命令 (如 look, n, i)...";
         print("⚒️ 桑华山的阴冷再次包裹了你。你必须逃出去，然后复仇。");
         look();
         updateMinimap();
@@ -1101,8 +1139,8 @@ function resetGame() {
 
 // -------------------- 界面交互 --------------------
 function sendCommand() {
-    const input = cmdInput.value;
-    cmdInput.value = '';
+    const input = UI.elements.cmdInput.value;
+    UI.elements.cmdInput.value = '';
     
     // 如果正在等待名字输入
     if (waitingForName) {
@@ -1113,10 +1151,12 @@ function sendCommand() {
     processCommand(input);
 }
 
-cmdInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        sendCommand();
-    }
+window.addEventListener('DOMContentLoaded', () => {
+    UI.elements.cmdInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendCommand();
+        }
+    });
 });
 
 // ==================== 物品系统辅助函数 ====================
@@ -1146,7 +1186,7 @@ function examineItemFromPanel(itemId) {
         return;
     }
     
-    const detailPanel = document.getElementById('detail-panel');
+    
     let html = makeTitle('物品详情');
     html += `名称：${item.name}\n`;
     html += `类型：${getItemTypeName(item.type)}\n`;
@@ -1219,7 +1259,7 @@ function examineItemFromPanel(itemId) {
     const returnAction = previousPanelType === 'equipment' ? 'showEquipmentPanel()' : 'showInventoryPanel()';
     html += `<div><span style="color: #aaa; cursor: pointer;" onclick="${returnAction}">↩️ 返回</span></div>`;
     
-    detailPanel.innerHTML = html;
+    UI.setDetail(html);
     currentPanel = 'item_detail';
 }
 
@@ -1231,7 +1271,7 @@ function examineEquippedItem(slotKey) {
         return;
     }
     
-    const detailPanel = document.getElementById('detail-panel');
+    
     let html = makeTitle('装备详情');
     html += `名称：${item.name}\n`;
     html += `类型：${getItemTypeName(item.type)}\n`;
@@ -1254,7 +1294,7 @@ function examineEquippedItem(slotKey) {
     html += `<div><span style="color: #ffaa66; text-decoration: underline; cursor: pointer;" onclick="unequipItemFromDetail('${slotKey}')">⬇️ 卸下</span></div>`;
     html += `<div><span style="color: #aaa; cursor: pointer;" onclick="showEquipmentPanel()">↩️ 返回</span></div>`;
     
-    detailPanel.innerHTML = html;
+    UI.setDetail(html);
     currentPanel = 'equipped_detail';
 }
 
@@ -1354,8 +1394,7 @@ function useItemFromDetail(itemId) {
         print("");
         
         // 显示遮罩，封锁所有交互
-        const overlay = document.getElementById('block-overlay');
-        if (overlay) overlay.classList.add('active');
+        UI.setOverlay(true);
         
         // 传送到马路房间
         gameState.player.location = 'road';
@@ -1403,12 +1442,11 @@ function useItemFromDetail(itemId) {
                 } else {
                     print(`<span style="color: #cccccc;">${roadStory[lineIndex]}</span>`);
                 }
-                outputDiv.scrollTop = outputDiv.scrollHeight;
                 lineIndex++;
                 setTimeout(showNextRoadLine, roadStory[lineIndex - 1] === "" ? 500 : 1300);
             } else {
                 // 剧情结束，移除遮罩
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
                 
                 // 标记马路场景已进入
                 gameState.gameFlags.roadEntered = true;
@@ -1534,14 +1572,12 @@ function readItemFromDetail(itemId) {
         print("<br>");
         
         // 显示遮罩，封锁所有交互
-        const overlay = document.getElementById('block-overlay');
-        if (overlay) overlay.classList.add('active');
+        UI.setOverlay(true);
         
         let lineIndex = 0;
         function showNextLine() {
             if (lineIndex < item.content.length) {
                 print(`<span class="story-text">${item.content[lineIndex]}</span>`);
-                outputDiv.scrollTop = outputDiv.scrollHeight;
                 lineIndex++;
                 setTimeout(showNextLine, 1300);
             } else {
@@ -1549,7 +1585,7 @@ function readItemFromDetail(itemId) {
                 print("<br>");
                 print(`<span style="color: #888;">────────────────</span>`);
                 print(`<span style="color: #aaa; cursor: pointer;" onclick="showInventoryPanel()">↩️ 返回物品栏</span>`);
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
             }
         }
         showNextLine();
@@ -1562,15 +1598,13 @@ function readItemFromDetail(itemId) {
         print("<br>");
         
         // 显示遮罩，封锁所有交互
-        const overlay = document.getElementById('block-overlay');
-        if (overlay) overlay.classList.add('active');
+        UI.setOverlay(true);
         
         let lineIndex = 0;
         function showNextOrderLine() {
             if (lineIndex < item.content.length) {
                 // 密令使用金色文字显示
                 print(`<span style="color: #ffdd44; font-family: serif;">${item.content[lineIndex]}</span>`);
-                outputDiv.scrollTop = outputDiv.scrollHeight;
                 lineIndex++;
                 setTimeout(showNextOrderLine, 1300);
             } else {
@@ -1581,7 +1615,7 @@ function readItemFromDetail(itemId) {
                 print(`<span style="color: #ff4444;">═══════════════════════════</span>`);
                 print(`<span style="color: #888;">────────────────</span>`);
                 print(`<span style="color: #aaa; cursor: pointer;" onclick="showInventoryPanel()">↩️ 返回物品栏</span>`);
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
             }
         }
         showNextOrderLine();
@@ -1795,7 +1829,7 @@ function showInventoryPanel() {
         currentPanel = null;
     } else {
         // 打开物品栏
-        const detailPanel = document.getElementById('detail-panel');
+        
         let html = makeTitle('行囊物品');
         
         // 添加分类菜单（居中）
@@ -1837,7 +1871,7 @@ function showInventoryPanel() {
         html += centerLine();
         html += `<div style="text-align: center;"><span style="color: #aaa; cursor: pointer;" onclick="showInventoryPanel()">↩️ 关闭</span></div>`;
         
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
         currentPanel = 'inventory';
     }
 }
@@ -1856,7 +1890,7 @@ function generateInventoryCategoryMenu() {
 
 // 显示物品分类
 function showInventoryCategory(category) {
-    const detailPanel = document.getElementById('detail-panel');
+    
     const categoryName = category === 'consumable' ? '消耗品' : category === 'important' ? '重要道具' : category === 'limb' ? '肢体' : '杂物';
     let html = makeTitle(`行囊物品 - ${categoryName}`);
     
@@ -1917,14 +1951,14 @@ function showInventoryCategory(category) {
     html += centerLine();
     html += `<div style="text-align: center;"><span style="color: #aaa; cursor: pointer;" onclick="showInventoryPanel()">↩️ 返回物品栏</span></div>`;
     
-    detailPanel.innerHTML = html;
+    UI.setDetail(html);
     currentPanel = 'inventory';
 }
 
 // 显示全部物品
 function showInventoryAll() {
     // 直接显示全部物品，不关闭当前面板
-    const detailPanel = document.getElementById('detail-panel');
+    
     let html = makeTitle('行囊物品');
     
     // 添加分类菜单（居中）
@@ -1967,7 +2001,7 @@ function showInventoryAll() {
     html += centerLine();
     html += `<div style="text-align: center;"><span style="color: #aaa; cursor: pointer;" onclick="showInventoryPanel()">↩️ 关闭</span></div>`;
     
-    detailPanel.innerHTML = html;
+    UI.setDetail(html);
     currentPanel = 'inventory';
 }
 
@@ -1979,7 +2013,7 @@ function showEquipmentPanel() {
         currentPanel = null;
     } else {
         // 打开装备栏
-        const detailPanel = document.getElementById('detail-panel');
+        
         let html = makeTitle('当前装备');
         
         const slots = [
@@ -2020,7 +2054,7 @@ function showEquipmentPanel() {
         html += centerLine();
         html += `<div style="text-align: center;"><span style="color: #aaa; cursor: pointer;" onclick="showEquipmentPanel()">↩️ 关闭</span></div>`;
         
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
         currentPanel = 'equipment';
     }
 }
@@ -2033,7 +2067,7 @@ function showSkillsPanel() {
         currentPanel = null;
     } else {
         // 打开技能栏
-        const detailPanel = document.getElementById('detail-panel');
+        
         let html = makeTitle('技能总览');
         
         const playerSkills = gameState.player.skills || [];
@@ -2050,7 +2084,7 @@ function showSkillsPanel() {
         html += centerLine();
         html += `<div style="text-align: center;"><span style="color: #aaa; cursor: pointer;" onclick="showSkillsPanel()">↩️ 关闭</span></div>`;
         
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
         currentPanel = 'skills';
     }
 }
@@ -2063,7 +2097,7 @@ function showSkillDetail(skillId) {
         return;
     }
     
-    const detailPanel = document.getElementById('detail-panel');
+    
     let html = makeTitle('技能详情');
     html += `名称：${skill.name}\n`;
     html += `消耗：${skill.cost} SP\n`;
@@ -2071,7 +2105,7 @@ function showSkillDetail(skillId) {
     html += centerLine();
     html += `<div style="text-align: center;"><span style="color: #aaffaa; text-decoration: underline; cursor: pointer;" onclick="showSkillsPanel()">↩️ 返回技能栏</span></div>`;
     
-    detailPanel.innerHTML = html;
+    UI.setDetail(html);
     currentPanel = 'skill_detail';
 }
 
@@ -2083,7 +2117,7 @@ function showStatusPanel() {
         currentPanel = null;
     } else {
         // 打开状态栏
-        const detailPanel = document.getElementById('detail-panel');
+        
         const p = gameState.player;
         
         // 计算总属性（使用统一函数）
@@ -2132,14 +2166,14 @@ function showStatusPanel() {
         html += centerLine();
         html += `<div style="text-align: center;"><span style="color: #aaa; cursor: pointer;" onclick="showStatusPanel()">↩️ 关闭</span></div>`;
         
-        detailPanel.innerHTML = html;
+        UI.setDetail(html);
         currentPanel = 'status';
     }
 }
 
 // 清空输出区
 function clearOutputWindow() {
-    outputDiv.innerHTML = '';
+    UI.clearOutput();
     print("✨ 输出区已清空。");
     currentPanel = null;
 }
@@ -2251,18 +2285,17 @@ function updateSceneInfo() {
 
 // 向详情栏输出内容
 function printToDetail(content) {
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        detailPanel.innerHTML += content;
-        detailPanel.scrollTop = detailPanel.scrollHeight;
+    
+    if (UI.elements.detailPanel) {
+        UI.printToDetail(content);
     }
 }
 
 // 清空详情栏
 function clearDetailPanel() {
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        detailPanel.innerHTML = '<span style="color: #888;">点击物品或NPC查看详情...</span>';
+    
+    if (UI.elements.detailPanel) {
+        UI.clearDetail();
     }
 }
 
@@ -2366,9 +2399,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
-        if (detailPanel) {
-            detailPanel.innerHTML = html;
+        
+        if (UI.elements.detailPanel) {
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return; // 炉灶不需要继续下面的通用处理
@@ -2378,9 +2411,9 @@ function showGroundItemInfo(itemId) {
         html += `<div><span style="color: #aaa; cursor: pointer;" onclick="clearDetailPanel()">↩️ 返回</span></div>`;
         
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
-        if (detailPanel) {
-            detailPanel.innerHTML = html;
+        
+        if (UI.elements.detailPanel) {
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return; // 工作台不需要继续下面的通用处理
@@ -2391,9 +2424,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
-        if (detailPanel) {
-            detailPanel.innerHTML = html;
+        
+        if (UI.elements.detailPanel) {
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return; // 榨奶器不需要继续下面的通用处理
@@ -2404,9 +2437,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
-        if (detailPanel) {
-            detailPanel.innerHTML = html;
+        
+        if (UI.elements.detailPanel) {
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return; // 雷管不需要继续下面的通用处理
@@ -2417,9 +2450,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
-        if (detailPanel) {
-            detailPanel.innerHTML = html;
+        
+        if (UI.elements.detailPanel) {
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return; // 侧门不需要继续下面的通用处理
@@ -2430,25 +2463,25 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
-        if (detailPanel) {
-            detailPanel.innerHTML = html;
+        
+        if (UI.elements.detailPanel) {
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return; // 雕像不需要继续下面的通用处理
     } else if (itemId === 'mansion_gate_door') {
-        // 伯爵宅邸大门：使用钥匙进入
+        // 男爵宅邸大门：使用钥匙进入
         html += `<div><span style="color: #cc9966; text-decoration: underline; cursor: pointer;" onclick="useMansionGate('${itemId}')">🚪 使用钥匙开门</span></div>`;
         html += `<div><span style="color: #aaa; cursor: pointer;" onclick="clearDetailPanel()">↩️ 返回</span></div>`;
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
-        if (detailPanel) {
-            detailPanel.innerHTML = html;
+        
+        if (UI.elements.detailPanel) {
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
-        return; // 伯爵宅邸大门不需要继续下面的通用处理
+        return; // 男爵宅邸大门不需要继续下面的通用处理
     } else if (itemId === 'wooden_hut') {
         // 木屋：点击进入
         html += `<div><span style="color: #cc9966; text-decoration: underline; cursor: pointer;" onclick="enterWoodenHut('${itemId}')">🏠 进入木屋</span></div>`;
@@ -2456,9 +2489,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
-        if (detailPanel) {
-            detailPanel.innerHTML = html;
+        
+        if (UI.elements.detailPanel) {
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return;
@@ -2469,9 +2502,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
-        if (detailPanel) {
-            detailPanel.innerHTML = html;
+        
+        if (UI.elements.detailPanel) {
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return;
@@ -2482,9 +2515,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
-        if (detailPanel) {
-            detailPanel.innerHTML = html;
+        
+        if (UI.elements.detailPanel) {
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return;
@@ -2495,9 +2528,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
-        if (detailPanel) {
-            detailPanel.innerHTML = html;
+        
+        if (UI.elements.detailPanel) {
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return;
@@ -2508,9 +2541,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
-        if (detailPanel) {
-            detailPanel.innerHTML = html;
+        
+        if (UI.elements.detailPanel) {
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return;
@@ -2565,9 +2598,9 @@ function showGroundItemInfo(itemId) {
         
         // 保存当前物品ID并更新详情栏
         currentDetailItem = itemId;
-        const detailPanel = document.getElementById('detail-panel');
-        if (detailPanel) {
-            detailPanel.innerHTML = html;
+        
+        if (UI.elements.detailPanel) {
+            UI.setDetail(html);
         }
         currentPanel = 'ground_item';
         return; // 炉灶不需要继续下面的通用处理
@@ -2606,9 +2639,9 @@ function showGroundItemInfo(itemId) {
     currentDetailItem = itemId;
     
     // 更新详情栏
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        detailPanel.innerHTML = html;
+    
+    if (UI.elements.detailPanel) {
+        UI.setDetail(html);
     }
     
     currentPanel = 'ground_item';
@@ -2641,8 +2674,7 @@ function openIronLockWithKey(lockId) {
     print("");
     
     // 显示遮罩
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     const storyLines = [
         "钥匙在锁孔中转动，发出清脆的咔嗒声。",
@@ -2653,7 +2685,6 @@ function openIronLockWithKey(lockId) {
     function showNextStoryLine() {
         if (storyIndex < storyLines.length) {
             print(`<span class="story-text">${storyLines[storyIndex]}</span>`);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
             storyIndex++;
             setTimeout(showNextStoryLine, 1300);
         } else {
@@ -2687,7 +2718,7 @@ function openIronLockWithKey(lockId) {
             print("");
             print(`<span style="color: #aaffaa;">铁锁被打开了！矿坑暴露在月光下...</span>`);
             
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
             updateSceneInfo();
         }
     }
@@ -2766,8 +2797,7 @@ function breakLock(lockId) {
         print("");
         
         // 显示遮罩，延时剧情
-        const overlay = document.getElementById('block-overlay');
-        if (overlay) overlay.classList.add('active');
+        UI.setOverlay(true);
         
         // 替换铁锁为破开的铁锁
         const lockIndex = room.items.indexOf(lockId);
@@ -2796,7 +2826,6 @@ function breakLock(lockId) {
         function showNextStoryLine() {
             if (storyIndex < storyLines.length) {
                 print(`<span class="story-text">${storyLines[storyIndex]}</span>`);
-                outputDiv.scrollTop = outputDiv.scrollHeight;
                 storyIndex++;
                 setTimeout(showNextStoryLine, 1300);
             } else {
@@ -2818,7 +2847,7 @@ function breakLock(lockId) {
                 print(`<span style="color: #aaffaa;">矿坑已经出现，你可以选择跳下...</span>`);
                 
                 // 关闭遮罩并更新场景
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
                 updateSceneInfo();
             }
         }
@@ -2949,7 +2978,7 @@ function breakMediumDoor(doorId) {
         // 根据当前房间添加对应的东侧出口
         if (room.exits) {
             if (gameState.player.location === 'second_floor_1') {
-                // 伯爵女儿东侧走廊 - 通往隐藏房间
+                // 男爵女儿东侧走廊 - 通往隐藏房间
                 room.exits.east = 'hidden_room_cecilia';
                 // 创建隐藏房间（如果不存在）
                 if (!gameState.world['hidden_room_cecilia']) {
@@ -2965,20 +2994,20 @@ function breakMediumDoor(doorId) {
                 print(`<span style="color: #aaffaa;">你成功破坏了房门，发现了一个隐藏房间！</span>`);
                 print(`<span style="color: #aaffaa;">═══════════════════════════</span>`);
             } else if (gameState.player.location === 'second_floor_3') {
-                // 伯爵夫人东侧走廊 - 通往秘密储藏室
+                // 男爵夫人东侧走廊 - 通往秘密储藏室
                 room.exits.east = 'secret_storage';
                 // 创建秘密储藏室（如果不存在）
                 if (!gameState.world['secret_storage']) {
                     gameState.world['secret_storage'] = {
                         name: "秘密储藏室",
-                        desc: "一间隐秘的储藏室，货架上摆放着各种珍贵的物品。\n看来伯爵夫人把不少好东西都藏在了这里。\n西侧回到走廊。",
+                        desc: "一间隐秘的储藏室，货架上摆放着各种珍贵的物品。\n看来男爵夫人把不少好东西都藏在了这里。\n西侧回到走廊。",
                         exits: { west: 'second_floor_3' },
                         items: ['healing_potion', 'healing_potion', 'coin', 'coin', 'coin'],
                         npcs: []
                     };
                 }
                 print(`<span style="color: #aaffaa;">═══════════════════════════</span>`);
-                print(`<span style="color: #aaffaa;">你成功破坏了房门，发现了伯爵夫人的秘密储藏室！</span>`);
+                print(`<span style="color: #aaffaa;">你成功破坏了房门，发现了男爵夫人的秘密储藏室！</span>`);
                 print(`<span style="color: #aaffaa;">═══════════════════════════</span>`);
             }
         }
@@ -3062,8 +3091,7 @@ function triggerEnding() {
     print("");
     
     // 显示遮罩，封锁所有交互
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     // 结局剧情内容
     const endingStory = [
@@ -3111,7 +3139,6 @@ function triggerEnding() {
             } else {
                 print(`<span style="color: #cccccc;">${endingStory[lineIndex]}</span>`);
             }
-            outputDiv.scrollTop = outputDiv.scrollHeight;
             lineIndex++;
             setTimeout(showNextEndingLine, endingStory[lineIndex - 1] === "" ? 500 : 1300);
         } else {
@@ -3123,7 +3150,7 @@ function triggerEnding() {
             print("");
             
             // 移除遮罩
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
             
             // 在结尾房间添加"卡伦镇"可交互物品
             const endingRoom = gameState.world["mountain_path_14"];
@@ -3415,7 +3442,7 @@ function useSideGate(gateId) {
     updateSceneInfo();
 }
 
-// 使用伯爵宅邸大门
+// 使用男爵宅邸大门
 function useMansionGate(gateId) {
     const room = gameState.world[gameState.player.location];
     if (!room || !room.items || !room.items.includes(gateId)) {
@@ -3423,14 +3450,14 @@ function useMansionGate(gateId) {
         return;
     }
     
-    // 检查玩家是否有伯爵宅邸钥匙
+    // 检查玩家是否有男爵宅邸钥匙
     const hasKey = gameState.player.inventory.some(item => item && item.id === 'mansion_key');
     
     if (!hasKey) {
         print("");
         print(`<span style="color: #ffaa66;">═══════════════════════════</span>`);
         print(`<span style="color: #ffaa66;">大门被牢牢锁住。</span>`);
-        print(`<span style="color: #888;">你需要伯爵宅邸钥匙才能打开这扇门。</span>`);
+        print(`<span style="color: #888;">你需要男爵宅邸钥匙才能打开这扇门。</span>`);
         print(`<span style="color: #ffaa66;">═══════════════════════════</span>`);
         return;
     }
@@ -3441,7 +3468,7 @@ function useMansionGate(gateId) {
     print("");
     
     print(`<span style="color: #aaffaa;">═══════════════════════════</span>`);
-    print(`<span style="color: #aaffaa;">你使用伯爵宅邸钥匙打开了沉重的大门...</span>`);
+    print(`<span style="color: #aaffaa;">你使用男爵宅邸钥匙打开了沉重的大门...</span>`);
     print(`<span style="color: #888;">沉重的橡木门缓缓开启，露出宅邸内部的庭院。</span>`);
     print(`<span style="color: #aaffaa;">═══════════════════════════</span>`);
     print("");
@@ -3587,9 +3614,9 @@ function useStove(stoveId) {
     window.cookingIngredients = ingredientsByType;
     
     // 更新详情栏
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        detailPanel.innerHTML = html;
+    
+    if (UI.elements.detailPanel) {
+        UI.setDetail(html);
     }
     currentPanel = 'cooking_menu';
 }
@@ -3721,9 +3748,9 @@ function useWorkbench(workbenchId) {
     html += centerLine();
     html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="clearDetailPanel()">↩️ 返回</div>`;
     
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        detailPanel.innerHTML = html;
+    
+    if (UI.elements.detailPanel) {
+        UI.setDetail(html);
     }
     currentPanel = 'workbench_menu';
 }
@@ -3784,9 +3811,9 @@ function showWorkbenchCategory(category) {
     html += `<div style="border-top: 1px solid #444; margin: 10px 0;"></div>`;
     html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="useWorkbench('workbench')">↩️ 返回上一级</div>`;
     
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        detailPanel.innerHTML = html;
+    
+    if (UI.elements.detailPanel) {
+        UI.setDetail(html);
     }
     currentPanel = 'workbench_category';
 }
@@ -3855,7 +3882,6 @@ function startCraftingProcess(category, recipeId) {
     function printNextCraftLine() {
         if (lineIndex < craftStory.length) {
             print(`<span style="color: #88ccff;">${craftStory[lineIndex]}</span>`);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
             lineIndex++;
             setTimeout(printNextCraftLine, 800);
         } else {
@@ -3991,9 +4017,9 @@ function showCustomCookingMode() {
     html += `</div>`;
     
     // 更新详情栏
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        detailPanel.innerHTML = html;
+    
+    if (UI.elements.detailPanel) {
+        UI.setDetail(html);
     }
     currentPanel = 'custom_cooking';
 }
@@ -4184,9 +4210,9 @@ function showCookingMenuByType(type) {
     html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="useStove('stove')">↩️ 返回上一级</div>`;
     
     // 更新详情栏
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        detailPanel.innerHTML = html;
+    
+    if (UI.elements.detailPanel) {
+        UI.setDetail(html);
     }
     currentPanel = 'cooking_menu_detail';
 }
@@ -4282,7 +4308,6 @@ function startCookingProcess(inventoryIndex) {
         if (lineIndex < cookStory.length) {
             print("<br>");
             print(`<span style="color: #ffaa66;">${cookStory[lineIndex]}</span>`);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
             lineIndex++;
             showNextBtn(printNextLine);
         } else {
@@ -4388,22 +4413,18 @@ function jumpIntoPit(pitId) {
     print("");
     
     // 显示遮罩，封锁交互
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     setTimeout(() => {
         print(`<span class="story-text">身体在黑暗中急速下坠...</span>`);
-        outputDiv.scrollTop = outputDiv.scrollHeight;
     }, 1300);
     
     setTimeout(() => {
         print(`<span class="story-text">碎石和岩壁擦过你的手臂，留下一道道血痕。</span>`);
-        outputDiv.scrollTop = outputDiv.scrollHeight;
     }, 2600);
     
     setTimeout(() => {
         print(`<span class="story-text">砰！你重重地摔在坚硬的矿道地面上。</span>`);
-        outputDiv.scrollTop = outputDiv.scrollHeight;
     }, 3900);
     
     setTimeout(() => {
@@ -4411,7 +4432,6 @@ function jumpIntoPit(pitId) {
         gameState.player.hp = Math.max(0, gameState.player.hp - 10);
         print(`<span style="color: #ff6666;">你受到了 10 点坠落伤害！</span>`);
         print(`<span style="color: #ff8888;">当前 HP: ${gameState.player.hp}/${gameState.player.maxHp}</span>`);
-        outputDiv.scrollTop = outputDiv.scrollHeight;
         
         // 从当前房间移除矿坑
         const pitIndex = room.items.indexOf(pitId);
@@ -4427,7 +4447,7 @@ function jumpIntoPit(pitId) {
         print(`<span style="color: #aaffaa;">你来到了四号矿道出口...</span>`);
         
         // 关闭遮罩并更新场景
-        if (overlay) overlay.classList.remove('active');
+        UI.setOverlay(false);
         look();
         updateMinimap();
         updateSceneInfo();
@@ -4456,8 +4476,7 @@ function useLadder(ladderId) {
         }
         
         // 显示遮罩
-        const overlay = document.getElementById('block-overlay');
-        if (overlay) overlay.classList.add('active');
+        UI.setOverlay(true);
         
         // 从地下到地面
         if (currentLoc === 'tunnel_exit_4') {
@@ -4466,17 +4485,14 @@ function useLadder(ladderId) {
             
             setTimeout(() => {
                 print(`<span class="story-text">梯子稳稳地架在岩壁与地面之间。</span>`);
-                outputDiv.scrollTop = outputDiv.scrollHeight;
             }, 1000);
             
             setTimeout(() => {
                 print(`<span class="story-text">你顺着梯子向上爬去...</span>`);
-                outputDiv.scrollTop = outputDiv.scrollHeight;
             }, 2300);
             
             setTimeout(() => {
                 print(`<span class="story-text">头顶被封堵的木板被推开，月光洒落进来。</span>`);
-                outputDiv.scrollTop = outputDiv.scrollHeight;
             }, 3600);
             
             setTimeout(() => {
@@ -4487,7 +4503,7 @@ function useLadder(ladderId) {
                 print(`<span style="color: #aaffaa;">你来到了四号矿井口...</span>`);
                 
                 // 关闭遮罩并更新场景
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
                 look();
                 updateMinimap();
                 updateSceneInfo();
@@ -4500,17 +4516,17 @@ function useLadder(ladderId) {
             
             setTimeout(() => {
                 print(`<span class="story-text">梯子稳稳地架在井壁之间。</span>`);
-                outputDiv.scrollTop = outputDiv.scrollHeight;
+
             }, 1000);
             
             setTimeout(() => {
                 print(`<span class="story-text">你顺着梯子向下爬去...</span>`);
-                outputDiv.scrollTop = outputDiv.scrollHeight;
+
             }, 2300);
             
             setTimeout(() => {
                 print(`<span class="story-text">黑暗和腐臭的气息扑面而来。</span>`);
-                outputDiv.scrollTop = outputDiv.scrollHeight;
+
             }, 3600);
             
             setTimeout(() => {
@@ -4521,7 +4537,7 @@ function useLadder(ladderId) {
                 print(`<span style="color: #aaffaa;">你来到了四号矿道出口...</span>`);
                 
                 // 关闭遮罩并更新场景
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
                 look();
                 updateMinimap();
                 updateSceneInfo();
@@ -4661,8 +4677,7 @@ function useRemovedLadderFromInventory() {
     }
     
     // 显示遮罩
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     // 从地下到地面
     if (currentLoc === 'tunnel_exit_4') {
@@ -4671,17 +4686,17 @@ function useRemovedLadderFromInventory() {
         
         setTimeout(() => {
             print(`<span class="story-text">梯子稳稳地架在岩壁与地面之间。</span>`);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+    
         }, 1000);
         
         setTimeout(() => {
             print(`<span class="story-text">你顺着梯子向上爬去...</span>`);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+    
         }, 2300);
         
         setTimeout(() => {
             print(`<span class="story-text">头顶被封堵的木板被推开，月光洒落进来。</span>`);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+    
         }, 3600);
         
         setTimeout(() => {
@@ -4692,7 +4707,7 @@ function useRemovedLadderFromInventory() {
             print(`<span style="color: #aaffaa;">你来到了四号矿井口...</span>`);
             
             // 关闭遮罩并更新场景
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
             look();
             updateMinimap();
             updateSceneInfo();
@@ -4705,17 +4720,17 @@ function useRemovedLadderFromInventory() {
         
         setTimeout(() => {
             print(`<span class="story-text">梯子稳稳地架在井壁之间。</span>`);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+    
         }, 1000);
         
         setTimeout(() => {
             print(`<span class="story-text">你顺着梯子向下爬去...</span>`);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+    
         }, 2300);
         
         setTimeout(() => {
             print(`<span class="story-text">黑暗和腐臭的气息扑面而来。</span>`);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+    
         }, 3600);
         
         setTimeout(() => {
@@ -4726,7 +4741,7 @@ function useRemovedLadderFromInventory() {
             print(`<span style="color: #aaffaa;">你来到了四号矿道出口...</span>`);
             
             // 关闭遮罩并更新场景
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
             look();
             updateMinimap();
             updateSceneInfo();
@@ -4753,21 +4768,20 @@ function useLimb(itemId) {
     // 如果有剧情内容，延时逐行亮黄色输出
     if (item.story && item.story.length > 0) {
         // 显示遮罩，封锁所有交互
-        const overlay = document.getElementById('block-overlay');
-        if (overlay) overlay.classList.add('active');
+        UI.setOverlay(true);
         
         let lineIndex = 0;
         function showNextLine() {
             if (lineIndex < item.story.length) {
                 print("<br>");
                 print(`<span style="color: #ff4486;">${item.story[lineIndex]}</span>`);
-                outputDiv.scrollTop = outputDiv.scrollHeight;
+
                 lineIndex++;
                 showNextBtn(showNextLine);
             } else {
                 hideNextBtn();
                 // 全部显示完毕后关闭遮罩
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
                 
                 // 处理使用后销毁并生成新物品
                 if (item.onUseDestroy) {
@@ -4875,9 +4889,9 @@ function useMilker(milkerId) {
     html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="clearDetailPanel()">↩️ 返回</div>`;
     
     // 更新详情栏
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        detailPanel.innerHTML = html;
+    
+    if (UI.elements.detailPanel) {
+        UI.setDetail(html);
     }
     currentPanel = 'milking_menu';
 }
@@ -4930,7 +4944,7 @@ function startMilkingProcess(inventoryIndex) {
         if (lineIndex < milkStory.length) {
             print("<br>");
             print(`<span style="color: #a8ff44;">${milkStory[lineIndex]}</span>`);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+    
             lineIndex++;
             showNextBtn(printNextLine);
         } else {
@@ -5034,9 +5048,9 @@ function useMilkerForSemen(milkerId) {
     html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="clearDetailPanel()">↩️ 返回</div>`;
     
     // 更新详情栏
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        detailPanel.innerHTML = html;
+    
+    if (UI.elements.detailPanel) {
+        UI.setDetail(html);
     }
     currentPanel = 'semening_menu';
 }
@@ -5077,7 +5091,7 @@ function startSemenProcess(inventoryIndex) {
         if (lineIndex < semenStory.length) {
             print("<br>");
             print(`<span style="color: #ff88cc;">${semenStory[lineIndex]}</span>`);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+    
             lineIndex++;
             showNextBtn(printNextLine);
         } else {
@@ -5139,8 +5153,7 @@ function useCorpse(itemId) {
     }
     
     // 显示遮罩，封锁所有交互
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     // 逐行输出尸体剧情（点击Next驱动）
     let lineIndex = 0;
@@ -5148,13 +5161,13 @@ function useCorpse(itemId) {
         if (lineIndex < story.length) {
             print("<br>");
             print(`<span style="color: #c444ff;">${story[lineIndex]}</span>`);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+    
             lineIndex++;
             showNextBtn(showNextCorpseLine);
         } else {
             hideNextBtn();
             // 全部显示完毕后关闭遮罩
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
             print("");
             print(`<span style="color: #888;">互动结束...</span>`);
         }
@@ -5193,8 +5206,7 @@ function useCorpseOnGround(itemId) {
     }
     
     // 显示遮罩，封锁所有交互
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     // 逐行输出尸体剧情（点击Next驱动）
     let lineIndex = 0;
@@ -5202,13 +5214,13 @@ function useCorpseOnGround(itemId) {
         if (lineIndex < story.length) {
             print("<br>");
             print(`<span style="color: #ff66aa;">${story[lineIndex]}</span>`);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+    
             lineIndex++;
             showNextBtn(showNextCorpseLine);
         } else {
             hideNextBtn();
             // 全部显示完毕后关闭遮罩
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
             print("");
             print(`<span style="color: #888;">互动结束...</span>`);
         }
@@ -5403,7 +5415,7 @@ function pickupAllItems() {
             else if (itemId === 'wardrobe') {
                 itemsToKeep.push(itemId);
             }
-            // 伯爵宅邸大门不可拾取
+            // 男爵宅邸大门不可拾取
             else if (itemId === 'mansion_gate_door') {
                 itemsToKeep.push(itemId);
             }
@@ -5571,7 +5583,7 @@ function dismemberCorpseFromInventory(corpseId) {
 // 显示肢解选择界面
 function showDismemberPanel(corpseName, limbTemplates, corpseObj = null, source = 'inventory') {
     console.log('showDismemberPanel called', corpseName, corpseObj, source);
-    const detailPanel = document.getElementById('detail-panel');
+    
     let html = '';
     const dismemberedLimbs = corpseObj && corpseObj.dismemberedLimbs ? corpseObj.dismemberedLimbs : [];
     
@@ -5620,7 +5632,7 @@ function showDismemberPanel(corpseName, limbTemplates, corpseObj = null, source 
     html += `<span id="confirm-dismember-btn" style="color: #ff6b6b; cursor: pointer; font-weight: bold;">🔪 确认肢解</span>`;
     html += `</div>`;
     
-    detailPanel.innerHTML = html;
+    UI.setDetail(html);
     
     // 添加点击事件监听器
     document.getElementById('confirm-dismember-btn').addEventListener('click', function() {
@@ -5690,8 +5702,7 @@ function confirmDismember(corpseName, limbTemplates) {
     print("");
     
     // 显示遮罩，封锁所有交互
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     let limbIndex = 0;
     
@@ -5791,11 +5802,11 @@ function confirmDismember(corpseName, limbTemplates) {
             
             if (source === 'inventory') {
                 print(`<br><span style="color: #888;">肢解完成，选中的部位已放入行囊。</span>`);
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
                 showInventoryPanel();
             } else {
                 print(`<br><span style="color: #888;">肢解完成，选中的部位掉落在地上。</span>`);
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
                 updateSceneInfo();
             }
         }
@@ -5976,9 +5987,9 @@ function showNPCInfo(npcId) {
     currentDetailNPC = npcId;
     
     // 更新详情栏
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        detailPanel.innerHTML = html;
+    
+    if (UI.elements.detailPanel) {
+        UI.setDetail(html);
     }
     
     currentPanel = 'npc_detail';
@@ -5997,8 +6008,7 @@ function talkToNPCAction(npcId) {
     currentPanel = null;
     
     // 显示遮罩，封锁所有交互
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     // 判断是否是第一次对话
     const isFirstTime = !gameState.talkedNPCs[npcId];
@@ -6026,725 +6036,17 @@ function talkToNPCAction(npcId) {
         if (lineIndex < dialogues.length) {
             print("<br>");
             print(`<span style="color: #ff8844;">${dialogues[lineIndex]}</span>`);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+    
             lineIndex++;
             showNextBtn(showNextDialogue);
         } else {
             hideNextBtn();
             // 对话结束，隐藏遮罩
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
         }
     }
     
     showNextDialogue();
-}
-
-// ==================== 回合制战斗系统 ====================
-
-// 当前战斗中的敌人实例（用于快速查找）
-let currentBattleEnemies = {};
-
-// 技能定义
-const skills = {
-    hatred: {
-        name: "仇恨",
-        description: "释放后本场战斗攻击力翻倍，灵巧降低至0，防御降低50%（本场战斗只能使用一次）",
-        cost: 10,  // 消耗10技力
-        effect: function() {
-            // 检查是否已在本次战斗中使用过
-            if (battleState.hatredUsed) {
-                print(`<span style="color: #ffaaaa;">仇恨技能已经在本场战斗中使用过了！</span>`);
-                // 退还技力
-                gameState.player.sp += this.cost;
-                return false;
-            }
-            
-            // 标记为已使用
-            battleState.hatredUsed = true;
-            
-            // 攻击力翻倍
-            gameState.player.atk *= 2;
-            // 灵巧降低至0
-            gameState.player.agi = 0;
-            // 防御降低50%
-            gameState.player.def *= 0.5;
-            
-            print(`<span style="color: #ff6666;">你释放了技能「仇恨」！</span>`);
-            print(`<span style="color: #ff6666;">你的攻击力翻倍，灵巧降低至0，防御降低50%！</span>`);
-            return true;
-        }
-    }
-};
-
-// 使用技能
-function useSkill(skillId) {
-    if (!battleState.inBattle) {
-        print(`<span style="color: #ffaaaa;">战斗外无法使用技能！</span>`);
-        return;
-    }
-    
-    const skill = skills[skillId];
-    if (!skill) {
-        print(`<span style="color: #ffaaaa;">技能不存在！</span>`);
-        return;
-    }
-    
-    const currentSp = gameState.player.sp || 0;
-    if (currentSp < skill.cost) {
-        print(`<span style="color: #ffaaaa;">技力不足！</span>`);
-        return;
-    }
-    
-    // 消耗技力
-    gameState.player.sp = Math.floor(currentSp - skill.cost);
-    
-    // 执行技能效果
-    skill.effect();
-    
-    // 重新显示技能按钮，更新技力显示
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        let skillsHtml = '<h3>技能</h3>';
-        if (gameState.player.skills && gameState.player.skills.length > 0) {
-            skillsHtml += '<div class="skill-buttons">';
-            gameState.player.skills.forEach(sId => {
-                const s = skills[sId];
-                if (s) {
-                    const skillCurrentSp = gameState.player.sp || 0;
-                    const skillMaxSp = gameState.player.maxSp || 0;
-                    const disabled = skillCurrentSp < s.cost ? 'disabled' : '';
-                    skillsHtml += `
-                        <button class="skill-button ${disabled}" onclick="useSkill('${sId}')" ${disabled}>
-                            <span class="skill-name">${s.name}</span>
-                            <span class="skill-cost">SP: ${s.cost} (${skillCurrentSp}/${skillMaxSp})</span>
-                            <span class="skill-desc">${s.description}</span>
-                        </button>
-                    `;
-                }
-            });
-            skillsHtml += '</div>';
-        } else {
-            skillsHtml += '<p>暂无技能</p>';
-        }
-        detailPanel.innerHTML = skillsHtml;
-    }
-    
-    // 显示当前玩家状态
-    const updatedSp = gameState.player.sp || 0;
-    const maxSp = gameState.player.maxSp || 0;
-    print(`<span style="color: #aaffaa;">你的 HP: ${gameState.player.hp}/${gameState.player.maxHp} SP: ${updatedSp}/${maxSp}</span>`);
-    print("");
-}
-
-// 西侧矿道特殊剧情处理
-function handleWestTunnelStory(roomId) {
-    // 西侧矿道剧情房间列表 - 进入时立即锁死所有按键，防止玩家冲太快
-    const storyRooms = ['tunnel_4_west_4', 'tunnel_4_west_5', 'tunnel_4_west_6', 'tunnel_4_west_7'];
-    const overlay = document.getElementById('block-overlay');
-    
-    if (storyRooms.includes(roomId)) {
-        // 立即显示遮罩，锁死所有按键
-        if (overlay) overlay.classList.add('active');
-    }
-    
-    // 西侧矿道4 - 剧情模式，提示玩家返回
-    if (roomId === 'tunnel_4_west_4') {
-        setTimeout(() => {
-            const storyLines = [
-                "有什么东西在注视着你...",
-                "内心的声音：快回去..."
-            ];
-            
-            let index = 0;
-            function showNextLine() {
-                if (index < storyLines.length) {
-                    print(`<span class="story-text">${storyLines[index]}</span>`);
-                    outputDiv.scrollTop = outputDiv.scrollHeight;
-                    index++;
-                    setTimeout(showNextLine, 1300);
-                } else {
-                    if (overlay) overlay.classList.remove('active');
-                    print("");
-                    print(`<span style="color: #ffaa66;">不安感笼罩着你，或许应该原路返回...</span>`);
-                }
-            }
-            showNextLine();
-        }, 1200);
-    }
-    
-    // 西侧矿道5 - 更强烈的提示
-    if (roomId === 'tunnel_4_west_5') {
-        setTimeout(() => {
-            const storyLines = [
-                "心跳加速，冷汗滑落...",
-                "那个声音：快回去！最后的机会！"
-            ];
-            
-            let index = 0;
-            function showNextLine() {
-                if (index < storyLines.length) {
-                    print(`<span class="story-text">${storyLines[index]}</span>`);
-                    outputDiv.scrollTop = outputDiv.scrollHeight;
-                    index++;
-                    setTimeout(showNextLine, 1300);
-                } else {
-                    if (overlay) overlay.classList.remove('active');
-                    print("");
-                    print(`<span style="color: #ff6666;">恐惧如潮水般涌来：回去！回去！</span>`);
-                }
-            }
-            showNextLine();
-        }, 1200);
-    }
-    
-    // 西侧矿道6 - 血色宝石房间剧情
-    if (roomId === 'tunnel_4_west_6') {
-        setTimeout(() => {
-            const storyLines = [
-                "幻听开始在脑海中回响...",
-                "低语...嘶吼...诅咒...哭喊...狂笑...",
-                "回来...太迟了...回来...",
-                "染血宝石...它在...等待着..."
-            ];
-            
-            let index = 0;
-            function showNextLine() {
-                if (index < storyLines.length) {
-                    print(`<span class="story-text">${storyLines[index]}</span>`);
-                    outputDiv.scrollTop = outputDiv.scrollHeight;
-                    index++;
-                    setTimeout(showNextLine, 1300);
-                } else {
-                    if (overlay) overlay.classList.remove('active');
-                    print("");
-                    print(`<span style="color: #ff6666;">理智几近崩溃，你勉强保持着清醒...</span>`);
-                    print(`<span style="color: #aaffaa;">地上有一颗散发着血色光芒的宝石...</span>`);
-                }
-            }
-            showNextLine();
-        }, 1200);
-    }
-    
-    // 西侧矿道7 - 强制死亡（遮罩不解除）
-    if (roomId === 'tunnel_4_west_7') {
-        setTimeout(() => {
-            const storyLines = [
-                "有什么东西进入了你的身体...",
-                "它在吞噬你的意识...",
-                "双眼变得血红..."
-            ];
-            
-            let index = 0;
-            function showNextLine() {
-                if (index < storyLines.length) {
-                    print(`<span class="story-text">${storyLines[index]}</span>`);
-                    outputDiv.scrollTop = outputDiv.scrollHeight;
-                    index++;
-                    setTimeout(showNextLine, 1300);
-                } else {
-                    print("");
-                    print(`<span style="color: #ff0000; font-size: 18px;">你成为了疯疫的傀儡。</span>`);
-                    outputDiv.scrollTop = outputDiv.scrollHeight;
-                    
-                    // 强制死亡
-                    setTimeout(() => {
-                        print("");
-                        print(`<span style="color: #ff6666;">【死亡】你的意识永远消失在了黑暗之中...</span>`);
-                        print(`<span style="color: #aaa;">（游戏将重新开始...）</span>`);
-                        setTimeout(() => {
-                            location.reload();
-                        }, 3000);
-                    }, 2000);
-                }
-            }
-            showNextLine();
-        }, 1200);
-    }
-}
-
-// 开始多敌人战斗（根据灵巧决定行动顺序）
-function startMultiBattle(npcIds) {
-    if (!npcIds || npcIds.length === 0) return;
-    
-    // 显示遮罩
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
-    
-    // 先显示主界面内容
-    if (mainContent) {
-        outputDiv.innerHTML = mainContent;
-        outputDiv.scrollTop = outputDiv.scrollHeight;
-    }
-    
-    print("");
-    print(`═══════ ⚔️ 战斗开始 ═══════`);
-    
-    // 初始化敌人数据
-    const enemies = [];
-    npcIds.forEach((npcId, index) => {
-        const npc = getCharacterInfo(npcId);
-        if (npc && npc.canFight) {
-            // 为每个敌人创建独立实例（即使有相同ID）
-            const enemyInstance = {
-                index: index,
-                npcId: npcId,
-                name: npc.name,
-                currentHp: npc.hp,
-                maxHp: npc.hp,
-                atk: npc.atk,
-                def: npc.def,
-                agi: getCharacterAgility(npc),
-                drops: npc.drops ? [...npc.drops] : [],
-                exp: npc.exp || 0
-            };
-            enemies.push(enemyInstance);
-            
-            // 显示敌人信息
-            print(`<span style="color: #ffaaaa;">敌人${index + 1}: ${npc.name} (HP:${npc.hp} ATK:${npc.atk} DEF:${npc.def} AGI:${enemyInstance.agi})</span>`);
-        }
-    });
-    
-    // 回满技力
-    gameState.player.sp = Math.floor(gameState.player.maxSp || 10);
-    const currentSp = gameState.player.sp || 0;
-    const maxSp = gameState.player.maxSp || 10;
-    print(`<span style="color: #aaffaa;">你 (HP:${gameState.player.hp}/${gameState.player.maxHp} SP:${currentSp}/${maxSp} ATK:${getCharacterAttack(gameState.player)} DEF:${getCharacterDefense(gameState.player)} AGI:${getCharacterAgility(gameState.player)})</span>`);
-    print("────────────────────────────────");
-    
-    // 显示技能按钮
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        let skillsHtml = '<h3>技能</h3>';
-        if (gameState.player.skills && gameState.player.skills.length > 0) {
-            skillsHtml += '<div class="skill-buttons">';
-            gameState.player.skills.forEach(skillId => {
-                const skill = skills[skillId];
-                if (skill) {
-                    skillsHtml += `
-                        <button class="skill-button" onclick="useSkill('${skillId}')">
-                            <span class="skill-name">${skill.name}</span>
-                            <span class="skill-cost">SP: ${skill.cost}</span>
-                            <span class="skill-desc">${skill.description}</span>
-                        </button>
-                    `;
-                }
-            });
-            skillsHtml += '</div>';
-        } else {
-            skillsHtml += '<p>暂无技能</p>';
-        }
-        detailPanel.innerHTML = skillsHtml;
-    }
-    
-    // 初始化战斗状态
-    battleState = {
-        inBattle: true,
-        enemies: enemies,
-        round: 1,
-        currentTurnIndex: 0,
-        turnOrder: [],  // 将在calculateTurnOrder中计算
-        hatredUsed: false,  // 重置仇恨技能使用状态
-        originalPlayerStats: {  // 保存玩家原始属性
-            atk: gameState.player.atk,
-            def: gameState.player.def,
-            agi: gameState.player.agi
-        }
-    };
-    
-    // 计算行动顺序并开始第一回合
-    setTimeout(() => {
-        startNewRound();
-    }, 800);
-}
-
-// 计算行动顺序（按灵巧排序）
-function calculateTurnOrder() {
-    const playerAgi = getCharacterAgility(gameState.player);
-    
-    // 收集所有参战者及其灵巧值
-    const participants = [];
-    
-    // 玩家
-    participants.push({ type: 'player', agi: playerAgi });
-    
-    // 所有存活的敌人
-    battleState.enemies.forEach((enemy, index) => {
-        if (enemy.currentHp > 0) {
-            participants.push({ type: 'enemy', index: index, agi: enemy.agi });
-        }
-    });
-    
-    // 按灵巧排序（高灵巧先行动）
-    // 当灵巧相等时：玩家 vs 怪物（玩家先手），怪物 vs 怪物（随机）
-    participants.sort((a, b) => {
-        if (a.agi !== b.agi) {
-            return b.agi - a.agi;  // 高灵巧在前
-        }
-        // 灵巧相等
-        if (a.type === 'player' && b.type === 'enemy') {
-            return -1;  // 玩家先于敌人
-        }
-        if (a.type === 'enemy' && b.type === 'player') {
-            return 1;  // 敌人后于玩家
-        }
-        // 都是怪物，随机排序
-        return Math.random() - 0.5;
-    });
-    
-    return participants.map(p => p.type === 'player' ? 'player' : p.index);
-}
-
-// 开始新回合
-function startNewRound() {
-    if (!battleState.inBattle) return;
-    
-    // 检查是否还有存活的敌人
-    const aliveEnemies = battleState.enemies.filter(e => e.currentHp > 0);
-    if (aliveEnemies.length === 0) {
-        battleEnd(true);
-        return;
-    }
-    
-    // 检查玩家是否存活
-    if (gameState.player.hp <= 0) {
-        battleEnd(false);
-        return;
-    }
-    
-    print(`<span style="color: #ffdd44;">═══════════════════════════</span>`);
-    print(`<span style="color: #ffdd44;">【第${battleState.round}回合】</span>`);
-    
-    // 计算本回合行动顺序
-    battleState.turnOrder = calculateTurnOrder();
-    battleState.currentTurnIndex = 0;
-    
-    // 显示行动顺序预览
-    const orderNames = battleState.turnOrder.map(target => {
-        if (target === 'player') return '你';
-        return battleState.enemies[target].name;
-    });
-    print(`<span style="color: #888;">行动顺序: ${orderNames.join(' → ')}</span>`);
-    print("");
-    
-    // 显示技能按钮
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        let skillsHtml = '<h3>技能</h3>';
-        if (gameState.player.skills && gameState.player.skills.length > 0) {
-            skillsHtml += '<div class="skill-buttons">';
-            gameState.player.skills.forEach(skillId => {
-                const skill = skills[skillId];
-                if (skill) {
-                    const skillCurrentSp = gameState.player.sp || 0;
-                    const skillMaxSp = gameState.player.maxSp || 0;
-                    const disabled = skillCurrentSp < skill.cost ? 'disabled' : '';
-                    skillsHtml += `
-                        <button class="skill-button ${disabled}" onclick="useSkill('${skillId}')" ${disabled}>
-                            <span class="skill-name">${skill.name}</span>
-                            <span class="skill-cost">SP: ${skill.cost} (${skillCurrentSp}/${skillMaxSp})</span>
-                            <span class="skill-desc">${skill.description}</span>
-                        </button>
-                    `;
-                }
-            });
-            skillsHtml += '</div>';
-        } else {
-            skillsHtml += '<p>暂无技能</p>';
-        }
-        detailPanel.innerHTML = skillsHtml;
-    }
-    
-    // 开始执行行动
-    setTimeout(() => {
-        executeNextTurn();
-    }, 600);
-}
-
-// 执行下一个行动
-function executeNextTurn() {
-    if (!battleState.inBattle) return;
-    
-    // 检查战斗是否结束
-    const aliveEnemies = battleState.enemies.filter(e => e.currentHp > 0);
-    if (aliveEnemies.length === 0) {
-        battleEnd(true);
-        return;
-    }
-    if (gameState.player.hp <= 0) {
-        battleEnd(false);
-        return;
-    }
-    
-    // 检查是否还有未行动的单位
-    if (battleState.currentTurnIndex >= battleState.turnOrder.length) {
-        // 本回合结束，进入下一回合
-        battleState.round++;
-        setTimeout(() => {
-            startNewRound();
-        }, 800);
-        return;
-    }
-    
-    const currentTarget = battleState.turnOrder[battleState.currentTurnIndex];
-    battleState.currentTurnIndex++;
-    
-    if (currentTarget === 'player') {
-        // 玩家回合
-        executePlayerTurn();
-    } else {
-        // 敌人回合
-        executeEnemyTurn(currentTarget);
-    }
-}
-
-// 执行玩家回合
-function executePlayerTurn() {
-    if (!battleState.inBattle) return;
-    
-    // 检查玩家是否还存活
-    if (gameState.player.hp <= 0) {
-        battleEnd(false);
-        return;
-    }
-    
-    // 选择第一个存活的敌人攻击
-    const aliveEnemies = battleState.enemies.filter(e => e.currentHp > 0);
-    if (aliveEnemies.length === 0) {
-        battleEnd(true);
-        return;
-    }
-    
-    // 自动攻击第一个存活的敌人
-    const targetEnemy = aliveEnemies[0];
-    const playerAtk = getCharacterAttack(gameState.player);
-    const enemyDef = targetEnemy.def;
-    const enemyAgi = targetEnemy.agi;
-    
-    print(`<span style="color: #aaffaa;">→ 你的回合</span>`);
-    print(`你选择攻击 ${targetEnemy.name}！`);
-    
-    // 判定闪避
-    if (tryDodge(enemyAgi)) {
-        print(`你的攻击被 ${targetEnemy.name} 闪避了！`);
-    } else {
-        const damage = calculateDamage(playerAtk, enemyDef);
-        targetEnemy.currentHp = Math.max(0, targetEnemy.currentHp - damage);
-        print(`你对 ${targetEnemy.name} 造成 <span style="color: #ff6666;">${damage}</span> 点伤害！`);
-    }
-    
-    // 检查敌人是否死亡
-    if (targetEnemy.currentHp <= 0) {
-        print(`<span style="color: #ff8888;">${targetEnemy.name} 倒下了！</span>`);
-    } else {
-        print(`<span style="color: #ff8888;">${targetEnemy.name} HP: ${targetEnemy.currentHp}/${targetEnemy.maxHp}</span>`);
-    }
-    
-    // 显示当前玩家状态
-    const currentSp = gameState.player.sp || 0;
-    const maxSp = gameState.player.maxSp || 0;
-    print(`<span style="color: #aaffaa;">你的 HP: ${gameState.player.hp}/${gameState.player.maxHp} SP: ${currentSp}/${maxSp}</span>`);
-    print("");
-    
-    // 显示技能按钮
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        let skillsHtml = '<h3>技能</h3>';
-        if (gameState.player.skills && gameState.player.skills.length > 0) {
-            skillsHtml += '<div class="skill-buttons">';
-            gameState.player.skills.forEach(skillId => {
-                const skill = skills[skillId];
-                if (skill) {
-                    const skillCurrentSp = gameState.player.sp || 0;
-                    const skillMaxSp = gameState.player.maxSp || 0;
-                    const disabled = skillCurrentSp < skill.cost ? 'disabled' : '';
-                    skillsHtml += `
-                        <button class="skill-button ${disabled}" onclick="useSkill('${skillId}')" ${disabled}>
-                            <span class="skill-name">${skill.name}</span>
-                            <span class="skill-cost">SP: ${skill.cost} (${skillCurrentSp}/${skillMaxSp})</span>
-                            <span class="skill-desc">${skill.description}</span>
-                        </button>
-                    `;
-                }
-            });
-            skillsHtml += '</div>';
-        } else {
-            skillsHtml += '<p>暂无技能</p>';
-        }
-        detailPanel.innerHTML = skillsHtml;
-    }
-    
-    // 执行下一个行动
-    setTimeout(() => {
-        executeNextTurn();
-    }, 1200);
-}
-
-// 执行敌人回合
-function executeEnemyTurn(enemyIndex) {
-    if (!battleState.inBattle) return;
-    
-    const enemy = battleState.enemies[enemyIndex];
-    
-    // 检查敌人是否还存活
-    if (!enemy || enemy.currentHp <= 0) {
-        executeNextTurn();
-        return;
-    }
-    
-    // 检查玩家是否存活
-    if (gameState.player.hp <= 0) {
-        battleEnd(false);
-        return;
-    }
-    
-    const playerDef = getCharacterDefense(gameState.player);
-    const playerAgi = getCharacterAgility(gameState.player);
-    
-    print(`<span style="color: #ffaaaa;">→ ${enemy.name} 的回合</span>`);
-    print(`${enemy.name} 向你发起攻击！`);
-    
-    // 判定闪避
-    if (tryDodge(playerAgi)) {
-        print(`${enemy.name} 的攻击被你闪避了！`);
-    } else {
-        const damage = calculateDamage(enemy.atk, playerDef);
-        gameState.player.hp = Math.max(0, gameState.player.hp - damage);
-        print(`${enemy.name} 对你造成 <span style="color: #ff6666;">${damage}</span> 点伤害！`);
-    }
-    
-    // 检查玩家是否死亡
-    if (gameState.player.hp <= 0) {
-        print(`<span style="color: #ff6666;">你倒下了...</span>`);
-        setTimeout(() => battleEnd(false), 1000);
-        return;
-    }
-    
-    const currentSp = gameState.player.sp || 0;
-    const maxSp = gameState.player.maxSp || 0;
-    print(`<span style="color: #aaffaa;">你的 HP: ${gameState.player.hp}/${gameState.player.maxHp} SP: ${currentSp}/${maxSp}</span>`);
-    print("");
-    
-    // 执行下一个行动
-    setTimeout(() => {
-        executeNextTurn();
-    }, 1200);
-}
-
-// 开始战斗（玩家主动发起，单敌人）- 保持兼容性
-function startBattle(npcId) {
-    startMultiBattle([npcId]);
-}
-
-// 战斗结束
-function battleEnd(playerWon) {
-    battleState.inBattle = false;
-    
-    // 恢复玩家原始属性（仇恨技能的效果）
-    if (battleState.originalPlayerStats) {
-        gameState.player.atk = battleState.originalPlayerStats.atk;
-        gameState.player.def = battleState.originalPlayerStats.def;
-        gameState.player.agi = battleState.originalPlayerStats.agi;
-        battleState.originalPlayerStats = null;
-    }
-    
-    print(`<span style="color: #ffdd44;">═══════════════════════════</span>`);
-    
-    if (playerWon) {
-        print(`<span style="color: #aaffaa;">【胜利！】你击败了所有敌人！</span>`);
-        
-        const room = gameState.world[gameState.player.location];
-        let totalExp = 0;
-        const defeatedEnemies = [];
-        
-        // 为每个击败的敌人生成尸体
-        battleState.enemies.forEach((enemy, index) => {
-            const npc = getCharacterInfo(enemy.npcId);
-            if (!npc) return;
-            
-            defeatedEnemies.push(enemy.npcId);
-            
-            // 瑟蕾娜特殊处理：不生成尸体，化为紫雾消散，掉落物直接生成到地面
-            if (enemy.npcId === 'serena') {
-                print(`<span style="color: #cc66ff;">"既然如此，就送你个宝贝。"</span>`);
-                print(`<span style="color: #cc66ff;">瑟蕾娜的身躯化为一团淡紫色的雾气，在空中消散。</span>`);
-                print(`<span style="color: #cc66ff;">地面上只留下了一个闪闪发亮的宝石。</span>`);
-                if (enemy.drops && enemy.drops.length > 0 && room) {
-                    enemy.drops.forEach((dropId, dropIndex) => {
-                        const dropItem = createItemFromTemplate(dropId);
-                        if (dropItem) {
-                            const dropItemId = `drop_${dropId}_${Date.now()}_${dropIndex}`;
-                            dropItem.id = dropItemId;
-                            ITEM_TEMPLATES[dropItemId] = dropItem;
-                            if (!room.items) room.items = [];
-                            room.items.push(dropItemId);
-                        }
-                    });
-                }
-                totalExp += enemy.exp;
-                return; // 跳过后面的尸体生成逻辑
-            }
-            
-            // 使用createCorpse统一生成尸体（模板映射和属性定义均在item.js中）
-            const drops = enemy.drops ? [...enemy.drops] : [];
-            const corpseId = `corpse_${enemy.npcId}_${Date.now()}_${index}`;
-            const corpse = createCorpse(enemy.npcId, drops);
-            corpse.id = corpseId; // 使用带索引的唯一ID
-            
-            // 尸体放到地上
-            if (room) {
-                if (!room.items) room.items = [];
-                room.items.push(corpseId);
-            }
-            
-            // 在物品模板中临时注册尸体
-            ITEM_TEMPLATES[corpseId] = corpse;
-            
-            print(`<span style="color: #888;">${enemy.name}的尸体倒在地上...</span>`);
-            
-            // 累加经验值
-            totalExp += enemy.exp;
-        });
-        
-        // 获取经验值
-        if (totalExp > 0) {
-            print("");
-            print(`<span style="color: #ffdd44;">获得 ${totalExp} 点经验值！</span>`);
-            gameState.player.exp += totalExp;
-            
-            // 检查升级
-            checkLevelUp();
-        }
-        
-        // 从房间移除所有被击败的NPC
-        if (room && room.npcs) {
-            defeatedEnemies.forEach(npcId => {
-                const index = room.npcs.indexOf(npcId);
-                if (index > -1) {
-                    room.npcs.splice(index, 1);
-                }
-            });
-        }
-        
-        // 更新周围可见框
-        updateSceneInfo();
-    } else {
-        print(`<span style="color: #ff6666;">【失败...】你被击败了。</span>`);
-        print(`<span style="color: #aaa;">（游戏将重新开始...）</span>`);
-        setTimeout(() => {
-            location.reload();
-        }, 2000);
-    }
-    
-    // 隐藏遮罩
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.remove('active');
-    
-    // 清空技能面板
-    const detailPanel = document.getElementById('detail-panel');
-    if (detailPanel) {
-        detailPanel.innerHTML = '<span style="color: #888;">点击物品或NPC查看详情...</span>';
-    }
-    currentPanel = null;
 }
 
 // 检查并处理升级
@@ -6929,7 +6231,7 @@ function milkNPC(npcId) {
                 let text = semenStory[lineIndex].replace('\${npc.name}', npc.name);
                 print("<br>");
                 print(`<span style="color: #ff88cc;">${text}</span>`);
-                outputDiv.scrollTop = outputDiv.scrollHeight;
+
                 lineIndex++;
                 showNextBtn(printNextLine);
             } else {
@@ -7040,14 +6342,13 @@ function assaultNPC(npcId) {
         print("");
         
         // 显示遮罩，封锁所有交互
-        const overlay = document.getElementById('block-overlay');
-        if (overlay) overlay.classList.add('active');
+        UI.setOverlay(true);
         
         // 获取NPC的侵犯剧情（数据源：character.js 中的 assaultStory 字段）
         const story = npc.assaultStory;
         if (!story || story.length === 0) {
             print(`<span style="color: #888;">侵犯结束，没有什么特别的事情发生。</span>`);
-            if (overlay) overlay.classList.remove('active');
+            UI.setOverlay(false);
             return;
         }
         
@@ -7057,13 +6358,13 @@ function assaultNPC(npcId) {
             if (lineIndex < story.length) {
                 print("<br>");
                 print(`<span style="color: #ff44e3;">${story[lineIndex]}</span>`);
-                outputDiv.scrollTop = outputDiv.scrollHeight;
+
                 lineIndex++;
                 showNextBtn(showNextAssaultLine);
             } else {
                 hideNextBtn();
                 // 全部显示完毕后关闭遮罩
-                if (overlay) overlay.classList.remove('active');
+                UI.setOverlay(false);
                 print("");
                 print(`<span style="color: #ff66aa;">侵犯结束...</span>`);
                 
@@ -7107,6 +6408,7 @@ async function startGame() {
         await ModLoader.loadAllMods();
         ModLoader.applyToCharacters();
         ModLoader.applyToItems();
+        ModLoader.applyToCorpseMap();
     }
     
     // 重新初始化游戏
@@ -7119,6 +6421,7 @@ async function loadGameFromMenu() {
         await ModLoader.loadAllMods();
         ModLoader.applyToCharacters();
         ModLoader.applyToItems();
+        ModLoader.applyToCorpseMap();
     }
     
     if (await loadGame()) {
@@ -7160,7 +6463,7 @@ function initializeGame() {
     
     // 重新聚焦输入框
     if (typeof cmdInput !== 'undefined') {
-        cmdInput.focus();
+        UI.elements.cmdInput.focus();
     }
 }
 
@@ -7234,8 +6537,7 @@ function sweepLeafPile() {
     print("");
     
     // 显示遮罩
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     print(`<span style="color: #aaffaa;">═══════════════════════════</span>`);
     print(`<span style="color: #aaffaa;">你弯下腰，用力将厚厚的落叶堆推向两旁...</span>`);
@@ -7261,7 +6563,7 @@ function sweepLeafPile() {
         print(`<span style="color: #aaffaa;">落叶被扫开了，露出一个隐蔽的地道入口！</span>`);
         print(`<span style="color: #aaffaa;">═══════════════════════════</span>`);
         
-        if (overlay) overlay.classList.remove('active');
+        UI.setOverlay(false);
         updateSceneInfo();
         updateMinimap();
     }, 1500);
@@ -7283,8 +6585,7 @@ function enterTunnel() {
     print("");
     
     // 显示遮罩
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     print(`<span style="color: #aaffaa;">═══════════════════════════</span>`);
     print(`<span style="color: #aaffaa;">你小心翼翼地钻进了地道...</span>`);
@@ -7297,7 +6598,7 @@ function enterTunnel() {
         print("");
         print(`<span style="color: #aaffaa;">你来到了一间隐蔽的地下室...</span>`);
         
-        if (overlay) overlay.classList.remove('active');
+        UI.setOverlay(false);
         look();
         updateMinimap();
         updateSceneInfo();
@@ -7336,7 +6637,7 @@ function useTeleportCircle(itemId) {
         print(`<span style="color: #6688ff;">传送阵感应到了以下维度的连接：</span>`);
         print("");
         
-        const detailPanel = document.getElementById('detail-panel');
+        
         let html = '';
         html += makeTitle('🌀 传送阵');
         html += `<div style="color: #6688ff; margin-bottom: 10px;">传送阵的符文闪烁着光芒，连接着以下mod世界：</div>`;
@@ -7376,13 +6677,13 @@ function useTeleportCircle(itemId) {
         html += centerLine();
         html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="clearDetailPanel()">↩️ 返回</div>`;
         
-        if (detailPanel) {
-            detailPanel.innerHTML = html;
+        if (UI.elements.detailPanel) {
+            UI.setDetail(html);
         }
         currentPanel = 'teleport_menu';
     } else if (isModWorld) {
         // mod世界传送阵 - 返回地下室
-        const detailPanel = document.getElementById('detail-panel');
+        
         let html = '';
         html += makeTitle('🌀 传送阵');
         html += `<div style="color: #6688ff; margin-bottom: 10px;">传送阵的符文闪烁着光芒，似乎可以将你传送回地下室...</div>`;
@@ -7391,8 +6692,8 @@ function useTeleportCircle(itemId) {
         html += centerLine();
         html += `<div style="color: #aaa; cursor: pointer; margin-top: 10px;" onclick="clearDetailPanel()">↩️ 返回</div>`;
         
-        if (detailPanel) {
-            detailPanel.innerHTML = html;
+        if (UI.elements.detailPanel) {
+            UI.setDetail(html);
         }
         currentPanel = 'teleport_menu';
     }
@@ -7405,8 +6706,7 @@ function teleportToMod(modRoomId) {
     print("");
     
     // 显示遮罩
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     print(`<span style="color: #6688ff;">═══════════════════════════</span>`);
     print(`<span style="color: #6688ff;">你踏入传送阵，符文爆发出耀眼的蓝色光芒...</span>`);
@@ -7420,7 +6720,7 @@ function teleportToMod(modRoomId) {
         print(`<span style="color: #aaffaa;">你来到了mod世界！</span>`);
         print(`<span style="color: #6688ff;">═══════════════════════════</span>`);
         
-        if (overlay) overlay.classList.remove('active');
+        UI.setOverlay(false);
         look();
         updateMinimap();
         updateSceneInfo();
@@ -7434,8 +6734,7 @@ function teleportToBasement() {
     print("");
     
     // 显示遮罩
-    const overlay = document.getElementById('block-overlay');
-    if (overlay) overlay.classList.add('active');
+    UI.setOverlay(true);
     
     print(`<span style="color: #6688ff;">═══════════════════════════</span>`);
     print(`<span style="color: #6688ff;">你踏入传送阵，符文爆发出耀眼的蓝色光芒...</span>`);
@@ -7443,7 +6742,7 @@ function teleportToBasement() {
 
     setTimeout(() => {
         print(`<span class="story-text">光芒渐渐散去，熟悉的地下室出现在你面前。</span>`);
-        outputDiv.scrollTop = outputDiv.scrollHeight;
+
     }, 2400);
     
     setTimeout(() => {
@@ -7453,7 +6752,7 @@ function teleportToBasement() {
         print(`<span style="color: #aaffaa;">你回到了地下室！</span>`);
         print(`<span style="color: #6688ff;">═══════════════════════════</span>`);
         
-        if (overlay) overlay.classList.remove('active');
+        UI.setOverlay(false);
         look();
         updateMinimap();
         updateSceneInfo();
@@ -7471,6 +6770,6 @@ window.onload = () => {
         // 如果没有主菜单，则正常启动游戏
         look();
         updateMinimap();
-        cmdInput.focus();
+        UI.elements.cmdInput.focus();
     }
 };

@@ -33,33 +33,6 @@ const CHARACTER_TEMPLATES = {
         quest: "find_escape_route"  // 关联的任务ID
     },
     
-    evil_guard: {
-        id: "evil_guard",
-        name: "凶恶的守卫",
-        type: "npc",
-        desc: "一个满脸横肉的守卫，手里握着带血的铁棍。他看向你的眼神充满了轻蔑。",
-        dialogue: [
-            "乖乖干活！别想逃跑！",
-            "上一个想逃跑的矿工，被我打断了腿。",
-            "嘿嘿，想活命就老实点！"
-        ],
-        repeatDialogue: [
-            "看什么看！还不快去干活！",
-            "再让我看见你偷懒，小心你的腿！"
-        ],
-        level: 3,
-        hp: 30,
-        maxHp: 30,
-        atk: 5,
-        def: 2,
-        agi: 4,
-        // 交互相关
-        canTalk: true,
-        canFight: true,  // 可以战斗
-        hostile: false,   // 敌对NPC，会主动攻击
-        drops: ["herb", "coin"]  // 击杀后掉落的物品
-    },
-    
     mine_supervisor: {
         id: "mine_supervisor",
         name: "监工",
@@ -83,7 +56,7 @@ const CHARACTER_TEMPLATES = {
         canTalk: true,
         canFight: true,
         hostile: true,
-        drops: ["iron_stick",  "bread"],  // 击杀后掉落
+        drops: ["bread"],  // 击杀后掉落
         exp: 10  // 击杀获得10经验
     },
 
@@ -218,7 +191,7 @@ const CHARACTER_TEMPLATES = {
         canTalk: true,
         canFight: true,
         hostile: true,
-        drops: ["pickaxe", "herb"],
+        drops: ["herb"],
         exp: 10
     },
 

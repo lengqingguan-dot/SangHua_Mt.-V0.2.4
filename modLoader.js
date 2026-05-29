@@ -11,6 +11,7 @@ const ModLoader = {
     mergedWorld: {},        // 合并后的模组世界数据
     mergedCharacters: {},   // 合并后的模组角色数据
     mergedItems: {},        // 合并后的模组物品数据
+    mergedCorpseMap: {},    // 合并后的尸体模板映射
     modConnections: [],     // 模组与主世界的连接信息
 
     // ============================================================
@@ -157,6 +158,15 @@ const ModLoader = {
             }
         }
 
+        // 收集mod定义的尸体模板映射（MOD_CORPSE_TEMPLATE_MAP）
+        if (typeof MOD_CORPSE_TEMPLATE_MAP !== 'undefined') {
+            for (const key in MOD_CORPSE_TEMPLATE_MAP) {
+                if (MOD_CORPSE_TEMPLATE_MAP.hasOwnProperty(key)) {
+                    this.mergedCorpseMap[key] = MOD_CORPSE_TEMPLATE_MAP[key];
+                }
+            }
+        }
+
         // 收集连接信息
         for (const mod of this.mods) {
             if (mod.config.connectsTo) {
@@ -224,6 +234,19 @@ const ModLoader = {
             for (const itemId in this.mergedItems) {
                 if (this.mergedItems.hasOwnProperty(itemId)) {
                     ITEM_TEMPLATES[itemId] = this.mergedItems[itemId];
+                }
+            }
+        }
+    },
+
+    // ============================================================
+    //  将模组数据合并到尸体模板映射
+    // ============================================================
+    applyToCorpseMap() {
+        if (typeof CORPSE_TEMPLATE_MAP !== 'undefined') {
+            for (const key in this.mergedCorpseMap) {
+                if (this.mergedCorpseMap.hasOwnProperty(key)) {
+                    CORPSE_TEMPLATE_MAP[key] = this.mergedCorpseMap[key];
                 }
             }
         }
