@@ -17,36 +17,8 @@ const DEFAULT_BATTLE_STATE = JSON.parse(JSON.stringify(battleState));
 let currentBattleEnemies = {};
 
 // 2. 技能定义
-const skills = {
-    hatred: {
-        name: "仇恨",
-        description: "释放后本场战斗攻击力翻倍，灵巧降低至0，防御降低50%（本场战斗只能使用一次）",
-        cost: 10,  // 消耗10技力
-        effect: function() {
-            // 检查是否已在本次战斗中使用过
-            if (battleState.hatredUsed) {
-                print(`<span style="color: #ffaaaa;">仇恨技能已经在本场战斗中使用过了！</span>`);
-                // 退还技力
-                gameState.player.sp += this.cost;
-                return false;
-            }
-            
-            // 标记为已使用
-            battleState.hatredUsed = true;
-            
-            // 攻击力翻倍
-            gameState.player.atk *= 2;
-            // 灵巧降低至0
-            gameState.player.agi = 0;
-            // 防御降低50%
-            gameState.player.def *= 0.5;
-            
-            print(`<span style="color: #ff6666;">你释放了技能「仇恨」！</span>`);
-            print(`<span style="color: #ff6666;">你的攻击力翻倍，灵巧降低至0，防御降低50%！</span>`);
-            return true;
-        }
-    }
-};
+// 技能数据已提取至 game/skills.js，此处保留公开声明
+// skills 对象由 game/skills.js 定义
 
 // 3. 战斗函数
 function useSkill(skillId) {

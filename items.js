@@ -540,16 +540,6 @@ const ITEM_TEMPLATES = {
         usable: true,
         customAction: true
     },
-    // 雷管
-    dynamite: {
-        id: "dynamite",
-        name: "雷管",
-        type: "misc",
-        desc: "一捆工业雷管，旁边还有一些引爆装置。这是矿工们用来爆破岩壁的工具，威力足以炸开厚重的岩石墙。\n在东边的岩壁上有一堆松动的封堵物，看起来可以用这个炸开。",
-        usable: true,
-        customAction: true
-    },
-
     // ========== 厨房物品 ==========
     // 菜刀
     kitchen_knife: {
@@ -699,14 +689,6 @@ const ITEM_TEMPLATES = {
         desc: "几片透明的吉利丁片，用于凝固成型。",
         isSeasoning: true
     },
-    // 新增烹饪辅料
-    honey: {
-        id: "honey",
-        name: "蜂蜜",
-        type: "misc",
-        desc: "一罐金色的蜂蜜，甘甜芬芳。",
-        isSeasoning: true
-    },
     rose_petal: {
         id: "rose_petal",
         name: "玫瑰花瓣",
@@ -853,13 +835,6 @@ const ITEM_TEMPLATES = {
         name: "紫苏叶",
         type: "misc",
         desc: "新鲜的紫苏叶，具有独特的香气和风味。",
-        isSeasoning: true
-    },
-    sake: {
-        id: "sake",
-        name: "清酒",
-        type: "misc",
-        desc: "清澈的清酒，口感温和醇厚。",
         isSeasoning: true
     },
     thyme: {
@@ -3120,6 +3095,18 @@ const ITEM_TEMPLATES = {
         desc: "你曾经被困的地方，现在已经成为你不堪回首的记忆。",
         usable: true,
         notPickable: true
+    },
+
+    // ========== 任务奖励物品 ==========
+    statue_obedient: {
+        id: "statue_obedient",
+        name: "雕像【顺从】",
+        type: "accessory",
+        desc: "一座由兰德尔家族成员的肢体拼凑而成的扭曲雕像。塞西莉亚的头颅、伊莎贝拉的躯干、艾莲娜的双腿被骑士大剑贯穿着固定在一起，散发着令人不安的气息。佩戴后可大幅提升战斗力，但它似乎在注视着你...",
+        atk: 25,
+        def: 10,
+        agi: 5,
+        slot: "accessory"
     }
 };
 

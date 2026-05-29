@@ -533,6 +533,7 @@
         </div>
     </div>
     
+    <!-- 基础数据层 -->
     <script src="items.js"></script>
     <script src="world_0.js"></script>
     <script src="world_1.js"></script>
@@ -541,6 +542,26 @@
     <script src="modLoader.js"></script>
     <script src="ui.js"></script>
     <script src="battle.js"></script>
+    <script src="game/skills.js"></script>
+    <!-- 游戏逻辑（game.js 包含未拆分的 crafting/corpseSystem/scenes） -->
     <script src="game.js"></script>
+    <!-- game/ 模块化逻辑（覆盖 game.js 中同名函数） -->
+    <script src="game/state.js"></script>
+    <script src="game/helpers.js"></script>
+    <script src="game/story.js"></script>
+    <script src="game/storyEngine.js"></script>
+    <script src="game/portals.js"></script>
+    <script src="game/commands.js"></script>
+    <script src="game/movement.js"></script>
+    <script src="game/saveSystem.js"></script>
+    <script src="game/look.js"></script>
+    <script src="game/pickup.js"></script>
+    <script src="game/inventoryPanels.js"></script>
+    <script src="game/sceneItems.js"></script>
+    <script src="game/crafting.js"></script>
+    <script src="game/corpseSystem.js"></script>
+    <script src="game/scenes.js"></script>
+    <script src="game/npcSystem.js"></script>
+    <script src="game/mainMenu.js"></script>
 </body>
 </html>
