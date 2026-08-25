@@ -10,6 +10,46 @@ const ORIGINAL_TEMPLATE_IDS = new Set(
     (typeof ITEM_TEMPLATES !== 'undefined') ? Object.keys(ITEM_TEMPLATES) : []
 );
 
+// Mod 在页面启动后才加载；只登记本次加载的 Mod 物品，避免把旧游戏遗留的
+// 动态掉落误登记成静态模板。
+function registerStaticItemTemplates() {
+    if (typeof ModLoader === 'undefined' || !ModLoader.mergedItems) return;
+    Object.keys(ModLoader.mergedItems).forEach(id => ORIGINAL_TEMPLATE_IDS.add(id));
+}
+
+// 已从世界数据中移除的旧装饰物。读旧存档时也一并清理，避免重新出现。
+const DEPRECATED_ROOM_ITEM_IDS = new Set([
+    'sofa_set', 'tea_table', 'fireplace',
+    'marble_bathtub', 'copper_faucet', 'towel_rack',
+    'bookcases', 'leather_chair', 'writing_desk',
+    'four_post_bed', 'tapestry', 'window_view',
+    'old_furniture', 'wooden_boxes',
+    'pink_bed', 'bookshelf', 'dressing_table',
+    'wicker_chairs', 'tea_table_terrace',
+    'medium_wooden_door_countess'
+]);
+
+function cleanupDeprecatedWorldContent(state) {
+    if (!state || !state.world) return;
+
+    Object.values(state.world).forEach(room => {
+        if (room && Array.isArray(room.items)) {
+            room.items = room.items.filter(id => !DEPRECATED_ROOM_ITEM_IDS.has(id));
+        }
+        if (room && room.exits) {
+            Object.keys(room.exits).forEach(direction => {
+                if (room.exits[direction] === 'secret_storage') delete room.exits[direction];
+            });
+        }
+    });
+
+    // 兼容曾进入过旧占位房间的存档，先送回原走廊再删除房间。
+    if (state.player && state.player.location === 'secret_storage') {
+        state.player.location = 'second_floor_3';
+    }
+    delete state.world.secret_storage;
+}
+
 // 判断是否为动态物品ID
 function isDynamicItem(itemId) {
     return !ORIGINAL_TEMPLATE_IDS.has(itemId);
@@ -102,6 +142,8 @@ async function loadGame() {
         if (!saved) { print("❌ 存档文件为空。"); return false; }
 
         const loaded = JSON.parse(saved);
+
+        cleanupDeprecatedWorldContent(loaded);
 
         // ★ 恢复动态物品模板
         if (loaded.dynamicItems) {

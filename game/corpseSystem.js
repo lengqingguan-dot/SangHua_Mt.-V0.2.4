@@ -105,13 +105,13 @@ function dismemberItem(itemId) {
 function showDismemberPanel(corpseName, limbTemplates, corpseObj, source) {
     const dismemberedLimbs = corpseObj && corpseObj.dismemberedLimbs ? corpseObj.dismemberedLimbs : [];
     let html = makeTitle('🔪 肢解选择');
-    html += `<div style="color:#ff6b6b;">选择要肢解下来的肢体：</div><div style="color:#888;font-size:12px;">（灰色为已肢解部位）</div>`;
+    html += `<div class="dismember-intro">${corpseName} · 选择要取下的部位，灰色项目表示已完成</div><div class="limb-grid">`;
     limbTemplates.forEach((limb, index) => {
         const isDone = dismemberedLimbs.includes(limb.id);
-        html += `<div style="margin:8px 0;"><input type="checkbox" id="limb_check_${index}" ${isDone ? 'disabled' : 'checked'}><label style="color:${isDone ? '#888' : '#fff'};">${limb.name} (${limb.count}个)${isDone ? ' ✓' : ''}</label></div>`;
+        html += `<label class="limb-option ${isDone ? 'limb-option--done' : ''}"><input type="checkbox" id="limb_check_${index}" ${isDone ? 'disabled' : 'checked'}><span>${limb.name} ×${limb.count}${isDone ? '　✓' : ''}</span></label>`;
     });
-    html += centerLine() + `<span style="color:#aaffaa;text-decoration:underline;cursor:pointer;" onclick="toggleAllLimbCheckboxes(true)">✅全选</span> <span style="color:#ff8888;text-decoration:underline;cursor:pointer;" onclick="toggleAllLimbCheckboxes(false)">❌取消全选</span>`;
-    html += `<div><span style="color:#aaa;cursor:pointer;" onclick="cancelDismember()">↩️返回</span> <span id="confirm-dismember-btn" style="color:#ff6b6b;cursor:pointer;">🔪确认肢解</span></div>`;
+    html += `</div><div class="dismember-controls"><span class="detail-action detail-action--good" onclick="toggleAllLimbCheckboxes(true)">✓ 全选</span><span class="detail-action" onclick="toggleAllLimbCheckboxes(false)">清空选择</span><span id="confirm-dismember-btn" class="detail-action detail-action--danger">🔪 确认肢解</span></div>`;
+    html += makePanelFooter('cancelDismember()', '返回', '←');
     window.currentDismemberCorpse = corpseObj; window.currentDismemberSource = source;
     window.currentDismemberLimbTemplates = limbTemplates; window.currentDismemberCorpseName = corpseName;
     UI.setDetail(html);

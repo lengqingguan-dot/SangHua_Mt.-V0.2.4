@@ -24,15 +24,15 @@ function relocateTo(roomId, options = {}) {
 }
 
 function centerLine() {
-    return `<div style="border-top: 1px solid #ffffffff;margin:10px 0;"></div>`;
+    return `<div class="detail-divider"></div>`;
 }
 
 function makeTitle(text) {
-    return `<div style="display: flex; justify-content: center; align-items: center;">
-<span style="flex: 1; border-top: 1px solid #ffffffff; margin-right: 8px;"></span>
-<span style="white-space: nowrap;">${text}</span>
-<span style="flex: 1; border-top: 1px solid #ffffffff; margin-left: 8px;"></span>
-</div>`;
+    return `<div class="detail-title">${text}</div>`;
+}
+
+function makePanelFooter(onclick, label = '关闭', icon = '✕') {
+    return `<div class="panel-footer"><button type="button" class="panel-footer__button" onclick="${onclick}"><span>${icon}</span>${label}</button></div>`;
 }
 
 function getItemTypeName(type) {

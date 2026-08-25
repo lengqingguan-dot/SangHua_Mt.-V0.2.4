@@ -128,8 +128,9 @@ function updateSceneInfo() {
         room.npcs.forEach(npcId => {
             const npc = getCharacterInfo(npcId);
             if (npc) {
-                const npcColor = npc.hostile ? '#ff6666' : '#90ee90';
-                html += `<div style="margin:5px 0;"><span style="cursor:pointer;color:${npcColor};" onclick="showNPCInfo('${npcId}')">👤 ${npc.name}</span></div>`;
+                const npcClass = npc.hostile ? 'scene-entry--danger' : 'scene-entry--npc';
+                const npcLabel = npc.hostile ? '敌对 NPC' : 'NPC';
+                html += `<div class="scene-entry ${npcClass}" onclick="showNPCInfo('${npcId}')"><span>👤 ${npc.name}</span><small>${npcLabel} · 点击查看</small></div>`;
             }
         });
     }
@@ -161,12 +162,14 @@ function updateSceneInfo() {
             const nameHtml = item.type === 'limb' && item.rarity ? getLimbDisplayName(item) : item.name;
             const displayName = count > 1 ? `${nameHtml}×${count}` : nameHtml;
             const isUnpickupable = item.notPickable || false;
-            html += `<div style="margin:5px 0;"><span style="cursor:pointer;color:${isUnpickupable ? '#888' : '#c0d0e0'};" onclick="showGroundItemInfo('${itemId}')">${emoji} ${displayName}</span></div>`;
+            const itemClass = isUnpickupable ? 'scene-entry--muted' : 'scene-entry--object';
+            const itemLabel = isUnpickupable ? '场景设施' : '地面物品';
+            html += `<div class="scene-entry ${itemClass}" onclick="showGroundItemInfo('${itemId}')"><span>${emoji} ${displayName}</span><small>${itemLabel} · 点击查看</small></div>`;
         });
 
         const hasIronLock = room.items && room.items.some(id => id === 'iron_lock' || (getItemInfoById(id) && getItemInfoById(id).id === 'iron_lock'));
         if (pickupableCount > 0 && !(loc === 'mine_exit_4' && hasIronLock)) {
-            html += `<div style="margin:10px 0 5px 0;border-top:1px dashed #4a5a6a;padding-top:8px;"><span style="color:#aaffaa;text-decoration:underline;cursor:pointer;font-size:13px;" onclick="pickupAllItems()">📥 全部拾取</span></div>`;
+            html += `<div class="scene-pick-all"><span style="cursor:pointer;" onclick="pickupAllItems()">📥 全部拾取</span></div>`;
         }
     }
 

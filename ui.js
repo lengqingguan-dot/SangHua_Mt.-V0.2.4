@@ -22,6 +22,19 @@ const UI = {
         this.elements.southRoomSpan = document.getElementById('south-room');
         this.elements.eastRoomSpan = document.getElementById('east-room');
         this.elements.westRoomSpan = document.getElementById('west-room');
+
+        // 兼容旧面板：若一个卡片框中只有一个直接操作，点击卡片任意位置都执行该操作。
+        if (this.elements.detailPanel) {
+            this.elements.detailPanel.addEventListener('click', event => {
+                if (event.target.closest('[onclick], button, input, label')) return;
+                let card = event.target.closest('div');
+                while (card && card !== this.elements.detailPanel) {
+                    const actions = Array.from(card.children).filter(child => child.matches('span[onclick]'));
+                    if (actions.length === 1) { actions[0].click(); return; }
+                    card = card.parentElement;
+                }
+            });
+        }
     },
 
     // 输出区操作
@@ -59,7 +72,7 @@ const UI = {
     },
 
     clearDetail() {
-        this.setDetail('<span style="color: #888;">点击物品或NPC查看详情...</span>');
+        this.setDetail('<div class="detail-empty">点击物品或 NPC 查看详情...</div>');
     },
 
     //  交互遮罩与剧情按钮

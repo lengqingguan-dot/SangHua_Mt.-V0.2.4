@@ -375,6 +375,273 @@
             margin-top: 5px;
             font-size: 13px;
         }
+
+        /* 游戏界面视觉升级：保持原有三栏位置与功能不变 */
+        #game-container {
+            position: relative;
+            gap: 12px;
+            padding-top: 6px;
+            background: linear-gradient(90deg, #3f341d, #c7aa60 35%, #3f341d 70%, #121923) top / 100% 5px no-repeat;
+        }
+        #game-container .left-panel,
+        #game-container .right-panel {
+            background: linear-gradient(160deg, #111923, #0a0f16 72%);
+            border-color: #344456;
+            border-radius: 3px;
+            box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.28), 0 8px 24px rgba(0, 0, 0, 0.14);
+        }
+        #game-container .left-panel { min-width: 190px; padding: 13px; }
+        #game-container .right-panel { min-width: 220px; padding: 13px; }
+        #game-container .center-panel { min-width: 500px; height: 720px; }
+        #game-container .panel-title {
+            color: #d9c58e;
+            letter-spacing: 0.08em;
+            border-bottom: 1px solid #3d4c5d;
+            padding-bottom: 9px;
+            margin-bottom: 10px;
+            text-shadow: 0 1px 0 #000;
+        }
+
+        /* 周围可见：保留原点击行为，增加对象类型层级 */
+        #scene-items-list { display: flex; flex-direction: column; gap: 7px; line-height: 1.35; }
+        #scene-items-list .scene-entry {
+            margin: 0;
+            padding: 9px 8px;
+            background: #111923;
+            border: 1px solid #2c3948;
+            cursor: pointer;
+            transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+        }
+        #scene-items-list .scene-entry:hover { background: #1d1c16; border-color: #8d7644; transform: translateX(2px); }
+        #scene-items-list .scene-entry--npc { border-left: 3px solid #4b8d69; }
+        #scene-items-list .scene-entry--danger { border-left: 3px solid #a54b54; }
+        #scene-items-list .scene-entry--object { border-left: 3px solid #8e7946; }
+        #scene-items-list .scene-entry--muted { opacity: 0.82; }
+        #scene-items-list .scene-entry > span { display: block; color: #c6d2df !important; text-decoration: none !important; }
+        #scene-items-list .scene-entry--danger > span { color: #ef9aa1 !important; }
+        #scene-items-list .scene-entry--npc > span { color: #a9dfbb !important; }
+        #scene-items-list .scene-entry small { display: block; margin-top: 3px; color: #65768a; font-size: 10px; }
+        #scene-items-list .scene-pick-all { margin: 5px 0 0; padding: 8px; border: 1px dashed #4d755c; background: #101a15; text-align: center; }
+        #scene-items-list .scene-pick-all span { color: #a7d7b7 !important; text-decoration: none !important; }
+
+        /* 详情栏：所有现有面板继续写入同一位置 */
+        #detail-panel {
+            min-height: 190px;
+            max-height: 240px;
+            padding: 14px 15px;
+            margin-bottom: 8px;
+            background: linear-gradient(155deg, #101823, #080d13 76%);
+            border-color: #405267;
+            border-radius: 3px;
+            box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.15);
+            scrollbar-color: #46596e #090e14;
+        }
+        #detail-panel .detail-title {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin: -2px 0 12px;
+            color: #ead7a1;
+            font-family: Georgia, 'Noto Serif SC', serif;
+            font-size: 17px;
+            font-weight: bold;
+            letter-spacing: 0.08em;
+            text-align: center;
+        }
+        #detail-panel .detail-title::before,
+        #detail-panel .detail-title::after { content: ''; height: 1px; flex: 1; background: linear-gradient(90deg, transparent, #75633d); }
+        #detail-panel .detail-title::after { background: linear-gradient(90deg, #75633d, transparent); }
+        #detail-panel .detail-divider { height: 1px; margin: 11px 0; background: linear-gradient(90deg, transparent, #3c4b5c 12%, #3c4b5c 88%, transparent); }
+        #detail-panel .detail-empty { min-height: 150px; display: grid; place-items: center; color: #65768a; font-size: 13px; letter-spacing: 0.03em; }
+        #detail-panel span[onclick] {
+            display: inline-block;
+            margin: 2px 1px;
+            padding: 3px 7px;
+            border: 1px solid transparent;
+            border-radius: 2px;
+            text-underline-offset: 3px;
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+        #detail-panel span[onclick]:hover { background: #211e15; border-color: #806c40; color: #f0d9a0 !important; }
+        #detail-panel .detail-actions { margin-top: 11px; padding-top: 9px; border-top: 1px solid #354456; }
+        #detail-panel .detail-empty--compact { min-height: 58px; }
+        #detail-panel .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 7px;
+            margin-top: 3px;
+        }
+        #detail-panel .inventory-entry {
+            display: grid;
+            grid-template-columns: 26px minmax(0, 1fr);
+            align-items: center;
+            gap: 0 7px;
+            min-width: 0;
+            padding: 8px;
+            background: #0d141c;
+            border: 1px solid #304052;
+            border-left: 2px solid #796841;
+            cursor: pointer;
+            transition: border-color .15s ease, background .15s ease, transform .15s ease;
+        }
+        #detail-panel .inventory-entry:hover { background: #1b1a14; border-color: #8b7546; transform: translateY(-1px); }
+        #detail-panel .inventory-entry__icon { grid-row: 1 / 3; font-size: 18px; text-align: center; }
+        #detail-panel .inventory-entry__name {
+            min-width: 0;
+            padding: 0;
+            margin: 0;
+            color: #cbd6e2;
+            cursor: pointer;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        #detail-panel .inventory-entry small { color: #65768a; font-size: 10px; }
+        #detail-panel .status-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 9px;
+            padding: 8px 10px;
+            background: #121923;
+            border: 1px solid #344456;
+            color: #e2cc92;
+            font-weight: bold;
+        }
+        #detail-panel .status-heading small { color: #788a9e; font-weight: normal; }
+        #detail-panel .status-resource { margin: 7px 0; }
+        #detail-panel .status-resource > div:first-child { display: flex; justify-content: space-between; color: #93a3b5; font-size: 11px; }
+        #detail-panel .status-resource b { color: #cdd7e1; }
+        #detail-panel .status-track { height: 7px; margin-top: 4px; overflow: hidden; background: #04070a; border: 1px solid #283443; }
+        #detail-panel .status-fill { display: block; height: 100%; }
+        #detail-panel .status-fill--hp { background: linear-gradient(90deg, #842b34, #d85c66); }
+        #detail-panel .status-fill--sp { background: linear-gradient(90deg, #28568b, #5b9dd5); }
+        #detail-panel .status-fill--exp { background: linear-gradient(90deg, #756027, #c4a652); }
+        #detail-panel .status-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
+        #detail-panel .status-stat-grid > div { padding: 7px; background: #0d141c; border: 1px solid #304052; text-align: center; }
+        #detail-panel .status-stat-grid span { display: block; color: #78899c; font-size: 10px; }
+        #detail-panel .status-stat-grid b { display: block; margin-top: 3px; color: #e0c98d; font-size: 16px; }
+        #detail-panel .status-note { color: #7e8fa3; text-align: center; font-size: 11px; font-style: italic; }
+
+        /* 详情栏通用组件 */
+        #detail-panel .panel-tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+        #detail-panel .panel-tab {
+            margin: 0; padding: 5px 10px; color: #77899c; background: #0b1118;
+            border: 1px solid #2d3b4b; border-radius: 12px; cursor: pointer; font-size: 11px;
+        }
+        #detail-panel .panel-tab:hover { color: #e5d19b; border-color: #806d43; background: #1b1912; }
+        #detail-panel .panel-tab--active { color: #f0d89c; border-color: #9a8149; background: #282217; box-shadow: inset 0 -2px #b29450; }
+        #detail-panel .panel-section-label { margin: 9px 0 6px; color: #8fa1b4; font-size: 10px; font-weight: bold; letter-spacing: .12em; text-transform: uppercase; }
+        #detail-panel .panel-footer {
+            display: flex; justify-content: center; margin-top: 12px; padding-top: 10px;
+            border-top: 1px solid #344354;
+        }
+        #detail-panel .panel-footer__button,
+        #detail-panel > div:last-child > span[onclick],
+        #detail-panel > div:last-child[onclick] {
+            display: block; width: fit-content; min-width: 112px; margin: 0 auto; padding: 7px 15px; color: #9eafc0 !important;
+            background: linear-gradient(#18222d, #0e151d); border: 1px solid #405166;
+            border-radius: 3px; cursor: pointer; text-align: center; text-decoration: none !important;
+            font: inherit; font-size: 12px; letter-spacing: .06em;
+        }
+        #detail-panel .panel-footer__button:hover,
+        #detail-panel > div:last-child > span[onclick]:hover,
+        #detail-panel > div:last-child[onclick]:hover {
+            color: #f1d99e !important; border-color: #927b47; background: linear-gradient(#282318, #171711);
+            box-shadow: 0 2px 10px rgba(0,0,0,.25), inset 0 -2px #a98d4e;
+        }
+        #detail-panel .detail-card { padding: 10px; background: #0d141c; border: 1px solid #304052; border-left: 2px solid #796841; }
+        #detail-panel .detail-card__header { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: #d8c58f; font-weight: bold; }
+        #detail-panel .detail-card__badge { padding: 2px 7px; color: #8fa2b5; background: #111b25; border: 1px solid #35485b; border-radius: 10px; font-size: 10px; font-weight: normal; }
+        #detail-panel .detail-card__desc { margin-top: 8px; color: #9eafc1; line-height: 1.65; font-size: 12px; }
+        #detail-panel .detail-action-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; margin-top: 9px; }
+        #detail-panel .detail-action {
+            margin: 0; padding: 7px 5px; color: #b8c7d5 !important; background: #111923;
+            border: 1px solid #344557 !important; border-radius: 2px; text-align: center; text-decoration: none !important;
+        }
+        #detail-panel .detail-action:hover { color: #f0d89e !important; border-color: #8d7745 !important; background: #242016 !important; }
+        #detail-panel .detail-action--danger { color: #e8989e !important; border-color: #62363e !important; }
+        #detail-panel .detail-action--good { color: #9fd5b2 !important; border-color: #365b45 !important; }
+        #detail-panel div:has(> span[onclick]) { cursor: pointer; }
+        #detail-panel div:has(> span[onclick]) > span[onclick]:only-of-type { display: block; }
+
+        /* 装备、任务、技能与肢解面板 */
+        #detail-panel .equipment-slots { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 7px; }
+        #detail-panel .equipment-slot { min-width: 0; padding: 10px 7px; background: #0c131b; border: 1px solid #304052; border-top: 2px solid #796841; text-align: center; }
+        #detail-panel .equipment-slot__icon { display: block; font-size: 22px; }
+        #detail-panel .equipment-slot small { display: block; margin: 3px 0 5px; color: #66788b; }
+        #detail-panel .equipment-slot[onclick] { cursor: pointer; transition: border-color .15s ease, background .15s ease, transform .15s ease; }
+        #detail-panel .equipment-slot[onclick]:hover { background: #1d1b14; border-color: #957d49; transform: translateY(-1px); }
+        #detail-panel .equipment-slot > span:last-child { display: block; max-width: 100%; margin: 0; padding: 2px; color: #d4c38f !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #detail-panel .equipment-summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-top: 9px; }
+        #detail-panel .equipment-summary div { padding: 6px; color: #8193a6; background: #111923; border: 1px solid #2f3d4c; text-align: center; font-size: 10px; }
+        #detail-panel .equipment-summary b { display: block; color: #e1ca90; font-size: 15px; }
+        #detail-panel .quest-list { display: grid; gap: 6px; }
+        #detail-panel .quest-card { display: flex; align-items: center; gap: 9px; padding: 9px; background: #0d141c; border: 1px solid #304052; border-left: 3px solid #8c7040; }
+        #detail-panel .quest-card[onclick] { cursor: pointer; transition: border-color .15s ease, background .15s ease, transform .15s ease; }
+        #detail-panel .quest-card[onclick]:hover { background: #1d1a13; border-color: #8d7746; transform: translateX(2px); }
+        #detail-panel .quest-card--side { border-left-color: #416b93; }
+        #detail-panel .quest-card__icon { font-size: 18px; }
+        #detail-panel .quest-card > span:nth-child(2) { flex: 1; margin: 0; padding: 0; color: #c8d3df !important; text-decoration: none !important; }
+        #detail-panel .quest-card small { color: #66798d; }
+        #detail-panel .quest-detail-meta { display: flex; gap: 6px; margin-bottom: 7px; }
+        #detail-panel .quest-condition { margin-top: 6px; padding: 7px 9px; color: #a9b6c3; background: #101821; border-left: 2px solid #61758a; }
+        #detail-panel .skill-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
+        #detail-panel .skill-card { padding: 9px; background: #0d141c; border: 1px solid #304052; border-top: 2px solid #66508e; cursor: pointer; transition: border-color .15s ease, background .15s ease, transform .15s ease; }
+        #detail-panel .skill-card:hover { background: #181522; border-color: #8067a9; transform: translateY(-1px); }
+        #detail-panel .skill-card__top { display: flex; justify-content: space-between; gap: 8px; }
+        #detail-panel .skill-card__top span { margin: 0; padding: 0; color: #d1c1e7 !important; text-decoration: none !important; }
+        #detail-panel .skill-card b { color: #77a7d7; font-size: 10px; }
+        #detail-panel .skill-card p { margin: 6px 0 0; color: #74869a; font-size: 10px; line-height: 1.45; }
+        #detail-panel .dismember-intro { margin-bottom: 8px; color: #b9878b; text-align: center; font-size: 11px; }
+        #detail-panel .limb-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
+        #detail-panel .limb-option { display: flex; align-items: center; gap: 7px; padding: 8px; color: #c4cdd6; background: #11151b; border: 1px solid #3c353c; cursor: pointer; }
+        #detail-panel .limb-option--done { color: #65717d; opacity: .65; }
+        #detail-panel .limb-option input { accent-color: #a94e58; }
+        #detail-panel .dismember-controls { display: flex; justify-content: space-between; gap: 6px; margin-top: 9px; }
+        #detail-panel .dismember-controls span { flex: 1; text-align: center; }
+
+        /* 文本输出框保持核心地位 */
+        #output {
+            min-height: 300px;
+            padding: 16px 17px;
+            margin-bottom: 6px;
+            background: #020508;
+            border-color: #3b4c62;
+            border-radius: 2px;
+            line-height: 1.65;
+            box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.78);
+            scrollbar-color: #46596e #070b10;
+        }
+        #output .story-text { color: #dd7378; }
+        #output .scene-desc { color: #e3e8ee; }
+
+        /* 原位置按钮与输入框，仅更新外观 */
+        .action-buttons { gap: 6px; margin: 6px 0; }
+        .action-buttons button { background: linear-gradient(#17222e, #101720); border-color: #405267; color: #cad6e2; border-radius: 2px; padding: 8px 3px; }
+        .action-buttons button:hover { color: #f0d9a0; border-color: #9a824d; background: linear-gradient(#282318, #171711); box-shadow: inset 0 -2px #b89a55; }
+        #input-line { gap: 6px; margin-bottom: 7px; }
+        #cmd-input { background: #070b10; border-color: #405267; border-radius: 2px; padding: 9px 10px; font-size: 14px; outline: none; }
+        #cmd-input:focus { border-color: #9b824b; box-shadow: 0 0 0 1px #43391f; }
+        #input-line button { color: #8e9daf; background: linear-gradient(#151e28, #0d141c); border-color: #344456; border-radius: 2px; box-shadow: none; }
+        #input-line button:hover,
+        #input-line button:focus-visible { color: #f0d9a0; background: linear-gradient(#282318, #171711); border-color: #8d7644; box-shadow: inset 0 -2px #9f864b; }
+        .save-load { gap: 5px; margin-top: 0; }
+        .save-load button { flex: 1; min-width: 0; padding: 7px 3px; color: #8798aa; background: #0d131a; border-color: #303d4c; border-radius: 2px; font-size: 11px; }
+        .save-load button:hover { color: #cbd6e2; border-color: #526377; background: #151e28; }
+
+        /* 小地图：保留点击移动与战斗逃跑逻辑 */
+        .minimap { width: 100%; }
+        .current-room-name { color: #ddca93; font-size: 16px; letter-spacing: 0.04em; border-bottom: 1px solid #3d4c5d; padding-bottom: 9px; }
+        .map-grid { gap: 6px; margin: 14px auto; }
+        .map-cell { background: #101821; border-color: #37475a; border-radius: 2px; color: #9aabba; box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.16); }
+        .map-cell.clickable { border-color: #53677e; }
+        .map-cell.clickable:hover { color: #edd8a0; background: #211d14; border-color: #9c8249; transform: translateY(-1px); }
+        .map-cell:not([id]) { background: radial-gradient(circle, #2d2717, #171711) !important; border-color: #9c8249 !important; color: #f0d798; }
+        .map-cell.empty { opacity: 0.2; }
+        .room-number-info { margin-top: 11px; padding: 7px 0; color: #b89c59; border-top: 1px dashed #39495a; border-bottom: 1px dashed #39495a; font-size: 12px; }
+        .story-note { margin-top: 11px; color: #66778b; font-size: 11px; line-height: 1.6; }
+
         #block-overlay {
             position: fixed;
             top: 0;
@@ -479,7 +746,7 @@
         </div>
         <div class="center-panel">
             <div id="detail-panel">
-                <span style="color: #888;">点击物品或NPC查看详情...</span>
+                <div class="detail-empty">点击物品或 NPC 查看详情...</div>
             </div>
             <div id="output">载入中…<br></div>
             <div class="action-buttons">

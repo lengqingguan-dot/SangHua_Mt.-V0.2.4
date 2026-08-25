@@ -190,22 +190,29 @@ function liftDungeonStrawMat(itemId) {
 function showGroundItemInfo(itemId) {
     const item = getItemInfoById(itemId);
     if (!item) { printToDetail("找不到该物品信息。"); return; }
-    let html = makeTitle('物品详情');
     const nameDisplay = getInventoryDisplayName(item);
-    html += `名称：${nameDisplay}\n类型：${getItemTypeName(item.type)}\n`;
-    if (item.score !== undefined) html += `评分：${item.score}\n`;
-    if (item.rarity) html += `品质：${getQualityName(item.rarity)}\n`;
-    if (item.desc) { if (item.story || item.milkItem || item.ingredientType || item.dismemberable) { html += `\n<span style="color: #66ff66;">${item.desc}</span>\n`; } else if (item.type === "consumable") { html += `\n<span style="color: #ff6666;">${item.desc}</span>\n`; } else { html += `描述：${item.desc}\n`; } }
-    if (item.atk) html += `攻击力：+${item.atk}\n`; if (item.def) html += `防御力：+${item.def}\n`;
-    if (item.effect) { if (item.effect === 'heal') html += `效果：恢复 ${item.value} 点生命\n`; else html += `效果：${item.effect}\n`; }
-    html += centerLine();
+    const typeName = getItemTypeName(item.type);
+    const meta = item.rarity ? `${typeName} · ${getQualityName(item.rarity)}` : typeName;
+    let html = makeTitle(item.notPickable ? '场景设施详情' : '物品详情');
+    html += `<div class="detail-card"><div class="detail-card__header"><span>${getItemEmoji(item)} ${nameDisplay}</span><span class="detail-card__badge">${meta}</span></div>`;
+    html += `<div class="detail-card__desc">${item.desc || '没有更多可以观察到的信息。'}</div>`;
+    if (item.score !== undefined || item.atk || item.def) {
+        html += `<div class="equipment-summary"><div>评分<b>${item.score !== undefined ? item.score : '—'}</b></div><div>攻击<b>${item.atk ? '+' + item.atk : '—'}</b></div><div>防御<b>${item.def ? '+' + item.def : '—'}</b></div></div>`;
+    }
+    if (item.effect) html += `<div class="quest-condition">效果：${item.effect === 'heal' ? `恢复 ${item.value} 点生命` : item.effect}</div>`;
+    html += `</div>`;
     const actionLines = []; let matched = false; let needsEarlyReturn = false;
     for (const entry of GROUND_ITEM_ACTIONS) { if (entry.match(itemId, item)) { entry.actions(itemId, item, actionLines); matched = true; if (entry.earlyReturn) needsEarlyReturn = true; break; } }
-    html += actionLines.join('');
-    if (needsEarlyReturn) { html += `<div><span style="color: #aaa; cursor: pointer;" onclick="clearDetailPanel()">↩️ 返回</span></div>`; currentDetailItem = itemId; UI.setDetail(html); currentPanel = 'ground_item'; return; }
-    if (!matched && !item.notPickable) { html += `<div><span style="color: #aaffaa; text-decoration: underline; cursor: pointer;" onclick="pickupItem('${itemId}')">✨ 拾取</span></div>`; const sameCount = countSameItemsOnGround(item); if (sameCount > 1) html += `<div><span style="color: #aaffaa; text-decoration: underline; cursor: pointer;" onclick="pickupAllSameItems('${itemId}')">📥 全部拾取(${sameCount}个)</span></div>`; }
-    html += `<div><span style="color: #aaa; cursor: pointer;" onclick="clearDetailPanel()">↩️ 返回</span></div>`;
+    let actionMarkup = actionLines.join('').replace(/<div><span[^>]*onclick="([^"]+)"[^>]*>(.*?)<\/span><\/div>/g, `<span class="detail-action" onclick="$1">$2</span>`);
+    if (!matched && !item.notPickable) {
+        actionMarkup += `<span class="detail-action detail-action--good" onclick="pickupItem('${itemId}')">✨ 拾取</span>`;
+        const sameCount = countSameItemsOnGround(item);
+        if (sameCount > 1) actionMarkup += `<span class="detail-action detail-action--good" onclick="pickupAllSameItems('${itemId}')">📥 全部拾取 (${sameCount})</span>`;
+    }
+    if (actionMarkup) html += `<div class="panel-section-label">可用操作</div><div class="detail-action-grid">${actionMarkup}</div>`;
+    html += makePanelFooter('clearDetailPanel()', '关闭详情');
     currentDetailItem = itemId; UI.setDetail(html); currentPanel = 'ground_item';
+    if (needsEarlyReturn) return;
 }
 
 function breakDoor(doorId, doorType) {
@@ -224,7 +231,6 @@ function breakDoor(doorId, doorType) {
 function handleMediumDoorUnlock(room) {
     const loc = gameState.player.location;
     if (loc === 'second_floor_1') { room.exits.east = 'hidden_room_cecilia'; if (!gameState.world['hidden_room_cecilia']) gameState.world['hidden_room_cecilia'] = { name: "隐秘房间", desc: "一个被隐藏的小房间...", exits: { west: 'second_floor_1' }, items: [], npcs: [] }; }
-    else if (loc === 'second_floor_3') { room.exits.east = 'secret_storage'; if (!gameState.world['secret_storage']) gameState.world['secret_storage'] = { name: "秘密储藏室", desc: "一间隐秘的储藏室...", exits: { west: 'second_floor_3' }, items: ['healing_potion', 'healing_potion', 'coin', 'coin', 'coin'], npcs: [] }; }
 }
 
 // ★ 重建雕像（支线任务5）—— 不含骑士大剑

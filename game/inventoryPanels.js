@@ -5,26 +5,38 @@
 function showInventoryPanel() {
     if (currentPanel === 'inventory') { clearDetailPanel(); currentPanel = null; return; }
     let html = makeTitle('行囊物品');
-    html += `<div style="text-align:center;">${generateInventoryCategoryMenu()}</div>`;
+    html += generateInventoryCategoryMenu('all');
     const inv = gameState.player.inventory;
-    if (inv.length === 0) { html += `你的行囊空空如也。\n`; }
-    else { inv.forEach(item => { const displayName = getInventoryDisplayName(item); html += `  ▫️ <span style="text-decoration:underline;cursor:pointer;" onclick="examineItemFromPanel('${item.id}')">${displayName}</span> ${getItemEmoji(item)}\n`; }); }
-    html += centerLine() + `<div style="text-align:center;"><span style="color:#aaa;cursor:pointer;" onclick="showInventoryPanel()">↩️ 关闭</span></div>`;
+    html += renderInventoryEntries(inv, '你的行囊空空如也。');
+    html += makePanelFooter('showInventoryPanel()', '关闭物品栏');
     UI.setDetail(html); currentPanel = 'inventory';
 }
 
-function generateInventoryCategoryMenu() {
-    return `<span style="color:#b7c9e2;text-decoration:underline;cursor:pointer;margin:0 10px;" onclick="showInventoryAll()">全部</span>` +
-           `<span style="color:#b7c9e2;text-decoration:underline;cursor:pointer;margin:0 10px;" onclick="showInventoryCategory('consumable')">消耗品</span>` +
-           `<span style="color:#b7c9e2;text-decoration:underline;cursor:pointer;margin:0 10px;" onclick="showInventoryCategory('important')">重要道具</span>` +
-           `<span style="color:#b7c9e2;text-decoration:underline;cursor:pointer;margin:0 10px;" onclick="showInventoryCategory('limb')">肢体</span>` +
-           `<span style="color:#b7c9e2;text-decoration:underline;cursor:pointer;margin:0 10px;" onclick="showInventoryCategory('misc')">杂物</span>\n` + centerLine();
+function renderInventoryEntries(items, emptyText) {
+    if (!items || items.length === 0) return `<div class="detail-empty detail-empty--compact">${emptyText}</div>`;
+    let html = `<div class="inventory-grid">`;
+    items.forEach(item => {
+        const displayName = getInventoryDisplayName(item);
+        const itemType = getItemTypeName(item.type);
+        html += `<div class="inventory-entry" onclick="examineItemFromPanel('${item.id}')"><span class="inventory-entry__icon">${getItemEmoji(item)}</span><span class="inventory-entry__name">${displayName}</span><small>${itemType}</small></div>`;
+    });
+    return html + `</div>`;
+}
+
+function generateInventoryCategoryMenu(active = 'all') {
+    const tab = (id, label, action) => `<span class="panel-tab ${active === id ? 'panel-tab--active' : ''}" onclick="${action}">${label}</span>`;
+    return `<div class="panel-tabs">` +
+           tab('all', '全部', 'showInventoryAll()') +
+           tab('consumable', '消耗品', "showInventoryCategory('consumable')") +
+           tab('important', '重要道具', "showInventoryCategory('important')") +
+           tab('limb', '肢体', "showInventoryCategory('limb')") +
+           tab('misc', '杂物', "showInventoryCategory('misc')") + `</div>`;
 }
 
 function showInventoryCategory(category) {
     const categoryName = category === 'consumable' ? '消耗品' : category === 'important' ? '重要道具' : category === 'limb' ? '肢体' : '杂物';
     let html = makeTitle(`行囊物品 - ${categoryName}`);
-    html += `<div style="text-align:center;">${generateInventoryCategoryMenu()}</div>`;
+    html += generateInventoryCategoryMenu(category);
     const inv = gameState.player.inventory;
     let filtered = [];
     switch (category) {
@@ -33,41 +45,45 @@ function showInventoryCategory(category) {
         case 'limb': filtered = inv.filter(i => i.id.includes('corpse') || i.story || i.ingredientType || i.dismemberable || i.milkItem); break;
         case 'misc': filtered = inv.filter(i => i.type === 'misc' && !i.id.includes('corpse') && !i.story && !i.ingredientType && !i.dismemberable && !i.milkItem); break;
     }
-    if (filtered.length === 0) { html += `该分类下没有物品。\n`; }
-    else { filtered.forEach(item => { const displayName = getInventoryDisplayName(item); html += `  ▫️ <span style="text-decoration:underline;cursor:pointer;" onclick="examineItemFromPanel('${item.id}')">${displayName}</span> ${getItemEmoji(item)}\n`; }); }
-    html += centerLine() + `<div style="text-align:center;"><span style="color:#aaa;cursor:pointer;" onclick="showInventoryPanel()">↩️ 返回物品栏</span></div>`;
+    html += renderInventoryEntries(filtered, '该分类下没有物品。');
+    html += makePanelFooter('showInventoryPanel()', '返回物品栏', '←');
     UI.setDetail(html); currentPanel = 'inventory';
 }
 
 function showInventoryAll() {
-    let html = makeTitle('行囊物品'); html += `<div style="text-align:center;">${generateInventoryCategoryMenu()}</div>`;
+    let html = makeTitle('行囊物品'); html += generateInventoryCategoryMenu('all');
     const inv = gameState.player.inventory;
-    if (inv.length === 0) { html += `你的行囊空空如也。\n`; }
-    else { inv.forEach(item => { const displayName = getInventoryDisplayName(item); html += `  ▫️ <span style="text-decoration:underline;cursor:pointer;" onclick="examineItemFromPanel('${item.id}')">${displayName}</span> ${getItemEmoji(item)}\n`; }); }
-    html += centerLine() + `<div style="text-align:center;"><span style="color:#aaa;cursor:pointer;" onclick="showInventoryPanel()">↩️ 关闭</span></div>`;
+    html += renderInventoryEntries(inv, '你的行囊空空如也。');
+    html += makePanelFooter('showInventoryPanel()', '关闭物品栏');
     UI.setDetail(html); currentPanel = 'inventory';
 }
 
 function examineItemFromPanel(itemId) {
     const item = findItemById(itemId); if (!item) { print("物品不存在。"); return; }
     const nameDisplay = getInventoryDisplayName(item);
-    let html = makeTitle('物品详情') + `名称：${nameDisplay}\n类型：${getItemTypeName(item.type)}\n`;
-    if (item.score !== undefined) html += `评分：${item.score}\n`;
-    if (item.rarity) html += `品质：${getQualityName(item.rarity)}\n`;
-    if (item.desc) html += `描述：${item.desc}\n`;
-    if (item.atk) html += `攻击力：+${item.atk}\n`; if (item.def) html += `防御力：+${item.def}\n`; if (item.agi) html += `灵巧：+${item.agi}\n`;
-    if (item.maxHpPercent && item.maxHpPercent < 0) html += `<span style="color:#ff6666;">诅咒：最大生命值${Math.round(item.maxHpPercent*100)}%</span>\n`;
-    if (item.effect === 'heal') html += `效果：恢复${item.value}点生命\n`;
-    else if (item.effect) html += `效果：${item.effect} 永久+${item.value}\n`;
-    html += centerLine();
-    if (item.id && item.id.includes('corpse')) { if (item.corpseStory) html += `<div><span style="color:#ff66aa;text-decoration:underline;cursor:pointer;" onclick="useCorpse('${item.id}')">🔞 互动</span></div>`; if (item.loot && item.loot.length > 0) html += `<div><span style="color:#ffdd44;text-decoration:underline;cursor:pointer;" onclick="lootCorpseFromInventory('${item.id}')">✨ 搜刮</span></div>`; if (item.dismemberable) html += `<div><span style="color:#ff6b6b;text-decoration:underline;cursor:pointer;" onclick="dismemberCorpseFromInventory('${item.id}')">🔪 肢解</span></div>`; }
-    else if (item.id === 'magic_mirror') { html += `<div><span style="color:#6688ff;text-decoration:underline;cursor:pointer;" onclick="useMagicMirror()">🌀 传送</span></div>`; html += `<div><span style="color:#aaffaa;text-decoration:underline;cursor:pointer;" onclick="equipItemFromDetail('${item.id}')">⚔️ 装备</span></div>`; }
-    else if (item.type === 'weapon' || item.type === 'armor' || item.type === 'accessory') { html += `<div><span style="color:#aaffaa;text-decoration:underline;cursor:pointer;" onclick="equipItemFromDetail('${item.id}')">⚔️ 装备</span></div>`; }
-    else if (item.type === 'consumable') { html += `<div><span style="color:#aaffaa;text-decoration:underline;cursor:pointer;" onclick="useItemFromDetail('${item.id}')">🧪 使用</span></div>`; }
-    else if (item.type === 'readable') { html += `<div><span style="color:#aaffaa;text-decoration:underline;cursor:pointer;" onclick="readItemFromDetail('${item.id}')">📖 阅读</span></div>`; }
-    else if (item.story) { html += `<div><span style="color:#80e5ff;text-decoration:underline;cursor:pointer;" onclick="useLimb('${item.id}')">🔍 互动</span></div>`; }
-    else if (item.id === 'removed_ladder' || (item.id.includes('removed_ladder') && item.id.includes('_dropped_'))) { html += `<div><span style="color:#aaffaa;text-decoration:underline;cursor:pointer;" onclick="useRemovedLadder()">🪜 使用梯子</span></div>`; }
-    html += `<div><span style="color:#ff8888;text-decoration:underline;cursor:pointer;" onclick="dropItemFromInventory('${item.id}')">🗑️ 丢弃</span></div>` + `<div><span style="color:#aaa;cursor:pointer;" onclick="showInventoryPanel()">↩️ 返回</span></div>`;
+    const meta = item.rarity ? `${getItemTypeName(item.type)} · ${getQualityName(item.rarity)}` : getItemTypeName(item.type);
+    let html = makeTitle('物品详情') + `<div class="detail-card"><div class="detail-card__header"><span>${getItemEmoji(item)} ${nameDisplay}</span><span class="detail-card__badge">${meta}</span></div>`;
+    if (item.desc) html += `<div class="detail-card__desc">${item.desc}</div>`;
+    if (item.score !== undefined || item.atk || item.def || item.agi) {
+        html += `<div class="equipment-summary"><div>评分<b>${item.score !== undefined ? item.score : '—'}</b></div><div>攻击<b>${item.atk ? '+' + item.atk : '—'}</b></div><div>防御/灵巧<b>${item.def ? '+' + item.def : (item.agi ? '+' + item.agi : '—')}</b></div></div>`;
+    }
+    if (item.maxHpPercent && item.maxHpPercent < 0) html += `<div class="quest-condition" style="border-left-color:#9f4650;color:#dc8c94;">诅咒：最大生命值 ${Math.round(item.maxHpPercent * 100)}%</div>`;
+    if (item.effect === 'heal') html += `<div class="quest-condition">效果：恢复 ${item.value} 点生命</div>`;
+    else if (item.effect) html += `<div class="quest-condition">效果：${item.effect} 永久 +${item.value}</div>`;
+    html += `</div><div class="detail-action-grid">`;
+    if (item.id && item.id.includes('corpse')) {
+        if (item.corpseStory) html += `<span class="detail-action" onclick="useCorpse('${item.id}')">🔞 互动</span>`;
+        if (item.loot && item.loot.length > 0) html += `<span class="detail-action" onclick="lootCorpseFromInventory('${item.id}')">✨ 搜刮</span>`;
+        if (item.dismemberable) html += `<span class="detail-action detail-action--danger" onclick="dismemberCorpseFromInventory('${item.id}')">🔪 肢解</span>`;
+    } else if (item.id === 'magic_mirror') {
+        html += `<span class="detail-action" onclick="useMagicMirror()">🌀 传送</span><span class="detail-action detail-action--good" onclick="equipItemFromDetail('${item.id}')">⚔️ 装备</span>`;
+    } else if (item.type === 'weapon' || item.type === 'armor' || item.type === 'accessory') html += `<span class="detail-action detail-action--good" onclick="equipItemFromDetail('${item.id}')">⚔️ 装备</span>`;
+    else if (item.type === 'consumable') html += `<span class="detail-action detail-action--good" onclick="useItemFromDetail('${item.id}')">🧪 使用</span>`;
+    else if (item.type === 'readable') html += `<span class="detail-action detail-action--good" onclick="readItemFromDetail('${item.id}')">📖 阅读</span>`;
+    else if (item.story) html += `<span class="detail-action" onclick="useLimb('${item.id}')">🔍 互动</span>`;
+    else if (item.id === 'removed_ladder' || (item.id.includes('removed_ladder') && item.id.includes('_dropped_'))) html += `<span class="detail-action detail-action--good" onclick="useRemovedLadder()">🪜 使用梯子</span>`;
+    html += `<span class="detail-action detail-action--danger" onclick="dropItemFromInventory('${item.id}')">🗑️ 丢弃</span></div>`;
+    html += makePanelFooter('showInventoryPanel()', '返回物品栏', '←');
     UI.setDetail(html); currentPanel = 'item_detail';
 }
 
@@ -81,19 +97,61 @@ function useItemFromDetail(itemId) { if (itemId === 'sanghuashan_mine') { return
 
 function readItemFromDetail(itemId) { const item = findItemById(itemId); if (!item) return; clearDetailPanel(); currentPanel = null; if (item.content && Array.isArray(item.content)) { print(`你打开「${item.name}」……`); print("<br>"); if (typeof StoryEngine !== 'undefined') { StoryEngine.playLines({ lines: item.content, color: '#ffdd44', useNextBtn: true, addLineBreaks: false, onComplete: () => { print("────────────────"); if (!gameState.gameFlags) gameState.gameFlags = {}; gameState.gameFlags[`read_${itemId}`] = true; StoryEngine.markConditionProgress('read_item', itemId); } }); } } }
 
-function showEquipmentPanel() { if (currentPanel === 'equipment') { clearDetailPanel(); currentPanel = null; return; } let html = makeTitle('当前装备'); ['weapon','armor','accessory'].forEach(slot => { const item = gameState.player.equipment[slot]; const equipName = item ? (item.rarity ? getEquipmentDisplayName(item) : item.name) : ''; html += item ? `🔸${slot}:<span style="text-decoration:underline;cursor:pointer;" onclick="examineEquippedItem('${slot}')">${equipName}</span>\n` : `🔸${slot}:<span style="color:#888;">（空）</span>\n`; }); html += centerLine() + `⚔️总攻击:${getCharacterAttack(gameState.player)} | 🛡️总防御:${getCharacterDefense(gameState.player)} | 💨总灵巧:${getCharacterAgility(gameState.player)}` + centerLine() + `<div style="text-align:center;"><span style="color:#aaa;cursor:pointer;" onclick="showEquipmentPanel()">↩️ 关闭</span></div>`; UI.setDetail(html); currentPanel = 'equipment'; }
+function showEquipmentPanel() {
+    if (currentPanel === 'equipment') { clearDetailPanel(); currentPanel = null; return; }
+    const slotInfo = {
+        weapon: { name: '武器', icon: '⚔️' },
+        armor: { name: '防具', icon: '🛡️' },
+        accessory: { name: '饰品', icon: '💠' }
+    };
+    let html = makeTitle('当前装备') + `<div class="equipment-slots">`;
+    Object.keys(slotInfo).forEach(slot => {
+        const item = gameState.player.equipment[slot];
+        const equipName = item ? (item.rarity ? getEquipmentDisplayName(item) : item.name) : '尚未装备';
+        html += `<div class="equipment-slot" ${item ? `onclick="examineEquippedItem('${slot}')"` : ''}><span class="equipment-slot__icon">${slotInfo[slot].icon}</span><small>${slotInfo[slot].name}</small>`;
+        html += item ? `<span>${equipName}</span>` : `<span style="color:#596a7c;">${equipName}</span>`;
+        html += `</div>`;
+    });
+    html += `</div><div class="equipment-summary"><div>攻击<b>${getCharacterAttack(gameState.player)}</b></div><div>防御<b>${getCharacterDefense(gameState.player)}</b></div><div>灵巧<b>${getCharacterAgility(gameState.player)}</b></div></div>`;
+    html += makePanelFooter('showEquipmentPanel()', '关闭装备栏');
+    UI.setDetail(html); currentPanel = 'equipment';
+}
 
-function examineEquippedItem(slotKey) { const item = gameState.player.equipment[slotKey]; if (!item) return; const displayName = item.rarity ? getEquipmentDisplayName(item) : item.name; let html = makeTitle('装备详情') + `名称：${displayName}\n类型：${getItemTypeName(item.type)}\n`; if (item.desc) html += `描述：${item.desc}\n`; if (item.atk) html += `攻击力：+${item.atk}\n`; if (item.def) html += `防御力：+${item.def}\n`; if (item.agi) html += `灵巧：+${item.agi}\n`; html += centerLine() + `<div><span style="color:#ffaa66;text-decoration:underline;cursor:pointer;" onclick="unequipItem('${slotKey}')">⬇️ 卸下</span></div>` + `<div><span style="color:#aaa;cursor:pointer;" onclick="showEquipmentPanel()">↩️ 返回</span></div>`; UI.setDetail(html); currentPanel = 'equipped_detail'; }
+function examineEquippedItem(slotKey) {
+    const item = gameState.player.equipment[slotKey]; if (!item) return;
+    const displayName = item.rarity ? getEquipmentDisplayName(item) : item.name;
+    let html = makeTitle('装备详情') + `<div class="detail-card"><div class="detail-card__header"><span>${getItemEmoji(item)} ${displayName}</span><span class="detail-card__badge">${getItemTypeName(item.type)}</span></div>`;
+    if (item.desc) html += `<div class="detail-card__desc">${item.desc}</div>`;
+    html += `<div class="equipment-summary"><div>攻击<b>+${item.atk || 0}</b></div><div>防御<b>+${item.def || 0}</b></div><div>灵巧<b>+${item.agi || 0}</b></div></div></div>`;
+    html += `<div class="detail-action-grid"><span class="detail-action detail-action--danger" onclick="unequipItem('${slotKey}')">⬇️ 卸下装备</span></div>`;
+    html += makePanelFooter('showEquipmentPanel()', '返回装备栏', '←');
+    UI.setDetail(html); currentPanel = 'equipped_detail';
+}
 
 function unequipItem(slotKey) { const item = gameState.player.equipment[slotKey]; if (!item) return; if (item.maxHpPercent && item.maxHpPercent < 0) { gameState.player.maxHp = Math.floor(gameState.player.maxHp / (1 + item.maxHpPercent)); if (gameState.player.hp > gameState.player.maxHp) gameState.player.hp = gameState.player.maxHp; } gameState.player.inventory.push(item); gameState.player.equipment[slotKey] = null; print(`你卸下了「${item.name}」。`); checkKnightSetChange(); clearDetailPanel(); showEquipmentPanel(); }
 
-function showStatusPanel() { if (currentPanel === 'status') { clearDetailPanel(); currentPanel = null; return; } const p = gameState.player; const hpPercent = Math.floor((p.hp/p.maxHp)*100), expPercent = Math.floor((p.exp/p.maxExp)*100); let html = makeTitle('角色状态') + `<div style="text-align:center;">👤 ${p.name}</div>` + centerLine() + `❤️ 生命：${p.hp}/${p.maxHp}\n[${'█'.repeat(Math.floor(hpPercent/10))}${'░'.repeat(10-Math.floor(hpPercent/10))}] ${hpPercent}%\n` + `⚡ 技力：${p.sp||0}/${p.maxSp||0}\n` + `⚔️ 攻击：${getCharacterAttack(p)}\n🛡️ 防御：${getCharacterDefense(p)}\n💨 灵巧：${getCharacterAgility(p)}\n` + `⭐ 等级：${p.level}\n📊 经验：${p.exp}/${p.maxExp}\n[${'█'.repeat(Math.floor(expPercent/10))}${'░'.repeat(10-Math.floor(expPercent/10))}] ${expPercent}%\n` + `💰 金币：${p.gold || 0}\n` + centerLine() + `<div style="text-align:center;color:#9aabbb;font-style:italic;">多年矿场的折磨锤炼了你一身如钢铁般的肌肉。</div>` + centerLine() + `<div style="text-align:center;"><span style="color:#aaa;cursor:pointer;" onclick="showStatusPanel()">↩️ 关闭</span></div>`; UI.setDetail(html); currentPanel = 'status'; }
+function showStatusPanel() {
+    if (currentPanel === 'status') { clearDetailPanel(); currentPanel = null; return; }
+    const p = gameState.player;
+    const hpPercent = Math.max(0, Math.min(100, Math.floor((p.hp / p.maxHp) * 100)));
+    const spPercent = Math.max(0, Math.min(100, Math.floor(((p.sp || 0) / (p.maxSp || 1)) * 100)));
+    const expPercent = Math.max(0, Math.min(100, Math.floor((p.exp / p.maxExp) * 100)));
+    let html = makeTitle('角色状态');
+    html += `<div class="status-heading"><span>👤 ${p.name}</span><small>等级 ${p.level}</small></div>`;
+    html += `<div class="status-resource"><div><span>❤️ 生命</span><b>${p.hp}/${p.maxHp}</b></div><div class="status-track"><i class="status-fill status-fill--hp" style="width:${hpPercent}%"></i></div></div>`;
+    html += `<div class="status-resource"><div><span>⚡ 技力</span><b>${p.sp || 0}/${p.maxSp || 0}</b></div><div class="status-track"><i class="status-fill status-fill--sp" style="width:${spPercent}%"></i></div></div>`;
+    html += `<div class="status-resource"><div><span>📊 经验</span><b>${p.exp}/${p.maxExp}</b></div><div class="status-track"><i class="status-fill status-fill--exp" style="width:${expPercent}%"></i></div></div>`;
+    html += `<div class="status-stat-grid"><div><span>⚔️ 攻击</span><b>${getCharacterAttack(p)}</b></div><div><span>🛡️ 防御</span><b>${getCharacterDefense(p)}</b></div><div><span>💨 灵巧</span><b>${getCharacterAgility(p)}</b></div><div><span>💰 金币</span><b>${p.gold || 0}</b></div></div>`;
+    html += centerLine() + `<div class="status-note">多年矿场的折磨锤炼了你一身如钢铁般的肌肉。</div>`;
+    html += makePanelFooter('showStatusPanel()', '关闭人物详情');
+    UI.setDetail(html); currentPanel = 'status';
+}
 
 function showQuestsPanel() { if (currentPanel === 'quests') { clearDetailPanel(); currentPanel = null; return; } showQuestsTab('incomplete'); }
 
 function showQuestsTabBar(active) {
-    const t = (id, label, color) => `<span style="color:${active === id ? color : '#888'};cursor:pointer;" onclick="showQuestsTab('${id}')">${label}</span>`;
-    return `<div style="text-align:center;margin-bottom:8px;">${t('incomplete', '未完成', '#ffaa66')} | ${t('completed', '已完成', '#66ff66')} | ${t('faction', '势力任务', '#ff8844')}</div>`;
+    const t = (id, label) => `<span class="panel-tab ${active === id ? 'panel-tab--active' : ''}" onclick="showQuestsTab('${id}')">${label}</span>`;
+    return `<div class="panel-tabs">${t('incomplete', '进行中')}${t('completed', '已完成')}${t('faction', '势力任务')}</div>`;
 }
 
 function showFactionQuestsTab() {
@@ -101,11 +159,11 @@ function showFactionQuestsTab() {
     let html = makeTitle('任务日志') + showQuestsTabBar('faction') + centerLine();
     if (!f || !f.joined) {
         html += `<div style="color:#888;">你尚未加入任何势力。</div>\n`;
-        html += centerLine() + `<div style="text-align:center;"><span style="color:#aaa;cursor:pointer;" onclick="showQuestsPanel()">↩️关闭</span></div>`;
+        html += makePanelFooter('showQuestsPanel()', '关闭任务栏');
         UI.setDetail(html); currentPanel = 'quests'; return;
     }
 
-    html += `<div style="text-align:center;color:#c3b38d;">☠️ 势力：灭绝  |  名望：${f.renown || 0}  |  等级：${f.level || 1}</div>\n`;
+    html += `<div class="detail-card"><div class="detail-card__header"><span>☠️ 势力：灭绝</span><span class="detail-card__badge">等级 ${f.level || 1}</span></div><div class="equipment-summary"><div>名望<b>${f.renown || 0}</b></div><div>势力等级<b>${f.level || 1}</b></div><div>悬赏数<b>${(gameState.bountyState && gameState.bountyState.activeBounties ? gameState.bountyState.activeBounties.length : 0)}</b></div></div></div>`;
     const nextReq = (typeof FACTION_LEVEL_UP_REQUIREMENTS !== 'undefined') ? FACTION_LEVEL_UP_REQUIREMENTS[f.level + 1] : null;
     if (nextReq) html += `<div style="color:#888;">升到 ${f.level + 1} 级需要名望 ${nextReq}。</div>\n`;
     else html += `<div style="color:#888;">已达最高等级。</div>\n`;
@@ -115,27 +173,102 @@ function showFactionQuestsTab() {
     if (active.length === 0) {
         html += `<div style="color:#888;">当前没有进行中的势力悬赏。</div>\n`;
     } else {
-        html += `<div style="color:#ffaa66;font-weight:bold;">进行中的悬赏：</div>\n`;
+        html += `<div class="panel-section-label">进行中的悬赏</div><div class="quest-list">`;
         active.forEach(b => {
             const room = gameState.world[b.roomId];
             const roomName = room ? room.name : '未知';
             const roomNum = room && room.roomNumber ? ('#' + room.roomNumber + ' ') : '';
-            html += `<div style="margin:4px 0;">⭐${b.stars} ${b.name}　📍 ${roomNum}${roomName}</div>\n`;
+            html += `<div class="quest-card"><span class="quest-card__icon">⭐${b.stars}</span><span>${b.name}</span><small>📍 ${roomNum}${roomName}</small></div>`;
         });
+        html += `</div>`;
     }
 
-    html += centerLine() + `<div style="text-align:center;"><span style="color:#aaa;cursor:pointer;" onclick="showQuestsPanel()">↩️关闭</span></div>`;
+    html += makePanelFooter('showQuestsPanel()', '关闭任务栏');
     UI.setDetail(html);
     currentPanel = 'quests';
 }
 
-function showQuestsTab(tab) { if (tab === 'faction') { showFactionQuestsTab(); return; } let html = makeTitle('任务日志') + showQuestsTabBar(tab) + centerLine(); const allMainQuests = [], allSideQuests = []; const storyEngineQuests = (typeof StoryEngine !== 'undefined') ? StoryEngine.registry : new Map(); const triggeredQuestIds = new Set((typeof StoryEngine !== 'undefined') ? [...StoryEngine.activeQuests, ...StoryEngine.completedQuests] : []); storyEngineQuests.forEach((story, id) => { if (story.type !== 'main' && story.type !== 'side') return; if (!triggeredQuestIds.has(id)) return; const isCompleted = (typeof StoryEngine !== 'undefined') && StoryEngine.completedQuests.includes(id); if (tab === 'completed' && !isCompleted) return; if (tab === 'incomplete' && isCompleted) return; const questInfo = { id, name: story.name || id, description: story.description || '', type: story.type, startStory: story.startStory || [], completeStory: story.completeStory || [], conditions: story.conditions }; if (story.type === 'main') allMainQuests.push(questInfo); else allSideQuests.push(questInfo); }); const typeStyle = (type) => type === 'main' ? 'color:#ffaa66;' : 'color:#66aaff;'; const typeLabel = (type) => type === 'main' ? '📜' : '📋'; if (allMainQuests.length > 0) { html += `<div style="color:#ffaa66;font-weight:bold;">━━━ 主线任务 ━━━</div>`; allMainQuests.forEach(q => { html += `<div style="margin:4px 0;"><span style="${typeStyle(q.type)}cursor:pointer;text-decoration:underline;" onclick="showQuestDetail('${q.id}','${tab}')">${typeLabel(q.type)} ${q.name}</span></div>`; }); html += '<br>'; } if (allSideQuests.length > 0) { html += `<div style="color:#66aaff;font-weight:bold;">━━━ 支线任务 ━━━</div>`; allSideQuests.forEach(q => { html += `<div style="margin:4px 0;"><span style="${typeStyle(q.type)}cursor:pointer;text-decoration:underline;" onclick="showQuestDetail('${q.id}','${tab}')">${typeLabel(q.type)} ${q.name}</span></div>`; }); } if (allMainQuests.length === 0 && allSideQuests.length === 0) { html += `<div style="color:#888;">${tab === 'completed' ? '暂无已完成任务' : '暂无进行中的任务'}</div>`; } html += centerLine() + `<div style="text-align:center;"><span style="color:#aaa;cursor:pointer;" onclick="showQuestsPanel()">↩️关闭</span></div>`; UI.setDetail(html); currentPanel = 'quests'; }
+function showQuestsTab(tab) {
+    if (tab === 'faction') { showFactionQuestsTab(); return; }
+    let html = makeTitle('任务日志') + showQuestsTabBar(tab);
+    const allMainQuests = [], allSideQuests = [];
+    const storyEngineQuests = (typeof StoryEngine !== 'undefined') ? StoryEngine.registry : new Map();
+    const triggeredQuestIds = new Set((typeof StoryEngine !== 'undefined') ? [...StoryEngine.activeQuests, ...StoryEngine.completedQuests] : []);
+    storyEngineQuests.forEach((story, id) => {
+        if (story.type !== 'main' && story.type !== 'side') return;
+        if (!triggeredQuestIds.has(id)) return;
+        const isCompleted = (typeof StoryEngine !== 'undefined') && StoryEngine.completedQuests.includes(id);
+        if (tab === 'completed' && !isCompleted) return;
+        if (tab === 'incomplete' && isCompleted) return;
+        const questInfo = { id, name: story.name || id, description: story.description || '', type: story.type, startStory: story.startStory || [], completeStory: story.completeStory || [], conditions: story.conditions };
+        if (story.type === 'main') allMainQuests.push(questInfo); else allSideQuests.push(questInfo);
+    });
+    const renderQuestGroup = (label, quests, type) => {
+        if (quests.length === 0) return '';
+        let group = `<div class="panel-section-label">${label}</div><div class="quest-list">`;
+        quests.forEach(q => {
+            const icon = type === 'main' ? '📜' : '📋';
+            const kind = type === 'main' ? '主线' : '支线';
+            group += `<div class="quest-card ${type === 'side' ? 'quest-card--side' : ''}" onclick="showQuestDetail('${q.id}','${tab}')"><span class="quest-card__icon">${icon}</span><span>${q.name}</span><small>${kind}</small></div>`;
+        });
+        return group + `</div>`;
+    };
+    html += renderQuestGroup('主线任务', allMainQuests, 'main');
+    html += renderQuestGroup('支线任务', allSideQuests, 'side');
+    if (allMainQuests.length === 0 && allSideQuests.length === 0) html += `<div class="detail-empty detail-empty--compact">${tab === 'completed' ? '暂无已完成任务' : '暂无进行中的任务'}</div>`;
+    html += makePanelFooter('showQuestsPanel()', '关闭任务栏');
+    UI.setDetail(html); currentPanel = 'quests';
+}
 
-function showQuestDetail(questId, tab) { let story; if (typeof StoryEngine !== 'undefined') story = StoryEngine.registry.get(questId); if (!story) { const q = gameState.quests.main.find(q => q.id === questId) || gameState.quests.side.find(q => q.id === questId); if (!q) { UI.setDetail(makeTitle('错误') + '找不到任务信息'); return; } story = { name: q.name, description: q.description, type: 'main' }; } const isCompleted = (typeof StoryEngine !== 'undefined') && StoryEngine.completedQuests.includes(questId); let html = makeTitle(story.name) + `类型：${story.type === 'main' ? '主线任务' : '支线任务'}\n描述：${story.description || '(无)'}\n` + centerLine(); if (isCompleted) { if (story.startStory && story.startStory.length > 0) { html += `<div><span style="color:#ffaa66;text-decoration:underline;cursor:pointer;" onclick="replayStory('${questId}','start')">🎬 播放触发剧情</span></div>` + centerLine(); } if (story.completeStory && story.completeStory.length > 0) { html += `<div><span style="color:#ffaa66;text-decoration:underline;cursor:pointer;" onclick="replayStory('${questId}','complete')">🎬 播放完成剧情</span></div>` + centerLine(); } } if (story.conditions) { html += `<div style="color:#888;font-weight:bold;">完成条件：</div>`; if (story.conditions.type === 'single') html += `<span style="color:#aaa;">${story.conditions.label || story.conditions.condValue}</span>\n`; else if (story.conditions.type === 'composite') story.conditions.subConditions.forEach((cond, i) => { html += `<span style="color:#aaa;">${i+1}. ${cond.label || cond.item || cond.condValue}</span>\n`; }); } html += centerLine() + `<div style="text-align:center;"><span style="color:#aaa;cursor:pointer;" onclick="showQuestsTab('${tab}')">↩️返回任务列表</span></div>`; UI.setDetail(html); currentPanel = 'quest_detail'; }
+function showQuestDetail(questId, tab) {
+    let story;
+    if (typeof StoryEngine !== 'undefined') story = StoryEngine.registry.get(questId);
+    if (!story) {
+        const q = gameState.quests.main.find(q => q.id === questId) || gameState.quests.side.find(q => q.id === questId);
+        if (!q) { UI.setDetail(makeTitle('错误') + '找不到任务信息'); return; }
+        story = { name: q.name, description: q.description, type: 'main' };
+    }
+    const isCompleted = (typeof StoryEngine !== 'undefined') && StoryEngine.completedQuests.includes(questId);
+    const typeName = story.type === 'main' ? '主线任务' : '支线任务';
+    let html = makeTitle(story.name) + `<div class="detail-card"><div class="detail-card__header"><span>${story.type === 'main' ? '📜' : '📋'} ${story.name}</span><span class="detail-card__badge">${isCompleted ? '已完成' : typeName}</span></div><div class="detail-card__desc">${story.description || '暂无任务说明。'}</div></div>`;
+    if (isCompleted && ((story.startStory && story.startStory.length) || (story.completeStory && story.completeStory.length))) {
+        html += `<div class="detail-action-grid">`;
+        if (story.startStory && story.startStory.length) html += `<span class="detail-action" onclick="replayStory('${questId}','start')">🎬 触发剧情</span>`;
+        if (story.completeStory && story.completeStory.length) html += `<span class="detail-action" onclick="replayStory('${questId}','complete')">🎬 完成剧情</span>`;
+        html += `</div>`;
+    }
+    if (story.conditions) {
+        html += `<div class="panel-section-label">完成条件</div>`;
+        if (story.conditions.type === 'single') html += `<div class="quest-condition">◆ ${story.conditions.label || story.conditions.condValue}</div>`;
+        else if (story.conditions.type === 'composite') story.conditions.subConditions.forEach((cond, i) => { html += `<div class="quest-condition">${i + 1}. ${cond.label || cond.item || cond.condValue}</div>`; });
+    }
+    html += makePanelFooter(`showQuestsTab('${tab}')`, '返回任务列表', '←');
+    UI.setDetail(html); currentPanel = 'quest_detail';
+}
 
-function showSkillsPanel() { if (currentPanel === 'skills') { clearDetailPanel(); currentPanel = null; return; } let html = makeTitle('技能总览'); const playerSkills = gameState.player.skills || []; if (playerSkills.length === 0) { html += `<span style="color:#888;">暂无技能</span>\n`; } else { playerSkills.forEach(sId => { const s = skills[sId]; if (s) html += `  ▫️ <span style="color:#b7c9e2;text-decoration:underline;cursor:pointer;" onclick="showSkillDetail('${sId}')">${s.name}</span> (SP:${s.cost})\n`; }); } html += centerLine() + `<div style="text-align:center;"><span style="color:#aaa;cursor:pointer;" onclick="showSkillsPanel()">↩️ 关闭</span></div>`; UI.setDetail(html); currentPanel = 'skills'; }
+function showSkillsPanel() {
+    if (currentPanel === 'skills') { clearDetailPanel(); currentPanel = null; return; }
+    let html = makeTitle('技能总览');
+    const playerSkills = gameState.player.skills || [];
+    if (playerSkills.length === 0) html += `<div class="detail-empty detail-empty--compact">暂无技能</div>`;
+    else {
+        html += `<div class="skill-list">`;
+        playerSkills.forEach(sId => {
+            const s = skills[sId];
+            if (s) html += `<div class="skill-card" onclick="showSkillDetail('${sId}')"><div class="skill-card__top"><span>✨ ${s.name}</span><b>${s.cost} SP</b></div><p>${s.description || '暂无技能说明'}</p></div>`;
+        });
+        html += `</div>`;
+    }
+    html += makePanelFooter('showSkillsPanel()', '关闭技能栏');
+    UI.setDetail(html); currentPanel = 'skills';
+}
 
-function showSkillDetail(skillId) { const skill = skills[skillId]; if (!skill) { print("技能不存在！"); return; } let html = makeTitle('技能详情') + `名称：${skill.name}\n消耗：${skill.cost}SP\n描述：${skill.description}\n` + centerLine() + `<div style="text-align:center;"><span style="color:#aaa;cursor:pointer;" onclick="showSkillsPanel()">↩️ 返回</span></div>`; UI.setDetail(html); currentPanel = 'skill_detail'; }
+function showSkillDetail(skillId) {
+    const skill = skills[skillId]; if (!skill) { print("技能不存在！"); return; }
+    let html = makeTitle('技能详情') + `<div class="detail-card"><div class="detail-card__header"><span>✨ ${skill.name}</span><span class="detail-card__badge">消耗 ${skill.cost} SP</span></div><div class="detail-card__desc">${skill.description || '暂无技能说明。'}</div></div>`;
+    html += makePanelFooter('showSkillsPanel()', '返回技能栏', '←');
+    UI.setDetail(html); currentPanel = 'skill_detail';
+}
 
 // ★ 任务回顾剧情：手动播放 + 橙色
 function replayStory(questId, type) {

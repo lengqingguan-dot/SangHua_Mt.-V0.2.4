@@ -43,7 +43,7 @@ function pickupItem(itemId) {
         print(`你拾取了「${item.name}」。`);
     }
 
-    delete ITEM_TEMPLATES[itemId];
+    if (isDynamicItem(itemId)) delete ITEM_TEMPLATES[itemId];
     updateSceneInfo();
     StoryEngine.check();
 }

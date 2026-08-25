@@ -13,6 +13,7 @@ async function startGame() {
         ModLoader.applyToCharacters();
         ModLoader.applyToItems();
         ModLoader.applyToCorpseMap();
+        registerStaticItemTemplates();
     }
 
     // 初始化剧情引擎并注册主游戏剧情
@@ -31,6 +32,7 @@ async function loadGameFromMenu() {
         ModLoader.applyToCharacters();
         ModLoader.applyToItems();
         ModLoader.applyToCorpseMap();
+        registerStaticItemTemplates();
     }
 
     if (typeof StoryEngine !== 'undefined') {

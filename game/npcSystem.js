@@ -12,39 +12,42 @@ function showNPCInfo(npcId) {
     const npc = getCharacterInfo(npcId);
     if (!npc) { printToDetail("找不到该角色信息。"); return; }
 
-    let html = makeTitle(npc.name);
-    html += `类型：${getCharacterTypeName(npc.type)}\n`;
-    if (npc.desc) html += `\n<span style="color: #80e5ff;">${npc.desc}</span>\n`;
-    html += centerLine();
+    const isHostile = npc.hostile || npc.type === 'enemy' || npc.type === 'boss';
+    let html = makeTitle('人物详情');
+    html += `<div class="detail-card"><div class="detail-card__header"><span>👤 ${npc.name}</span><span class="detail-card__badge">${getCharacterTypeName(npc.type)}</span></div>`;
+    html += `<div class="detail-card__desc">${npc.desc || '这个人物没有留下更多可供观察的信息。'}</div></div>`;
+    html += `<div class="panel-section-label">可用行动</div><div class="detail-action-grid">`;
 
     if (npc.canTalk && npc.dialogue) {
-        html += `<div><span style="color: #aaffaa; text-decoration: underline; cursor: pointer;" onclick="talkToNPCAction('${npcId}')">💬 对话</span></div>`;
+        html += `<span class="detail-action detail-action--good" onclick="talkToNPCAction('${npcId}')">💬 对话</span>`;
     }
     if (typeof StoryEngine !== 'undefined') {
         const activeQuest = StoryEngine.findActiveQuestForNpc(npcId);
         if (activeQuest && activeQuest.questDialogue) {
-            html += `<div><span style="color: #ffaa66; text-decoration: underline; cursor: pointer;" onclick="talkToNPCQuest('${npcId}')">📋 任务对话</span></div>`;
+            html += `<span class="detail-action" onclick="talkToNPCQuest('${npcId}')">📋 任务对话</span>`;
         }
     }
     if (npc.canFight) {
-        html += `<div><span style="color: #ffaaaa; text-decoration: underline; cursor: pointer;" onclick="attackNPC('${npcId}')">⚔️ 攻击</span></div>`;
+        html += `<span class="detail-action detail-action--danger" onclick="attackNPC('${npcId}')">⚔️ 攻击</span>`;
     }
     if (npc.gender === 'female') {
-        html += `<div><span style="color: #ff66aa; text-decoration: underline; cursor: pointer;" onclick="assaultNPC('${npcId}')">🔞 侵犯</span></div>`;
+        html += `<span class="detail-action detail-action--danger" onclick="assaultNPC('${npcId}')">🔞 侵犯</span>`;
     }
     if (npc.canSlaughter) {
-        html += `<div><span style="color: #ff8844; text-decoration: underline; cursor: pointer;" onclick="slaughterNPC('${npcId}')">🔪 屠宰</span></div>`;
+        html += `<span class="detail-action detail-action--danger" onclick="slaughterNPC('${npcId}')">🔪 屠宰</span>`;
     }
     if (npc.canMilk) {
-        html += `<div><span style="color: #ff88cc; text-decoration: underline; cursor: pointer;" onclick="milkNPC('${npcId}')">💦 榨精</span></div>`;
+        html += `<span class="detail-action" onclick="milkNPC('${npcId}')">💦 榨精</span>`;
     }
     if (npc.merchantType === 'sell') {
-        html += `<div><span style="color: #ffaa00; text-decoration: underline; cursor: pointer;" onclick="showTradePanel()">💰 出售</span></div>`;
+        html += `<span class="detail-action" onclick="showTradePanel()">💰 出售</span>`;
     } else if (npc.merchantType === 'buy') {
-        html += `<div><span style="color: #ffaa00; text-decoration: underline; cursor: pointer;" onclick="showBuyPanel()">🛒 购买</span></div>`;
+        html += `<span class="detail-action" onclick="showBuyPanel()">🛒 购买</span>`;
     }
 
-    html += `<div><span style="color: #aaa; cursor: pointer;" onclick="clearDetailPanel()">↩️ 返回</span></div>`;
+    html += `</div>`;
+    if (isHostile) html += `<div class="status-note">此人物具有敌意，请谨慎选择行动。</div>`;
+    html += makePanelFooter('clearDetailPanel()', '关闭人物详情');
     currentDetailNPC = npcId;
     UI.setDetail(html);
     currentPanel = 'npc_detail';

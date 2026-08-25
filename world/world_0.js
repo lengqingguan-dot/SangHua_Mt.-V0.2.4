@@ -1261,7 +1261,7 @@ const WORLD_TEMPLATE = {
         name: "会客室",
         desc: "一间典雅的会客室，布置得极为考究。\n舒适的沙发和扶手椅围绕着壁炉摆放，茶几上放着精致的茶具。\n墙上挂着兰德尔伯爵的肖像，彰显着主人的身份。\n南侧回到走廊。",
         exits: { south: "corridor_west" },
-        items: ["sofa_set", "tea_table", "fireplace"],
+        items: [],
         npcs: []
     },
     // 卫生间
@@ -1269,7 +1269,7 @@ const WORLD_TEMPLATE = {
         name: "卫生间",
         desc: "一间干净的卫生间，设施齐全。\n大理石浴缸、铜质水龙头、洁白的瓷砖，一切都一尘不染。\n角落里放着柔软的毛巾和香皂。\n北侧回到走廊。",
         exits: { north: "corridor_west" },
-        items: ["marble_bathtub", "copper_faucet", "towel_rack"],
+        items: [],
         npcs: []
     },
     // 一层走廊北侧
@@ -1342,7 +1342,7 @@ const WORLD_TEMPLATE = {
         name: "书房",
         desc: "一间静谧的书房，四壁都是高耸的书架，摆满了各种典籍。\n宽大的书桌后面是一把皮椅，桌上放着羽毛笔和墨水。\n这里是兰德尔伯爵处理政务的地方。\n东侧回到走廊。",
         exits: { east: "second_floor_north" },
-        items: ["bookcases", "leather_chair", "writing_desk"],
+        items: [],
         npcs: []
     },
     // 三层走廊中心（从二层上来）
@@ -1358,7 +1358,7 @@ const WORLD_TEMPLATE = {
         name: "伯爵卧室",
         desc: "兰德尔伯爵的私人卧室，是整个宅邸最奢华的房间。\n巨大的四柱床上铺着天鹅绒被褥，墙上挂着昂贵的挂毯。\n一扇窗户可以俯瞰整个宅邸的花园。\n东侧回到走廊。",
         exits: { east: "third_floor_center" },
-        items: ["four_post_bed", "tapestry", "window_view"],
+        items: [],
         npcs: []
     },
     // 三层走廊北侧
@@ -1374,7 +1374,7 @@ const WORLD_TEMPLATE = {
         name: "阁楼",
         desc: "宅邸的阁楼，堆满了废弃的家具和旧物。\n灰尘在从天窗射入的光线中飞舞，空气中弥漫着陈旧的气息。\n角落里堆着几个大木箱，不知道里面装着什么。\n下方是木梯可以回到三层。",
         exits: { down: "third_floor_north" },
-        items: ["ladder_from_attic", "old_furniture", "wooden_boxes"],
+        items: ["ladder_from_attic"],
         npcs: []
     },
     // 二层走廊房间1（4号）
@@ -1390,7 +1390,7 @@ const WORLD_TEMPLATE = {
         name: "伯爵女儿卧室",
         desc: "一间温馨雅致的少女卧室，粉色的窗帘和床品透露出房间主人的年龄。\n书架上摆满了诗集和小说，梳妆台上放着几支鲜花。\n东侧回到走廊。",
         exits: { east: "second_floor_1" },
-        items: ["pink_bed", "bookshelf", "dressing_table"],
+        items: [],
         npcs: ["cecilia"]
     },
     // 二层走廊房间2（3号）
@@ -1406,7 +1406,7 @@ const WORLD_TEMPLATE = {
         name: "露台",
         desc: "一个宽敞的露台，可以俯瞰宅邸的花园和远处的山峦。\n几张藤椅和茶几摆放在这里，是享受下午茶的好地方。\n西侧回到走廊。",
         exits: { west: "second_floor_2" },
-        items: ["wicker_chairs", "tea_table_terrace"],
+        items: [],
         npcs: []
     },
     // 二层走廊房间3（2号）
@@ -1414,7 +1414,7 @@ const WORLD_TEMPLATE = {
         name: "二层走廊",
         desc: "走廊继续向南延伸，窗外可以看到宅邸的花园。\n北边是来的方向，南边继续延伸，西侧是伯爵夫人卧室，东侧是家庭教师卧室和家庭教师东侧的一扇紧锁房门。",
         exits: { north: "second_floor_2", south: "second_floor_4", west: "countess_bedroom", east: "tutor_bedroom" },
-        items: ["medium_wooden_door_countess"],
+        items: [],
         npcs: []
     },
     // 伯爵夫人卧室（2号西侧）
