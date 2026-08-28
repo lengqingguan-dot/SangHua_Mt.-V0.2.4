@@ -21,7 +21,7 @@ Object.assign(CHARACTER_TEMPLATES, {
             "还站在这里干什么？还不快去挖矿石！",
             "今天的指标还没完成，别想偷懒！"
         ],
-        level: 3,
+        level: 2,
         hp: 25,
         maxHp: 25,
         atk: 4,

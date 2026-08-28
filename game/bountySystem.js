@@ -177,30 +177,30 @@ function showBountyBoard() {
     clearDetailPanel();
     currentPanel = null;
 
+    const [minStars, maxStars] = getAvailableStars();
     let html = makeTitle('📜 悬赏板');
-    html += `<div style="text-align:center;color:#c3b38d;">灭绝势力  |  名望：${f.renown}  |  等级：${f.level}</div>\n`;
-    html += `<div style="color:#888;">等级 ${f.level} 可接星级 ${getAvailableStars()[0]}~${getAvailableStars()[1]}，本板展示 ${getDisplayableBountyCount()} 个悬赏。</div>\n`;
-    html += centerLine();
+    html += `<div class="bounty-header"><div class="bounty-header__mark">☠️</div><div><b>灭绝势力</b><small>只记录已经确认的目标</small></div><div class="bounty-rank">等级 ${f.level}</div></div>`;
+    html += `<div class="bounty-stats"><div><span>当前名望</span><b>${f.renown}</b></div><div><span>可接星级</span><b>${minStars}–${maxStars}</b></div><div><span>展示数量</span><b>${getDisplayableBountyCount()}</b></div></div>`;
 
     const hasActive = gameState.bountyState.activeBounties && gameState.bountyState.activeBounties.length > 0;
     if (hasActive) {
-        html += `<div style="color:#ffaa66;">你已有一个进行中的势力任务，完成后方可接取新任务。</div>\n`;
+        html += `<div class="bounty-notice">已有进行中的势力任务，完成后才能接取新的悬赏。</div>`;
     }
     const bounties = gameState.bountyState.lastShownBounties;
     if (bounties.length === 0) {
-        html += `<div style="color:#888;">暂时没有可接取的悬赏，可以尝试刷新。</div>\n`;
+        html += `<div class="detail-empty detail-empty--compact">暂时没有可接取的悬赏，可以尝试刷新。</div>`;
     } else {
+        html += `<div class="panel-section-label">可接取悬赏</div><div class="bounty-list">`;
         bounties.forEach(bounty => {
-            const btn = hasActive
-                ? `<span style="color:#888;">📋 接取</span>`
-                : `<span style="color:#ffaa00;cursor:pointer;text-decoration:underline;" onclick="acceptBountyFromBoard('${bounty.id}')">📋 接取</span>`;
-            html += `<div style="margin:6px 0;">⭐${bounty.stars} ${bounty.name}　${btn}</div>\n`;
+            const starText = '★'.repeat(bounty.stars);
+            const clickAttr = hasActive ? '' : `onclick="acceptBountyFromBoard('${bounty.id}')"`;
+            html += `<div class="bounty-card ${hasActive ? 'bounty-card--disabled' : ''}" ${clickAttr}><div class="bounty-card__stars">${starText}</div><div class="bounty-card__name">${bounty.name}</div><div class="bounty-card__action">${hasActive ? '暂不可接' : '接取 ›'}</div></div>`;
         });
+        html += `</div>`;
     }
 
-    html += centerLine();
-    html += `<div><span style="color:#6688ff;cursor:pointer;text-decoration:underline;" onclick="refreshBountyBoard()">↩️ 刷新（1名望）</span></div>\n`;
-    html += `<div><span style="color:#aaa;cursor:pointer;" onclick="clearDetailPanel()">↩️ 返回</span></div>\n`;
+    html += `<div class="bounty-toolbar"><button type="button" onclick="refreshBountyBoard()" ${hasActive ? 'disabled' : ''}>⟳ 刷新悬赏 <small>消耗1名望</small></button></div>`;
+    html += makePanelFooter('clearDetailPanel()', '关闭悬赏板');
     UI.setDetail(html);
     currentPanel = 'bounty_board';
 }

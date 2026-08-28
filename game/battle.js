@@ -3,9 +3,6 @@
 //  回合制普攻 + 实时技能 + 盟友/敌方双阵营 + 即时尸体 + 逃跑/后台战斗
 // ============================================================
 
-// 逃跑敏捷判定系数（玩家Agi >= 敌方平均Agi * 该系数）
-const FLEE_AGI_FACTOR = 0.7;
-
 // 后台盟友战斗回合间隔（毫秒）
 const BACKGROUND_BATTLE_TICK = 2000;
 
@@ -107,10 +104,12 @@ function buildBattleEnemy(npcId, index) {
     if (!npc) return null;
     return {
         index, npcId, name: npc.name,
-        currentHp: npc.hp, maxHp: npc.hp,
+        currentHp: npc.hp, maxHp: npc.maxHp,
         sp: npc.sp || 0, maxSp: npc.maxSp || 0,
         atk: npc.atk, def: npc.def, agi: getCharacterAgility(npc),
         drops: npc.drops ? [...npc.drops] : [], exp: npc.exp || 0,
+        level: npc.level || 1, enemySkill: npc.enemySkill || null,
+        baseAtk: npc.atk, baseDef: npc.def, baseAgi: getCharacterAgility(npc),
         _ally: false, _dead: false, _corpseSpawned: false,
         _corpseSeq: _corpseSeqCounter++
     };
@@ -297,14 +296,34 @@ function _spawnCorpseForUnit(unit, silent = false, log, roomId) {
     if (unit._corpseSpawned) return;
     unit._corpseSpawned = true;
 
+    if (unit._magicDoll) {
+        const message = '拼合魔偶失去支撑，十二件肢体在紫色丝线中崩解并被魔偶之心收回。';
+        if (!silent) print(`<span style="color:#9b80b8;">${message}</span>`);
+        else if (log) log.push(message);
+        return;
+    }
+
     const targetRoomId = roomId || battleState.roomId || gameState.player.location;
     const room = gameState.world[targetRoomId];
     if (!room) return;
     if (!room.items) room.items = [];
 
     const npcId = unit.npcId;
+    if (npcId === 'mad_female_mage') {
+        if (!silent) print(`<span style="color:#bb77ff;">疯魔的女魔法师发出一声空洞的叹息，身体随即化为一阵紫黑雾气消失。</span>`);
+        const crystal = createItemFromTemplate('mage_crystal');
+        if (crystal) {
+            crystal.id = `mage_crystal_${Date.now()}_${unit._corpseSeq}`;
+            ITEM_TEMPLATES[crystal.id] = crystal;
+            room.items.push(crystal.id);
+            if (!silent) print(`<span style="color:#cc66ff;">雾气散去后，地面留下了史诗级道具「魔法师结晶」。</span>`);
+        }
+        if (typeof unlockAcademyDungeonExit === 'function') unlockAcademyDungeonExit();
+        if (!silent) _refreshSceneAfterBattleChange();
+        return;
+    }
     // 瑟蕾娜保留特殊演出：化为紫雾，不生成尸体
-    if (npcId === 'serena') return;
+    if (npcId === 'serena' || npcId === 'serena_quiet') return;
 
     let corpse = null;
     const corpseId = `corpse_${npcId}_${Date.now()}_${unit._corpseSeq}`;
@@ -318,6 +337,8 @@ function _spawnCorpseForUnit(unit, silent = false, log, roomId) {
         corpse = (typeof generateGenericFemaleCorpse === 'function') ? generateGenericFemaleCorpse('女贫民') : null;
     } else if (npcId === 'peasant_male') {
         corpse = (typeof generatePeasantMaleCorpse === 'function') ? generatePeasantMaleCorpse() : null;
+    } else if (npcId === 'female_mage') {
+        corpse = (typeof generateFemaleMageCorpse === 'function') ? generateFemaleMageCorpse() : null;
     } else if (npcId.indexOf('bounty_female_serf') === 0) {
         corpse = (typeof generateFemaleSerfCorpse === 'function') ? generateFemaleSerfCorpse() : null;
     } else if (npcId.indexOf('bounty_') === 0) {
@@ -422,6 +443,13 @@ function _pruneDefeatedGuardNpcs(defeatedNpcIds) {
 
 // 扣除HP并触发即时死亡处理
 function _applyDamageToUnit(unit, damage, silent = false, log, roomId) {
+    if (unit.magicBarrier > 0) {
+        const absorbed = Math.min(unit.magicBarrier, damage);
+        unit.magicBarrier -= absorbed;
+        damage -= absorbed;
+        if (!silent) print(`<span style="color:#aa88ff;">魔力屏障吸收了 ${absorbed} 点伤害。</span>`);
+        else if (log) log.push(`魔力屏障吸收了 ${absorbed} 点伤害。`);
+    }
     unit.currentHp = Math.max(0, unit.currentHp - damage);
     if (unit.currentHp <= 0) {
         _settleUnitDeath(unit, silent, log, roomId);
@@ -452,6 +480,12 @@ function renderSkillButtons() {
 // 战斗详情：技能 + 敌人（红）（盟友改由左侧「周围可见」显示）
 function renderBattleDetail() {
     let html = renderSkillButtons();
+
+    const doll = (battleState.allies || []).find(ally => ally._magicDoll && ally.currentHp > 0 && !ally._dead);
+    if (doll) {
+        const hpPercent = Math.max(0, Math.min(100, Math.round((doll.currentHp / doll.maxHp) * 100)));
+        html += `<div class="battle-doll-status"><div><span>💜 ${allyNameHtml(doll.name)}</span><b>${doll.currentHp}/${doll.maxHp}</b></div><div class="status-track"><i class="status-fill status-fill--sp" style="width:${hpPercent}%"></i></div><small>攻击 ${doll.atk} · 防御 ${doll.def} · 灵巧 ${doll.agi}</small></div>`;
+    }
 
     html += '<h3>敌人</h3>';
     const enemies = battleState.enemies.filter(e => e.currentHp > 0 && !e._dead);
@@ -545,6 +579,13 @@ function startMultiBattle(npcIds) {
         originalPlayerStats: { atk: gameState.player.atk, def: gameState.player.def, agi: gameState.player.agi },
         fleeAttemptedThisRound: false
     };
+    if (typeof buildMagicDollBattleAlly === 'function') {
+        const magicDoll = buildMagicDollBattleAlly(battleState.allies.length);
+        if (magicDoll) {
+            battleState.allies.push(magicDoll);
+            print(`<span style="color:#cc99ff;">💜 魔偶之心开始搏动，完整组装的拼合魔偶在你身旁苏醒并加入战斗！</span>`);
+        }
+    }
     document.body.classList.add('battle-mode');
 
     initCastleReinforcement(gameState.player.location);
@@ -591,11 +632,18 @@ function startNewRound() {
     battleState.fleeAttemptedThisRound = false;
 
     battleState.enemies.forEach(enemy => {
+        if (enemy.skillCooldown > 0) enemy.skillCooldown--;
+        if (enemy.barrierExpiresAtRound && battleState.round >= enemy.barrierExpiresAtRound) {
+            enemy.magicBarrier = 0;
+            enemy.def = enemy.baseDef;
+            delete enemy.barrierExpiresAtRound;
+            print(`<span style="color:#888;">${enemyNameHtml(enemy.name)}周围的魔力屏障崩解了。</span>`);
+        }
         if (enemy.npcId === 'andros' && enemy.divineBlessingTurns !== undefined && enemy.divineBlessingTurns > 0) {
             enemy.divineBlessingTurns--;
             if (enemy.divineBlessingTurns <= 0) {
                 print(`<span style="color: #888;">安德罗斯身上的神恩光芒消散了，属性恢复到原有水平。</span>`);
-                enemy.atk = 10; enemy.def = 10; enemy.agi = 10;
+                enemy.atk = enemy.baseAtk; enemy.def = enemy.baseDef; enemy.agi = enemy.baseAgi;
             }
         }
     });
@@ -668,7 +716,9 @@ function executeAllyTurn(allyIndex) {
 
     const target = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
     print(`<span style="color:#66ff66;">→ ${allyNameHtml(ally.name)} 的回合</span>`);
-    print(`${allyNameHtml(ally.name)} 挥舞武器，攻击 ${enemyNameHtml(target.name)}！`);
+    print(ally._magicDoll
+        ? `${allyNameHtml(ally.name)}在魔力丝线牵引下扑向 ${enemyNameHtml(target.name)}！`
+        : `${allyNameHtml(ally.name)} 挥舞武器，攻击 ${enemyNameHtml(target.name)}！`);
 
     if (tryDodge(target.agi)) {
         print(`${allyNameHtml(ally.name)} 的攻击被 ${enemyNameHtml(target.name)} 闪避了！`);
@@ -688,6 +738,17 @@ function executeEnemyTurn(enemyIndex) {
     const enemy = battleState.enemies[enemyIndex];
     if (!enemy || enemy.currentHp <= 0 || enemy._dead) { executeNextTurn(); return; }
     if (gameState.player.hp <= 0) { battleEnd(false); return; }
+
+    if (tryUseAcademyEnemySkill(enemy)) {
+        if (gameState.player.hp <= 0) {
+            print(`<span style="color: #ff6666;">你倒下了...</span>`);
+            setTimeout(() => battleEnd(false), 1000);
+            return;
+        }
+        if (UI.elements.detailPanel) UI.setDetail(renderBattleDetail());
+        setTimeout(() => executeNextTurn(), 1200);
+        return;
+    }
 
     if (enemy.npcId === 'slum_girl') {
         // 曼德罗拉：先手时发动「穿喉」，一击必杀、无视护甲
@@ -814,7 +875,7 @@ function battleEnd(playerWon) {
             if (!npc) return;
             defeatedEnemies.push(enemy.npcId);
 
-            if (enemy.npcId === 'serena') {
+            if (enemy.npcId === 'serena' || enemy.npcId === 'serena_quiet') {
                 print(`<span style="color: #cc66ff;">"既然如此，就送你个宝贝。"</span>`);
                 print(`<span style="color: #cc66ff;">瑟蕾娜的身躯化为一团紫雾...</span>`);
                 if (enemy.drops?.length > 0 && room) {
@@ -892,32 +953,40 @@ function _cleanupBattleState() {
 function tryFlee(direction) {
     if (!battleState.inBattle) return;
 
-    if (battleState.fleeAttemptedThisRound) {
-        print(`<span style="color: #ffaaaa;">你刚才已经尝试过逃跑，这一回合无法再试了！</span>`);
-        return;
-    }
-    battleState.fleeAttemptedThisRound = true;
-
     const room = gameState.world[gameState.player.location];
-    if (!room) return;
+    if (!room) {
+        print(`<span style="color:#ff8888;">当前房间数据异常，无法选择逃跑方向。</span>`);
+        return false;
+    }
 
     const dirMap = { 'n': 'north', 's': 'south', 'e': 'east', 'w': 'west', 'north': 'north', 'south': 'south', 'east': 'east', 'west': 'west' };
     const fullDir = dirMap[direction];
     const targetRoomId = fullDir && room.exits[fullDir];
-    if (!targetRoomId || !gameState.world[targetRoomId]) return;
+    if (!targetRoomId || !gameState.world[targetRoomId]) {
+        print(`<span style="color:#ff8888;">这个方向没有可以逃离的道路。</span>`);
+        return false;
+    }
+    if (battleState.fleeAttemptedThisRound) {
+        print(`<span style="color: #ffaaaa;">本回合已经尝试过逃跑，请等待下一回合！</span>`);
+        return false;
+    }
+    battleState.fleeAttemptedThisRound = true;
 
     const aliveEnemies = battleState.enemies.filter(e => e.currentHp > 0 && !e._dead);
     const aliveAllies = (battleState.allies || []).filter(a => a.currentHp > 0 && !a._dead);
+    const backgroundAllies = aliveAllies.filter(ally => !ally._magicDoll);
 
-    // 敏捷判定：玩家Agi >= 敌方平均Agi * 系数
+    // 敏捷判定：基础55%，每点敏捷差修正5%，最终限制在20%—90%。
     const avgEnemyAgi = aliveEnemies.length
         ? aliveEnemies.reduce((sum, e) => sum + (e.agi || 0), 0) / aliveEnemies.length
         : 0;
     const playerAgi = getCharacterAgility(gameState.player);
+    const fleeChance = Math.max(0.2, Math.min(0.9, 0.55 + (playerAgi - avgEnemyAgi) * 0.05));
+    const fleeRoll = Math.random();
 
-    if (playerAgi < avgEnemyAgi * FLEE_AGI_FACTOR) {
-        print(`<span style="color: #ff8888;">你试图逃跑，但被敌人拦住了！</span>`);
-        return;
+    if (fleeRoll >= fleeChance) {
+        print(`<span style="color: #ff8888;">你试图向${({ north: '北', south: '南', east: '东', west: '西' })[fullDir]}方逃跑，但被敌人拦住了！（成功率 ${Math.round(fleeChance * 100)}%，下一回合可再次尝试）</span>`);
+        return false;
     }
 
     const dirChinese = { north: '北', south: '南', east: '东', west: '西' };
@@ -928,19 +997,22 @@ function tryFlee(direction) {
     const bg = {
         roomId: gameState.player.location,
         enemies: JSON.parse(JSON.stringify(aliveEnemies)),
-        allies: JSON.parse(JSON.stringify(aliveAllies)),
-        allyCount: aliveAllies.length,
+        allies: JSON.parse(JSON.stringify(backgroundAllies)),
+        allyCount: backgroundAllies.length,
         round: battleState.round,
         log: [],
-        status: aliveAllies.length > 0 ? 'pending' : 'allies_defeat'
+        status: backgroundAllies.length > 0 ? 'pending' : 'allies_defeat'
     };
     gameState.backgroundBattles[bg.roomId] = bg;
 
-    if (aliveAllies.length > 0) {
+    if (backgroundAllies.length > 0) {
         print(`<span style="color:#888;">${allyNameHtml('你的盟友')}仍留在原地与敌人缠斗……</span>`);
         ensureBackgroundBattleLoop();
     } else {
         bg.log.push(`【仇恨记录】你逃离了战斗，敌人仍盘踞在房间中等待复仇。`);
+    }
+    if (aliveAllies.some(ally => ally._magicDoll)) {
+        print(`<span style="color:#9b80b8;">拼合魔偶化作紫色丝线，随魔偶之心一同撤离。</span>`);
     }
 
     // 清理当前战斗状态，不结算经验/掉落
@@ -963,6 +1035,7 @@ function tryFlee(direction) {
     // 目标房间可能触发新的敌对遭遇与剧情
     checkHostileNPCs(targetRoomId);
     StoryEngine.check();
+    return true;
 }
 
 // ============================================================
@@ -1151,4 +1224,42 @@ function _resumeBattleFromBackground(bg) {
     initCastleReinforcement(battleState.roomId);
     if (UI.elements.detailPanel) { UI.setDetail(renderBattleDetail()); }
     setTimeout(() => startNewRound(), 800);
+}
+
+function dealAcademyMagicDamage(enemy, multiplier, defenseIgnore, skillName) {
+    const playerDef = getCharacterDefense(gameState.player);
+    const effectiveDef = Math.floor(playerDef * (1 - defenseIgnore));
+    const raw = Math.floor(enemy.atk * multiplier * (0.9 + Math.random() * 0.2));
+    const damage = Math.max(1, raw - effectiveDef);
+    gameState.player.hp = Math.max(0, gameState.player.hp - damage);
+    print(`<span style="color:#bb77ff;">${enemyNameHtml(enemy.name)}施放「${skillName}」，对你造成 ${damage} 点魔法伤害！</span>`);
+}
+
+function tryUseAcademyEnemySkill(enemy) {
+    if (enemy.npcId === 'female_mage' && enemy.sp >= 10 && Math.random() < 0.35) {
+        print(`<span style="color: #ffaaaa;">→ ${enemyNameHtml(enemy.name)} 的回合</span>`);
+        enemy.sp -= 10;
+        dealAcademyMagicDamage(enemy, 1.4, 0.3, '奥术飞弹');
+        return true;
+    }
+    if (enemy.npcId !== 'mad_female_mage') return false;
+
+    if (!enemy.barrierUsed && enemy.currentHp <= enemy.maxHp * 0.5 && enemy.sp >= 30) {
+        print(`<span style="color: #ffaaaa;">→ ${enemyNameHtml(enemy.name)} 的回合</span>`);
+        enemy.sp -= 30;
+        enemy.barrierUsed = true;
+        enemy.magicBarrier = 80;
+        enemy.def = enemy.baseDef + 6;
+        enemy.barrierExpiresAtRound = battleState.round + 3;
+        print(`<span style="color:#aa88ff;">${enemyNameHtml(enemy.name)}施放「失控屏障」：获得 80 点护盾，防御提高 6 点，持续三回合。</span>`);
+        return true;
+    }
+    if ((!enemy.skillCooldown || enemy.skillCooldown <= 0) && enemy.sp >= 20) {
+        print(`<span style="color: #ffaaaa;">→ ${enemyNameHtml(enemy.name)} 的回合</span>`);
+        enemy.sp -= 20;
+        enemy.skillCooldown = 3;
+        dealAcademyMagicDamage(enemy, 1.6, 0.2, '魔力震爆');
+        return true;
+    }
+    return false;
 }

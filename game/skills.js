@@ -74,7 +74,7 @@ const skills = {
 
             const playerAtk = getCharacterAttack(gameState.player);
             const damage = calculateDamage(playerAtk, targetEnemy.def);
-            targetEnemy.currentHp = Math.max(0, targetEnemy.currentHp - damage);
+            _applyDamageToUnit(targetEnemy, damage, false, null, battleState.roomId || gameState.player.location);
             print(`<span style="color: #ff8844;">你对${enemyNameHtml(targetEnemy.name)}舍身一击，造成${damage}点伤害！</span>`);
 
             battleState.sacrificeCooldown = 3;
@@ -116,16 +116,16 @@ const skills = {
     // ★ 安德罗斯技能：神恩
     andros_divine_blessing: {
         name: "神恩",
-        description: "安德罗斯获得神之恩赐，三回合内攻击力、防御力、灵巧提升至500",
+        description: "安德罗斯获得神之恩赐，三回合内攻击力、防御力、灵巧提高50%",
         cost: 30,
         npcOnly: true,
         isBuff: true,
         effect: function(caster) {
-            caster.atk = 500;
-            caster.def = 500;
-            caster.agi = 500;
+            caster.atk = Math.round(caster.baseAtk * 1.5);
+            caster.def = Math.round(caster.baseDef * 1.5);
+            caster.agi = Math.round(caster.baseAgi * 1.5);
             caster.divineBlessingTurns = 3;
-            print(`<span style="color: #ffdd44;">${enemyNameHtml(caster.name)}释放了「神恩」！攻击力、防御力、灵巧提升至500（持续三回合）！</span>`);
+            print(`<span style="color: #ffdd44;">${enemyNameHtml(caster.name)}释放了「神恩」！攻击力、防御力、灵巧提高50%（持续三回合）！</span>`);
             return true;
         }
     },

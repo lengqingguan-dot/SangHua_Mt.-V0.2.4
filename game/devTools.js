@@ -121,7 +121,14 @@ const ROOM_ID_MAP = {
     319: 'count_command_room',
     320: 'dungeon_2',              321: 'dungeon_3',
     322: 'dungeon_4',
-    323: 'castle_rooftop'
+    323: 'castle_rooftop',
+    324: 'wasteland',            325: 'wasteland_trail',
+    326: 'wasteland_hollow',     327: 'hidden_path_3',
+    328: 'hidden_path_4',        329: 'hidden_path_5',
+    330: 'hidden_path_6',        331: 'hidden_path_n1',
+    332: 'hidden_path_n2',       333: 'mysterious_stone_gate',
+    334: 'quiet_clearing',       335: 'quiet_hut_floor1',
+    336: 'quiet_hut_floor2',     337: 'quiet_stable'
 };
 
 // 由 ROOM_ID_MAP 自动生成的反向映射: roomId → 编号

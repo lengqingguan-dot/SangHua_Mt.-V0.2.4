@@ -5,6 +5,27 @@
 
 const SLUM_QUEST_ID = 'quest_slum_district';
 
+const MANDOROLA_HIDDEN_DESC = "一个瘦小的女孩，细瘦的手还沾着灰。她把一根粗大的铁栓插回活板门后，才缓缓转过身看着你。";
+const MANDOROLA_REVEALED_DESC = "曼德罗拉是个格外好看的年轻女孩。她有一头浓密而顺直的黑色长发，几乎垂到腿弯，发梢参差地扫过黑衣，像是从出生起便从未认真修剪过。那张脸清秀而苍白，下颌线细巧，鼻梁挺直；一双罕见的金色瞳孔在昏暗地道里仍显得明亮，像两点藏在阴影中的烛火。她身形瘦小，贴身黑衣和灰扑扑的绑腿让动作显得格外轻捷，握刀的手指却留着常年训练磨出的薄茧。即使安静站着，她也始终微微侧身，将匕首藏在最顺手的位置，漂亮的外表下透着与年龄不相称的警惕与冷静。";
+
+function resetMandorolaIdentity() {
+    const mandorola = CHARACTER_TEMPLATES['slum_girl'];
+    if (!mandorola) return;
+    mandorola.name = '女孩';
+    mandorola.desc = MANDOROLA_HIDDEN_DESC;
+}
+
+function revealMandorolaIdentity() {
+    const mandorola = CHARACTER_TEMPLATES['slum_girl'];
+    if (!mandorola) return;
+    mandorola.name = '曼德罗拉';
+    mandorola.desc = MANDOROLA_REVEALED_DESC;
+    if (typeof gameState !== 'undefined') {
+        if (!gameState.gameFlags) gameState.gameFlags = {};
+        gameState.gameFlags.mandorolaIntroduced = true;
+    }
+}
+
 // 在房间165（residence_w2）生成任务相关NPC（避免重复）
 function spawnSlumNpcs() {
     const room = gameState.world['residence_w2'];
@@ -293,6 +314,8 @@ function mandorolaIntro() {
         ],
         color: '#ff8844', useNextBtn: true, requireOverlay: true,
         onComplete: () => {
+            revealMandorolaIdentity();
+            if (typeof updateSceneInfo === 'function') updateSceneInfo();
             print(`<span style="color:#ffaa66;">你感到刀刃贴着自己的喉咙，要怎么做？</span>`);
             print(`<span style="color:#ff6666;text-decoration:underline;cursor:pointer;" onclick="mandorolaResist()">⚔️ 反抗</span>`);
             print(`<span style="color:#aaffaa;text-decoration:underline;cursor:pointer;" onclick="mandorolaAgree()">👍 同意</span>`);
@@ -323,7 +346,7 @@ function mandorolaResist() {
 function mandorolaAgree() {
     clearDetailPanel(); currentPanel = null;
 
-    if (CHARACTER_TEMPLATES['slum_girl']) CHARACTER_TEMPLATES['slum_girl'].name = '曼德罗拉';
+    revealMandorolaIdentity();
     moveNpcToRoom('slum_girl', 'slum_tunnel_n4');
 
     const story = StoryEngine.registry.get(SLUM_QUEST_ID);

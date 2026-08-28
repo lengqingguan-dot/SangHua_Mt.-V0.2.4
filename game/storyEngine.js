@@ -301,7 +301,7 @@ const StoryEngine = {
                     const item = createItemFromTemplate(story.rewards.item);
                     if (item) {
                         gameState.player.inventory.push(item);
-                        print(`<span style="color: #aaffaa;">获得 ${item.name}</span>`);
+                        print(`<span style="color: #aaffaa;">获得 ${getInventoryDisplayName(item)}</span>`);
                     }
                 }
             }
@@ -396,7 +396,7 @@ const StoryEngine = {
             const item = createItemFromTemplate(rewards.item);
             if (item) {
                 gameState.player.inventory.push(item);
-                print(`<span style="color: #aaffaa;">获得 ${item.name}</span>`);
+                print(`<span style="color: #aaffaa;">获得 ${getInventoryDisplayName(item)}</span>`);
             }
         }
     },

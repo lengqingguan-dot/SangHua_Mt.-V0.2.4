@@ -14,6 +14,12 @@ function look() {
         }
     }
 
+    // 所有移动、传送和场景入口最终都会调用 look()；在这里统一记录
+    // 魔镜传送点，确保只有玩家首次亲自抵达后才会解锁。
+    if (typeof recordMirrorDestinationVisit === 'function') {
+        recordMirrorDestinationVisit(loc);
+    }
+
     // 进入房间时检查是否存在后台战斗记录（盟友后续或仇恨恢复）
     if (typeof maybeResumeOrReportBackgroundBattle === 'function' && !battleState.inBattle) {
         if (maybeResumeOrReportBackgroundBattle(loc)) {
@@ -159,12 +165,18 @@ function updateSceneInfo() {
             const item = itemMap[key];
             const itemId = item.id;
             const emoji = getItemEmoji(item);
-            const nameHtml = item.type === 'limb' && item.rarity ? getLimbDisplayName(item) : item.name;
+            const thumbnailScaleStyle = item.thumbnailScale ? ` style="--item-thumbnail-scale:${item.thumbnailScale}"` : '';
+            const itemVisual = item.thumbnail
+                ? `<img class="scene-entry__thumbnail" src="${item.thumbnail}" alt="" loading="lazy"${thumbnailScaleStyle}${item.thumbnailCutout ? ` onload="applyCutoutThumbnail(this)"` : ''}>`
+                : `<span class="scene-entry__emoji">${emoji}</span>`;
+            const nameHtml = item.id === 'red_banner'
+                ? getInventoryDisplayName(item)
+                : (item.type === 'limb' && item.rarity ? getLimbDisplayName(item) : item.name);
             const displayName = count > 1 ? `${nameHtml}×${count}` : nameHtml;
             const isUnpickupable = item.notPickable || false;
             const itemClass = isUnpickupable ? 'scene-entry--muted' : 'scene-entry--object';
             const itemLabel = isUnpickupable ? '场景设施' : '地面物品';
-            html += `<div class="scene-entry ${itemClass}" onclick="showGroundItemInfo('${itemId}')"><span>${emoji} ${displayName}</span><small>${itemLabel} · 点击查看</small></div>`;
+            html += `<div class="scene-entry ${itemClass}" onclick="showGroundItemInfo('${itemId}')"><div class="scene-entry__main">${itemVisual}<span class="scene-entry__name">${displayName}</span></div><small>${itemLabel} · 点击查看</small></div>`;
         });
 
         const hasIronLock = room.items && room.items.some(id => id === 'iron_lock' || (getItemInfoById(id) && getItemInfoById(id).id === 'iron_lock'));

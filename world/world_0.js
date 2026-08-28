@@ -686,7 +686,7 @@ const WORLD_TEMPLATE = {
         name: "山路尽头",
         desc: "山路的尽头，一片开阔的野地展现在眼前。\n你已经远离了桑华山，矿场的围墙消失在夜色中。\n这里是你逃离的最后一站，也是新生活的起点。\n北边是来的路，前方是未知的自由。",
         exits: { north: "mountain_path_13" },
-        items: [],
+        items: ["karen_town"],
         npcs: [],
         isEnding: true
     },

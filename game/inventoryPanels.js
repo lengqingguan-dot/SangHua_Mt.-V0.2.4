@@ -12,15 +12,92 @@ function showInventoryPanel() {
     UI.setDetail(html); currentPanel = 'inventory';
 }
 
+const LIMB_INVENTORY_OWNERS = [
+    { id: 'cecilia', name: '塞西莉亚', prefixes: ['cecilia'] },
+    { id: 'isabella', name: '伊莎贝拉', prefixes: ['isabella'] },
+    { id: 'liana', name: '莉娅娜', prefixes: ['liana'] },
+    { id: 'huasha', name: '华沙', prefixes: ['huasha'] },
+    { id: 'elaine', name: '艾琳', prefixes: ['elaine'] },
+    { id: 'mandorola', name: '曼德罗拉', prefixes: ['mandorola'] },
+    { id: 'aisha', name: '艾莎', prefixes: ['aisha'] },
+    { id: 'sophie', name: '索菲', prefixes: ['sophie'] },
+    { id: 'elena', name: '艾莲娜', prefixes: ['elena'] },
+    { id: 'serena', name: '瑟蕾娜', prefixes: ['serena'] },
+    { id: 'mara', name: '玛拉', prefixes: ['mara'] },
+    { id: 'other', name: '其他', prefixes: [] }
+];
+
+function isLimbInventoryItem(item) {
+    return !!item && (item.type === 'limb' || item.id.includes('corpse') || item.story || item.ingredientType || item.dismemberable || item.milkItem);
+}
+
+function getLimbInventoryOwnerId(item) {
+    const id = String(item && item.id || '').toLowerCase();
+    for (const owner of LIMB_INVENTORY_OWNERS) {
+        if (owner.id === 'other') continue;
+        if (owner.prefixes.some(prefix => id === `${prefix}_corpse` || id.startsWith(`${prefix}_`) || id.startsWith(`corpse_${prefix}_`))) return owner.id;
+    }
+    return 'other';
+}
+
+function getOwnedLimbGroups(items) {
+    const grouped = new Map(LIMB_INVENTORY_OWNERS.map(owner => [owner.id, { ...owner, items: [] }]));
+    items.forEach(item => grouped.get(getLimbInventoryOwnerId(item)).items.push(item));
+    return LIMB_INVENTORY_OWNERS.map(owner => grouped.get(owner.id)).filter(group => group.items.length > 0);
+}
+
+function getInventoryEntryStackKey(item) {
+    const equipmentTypes = ['weapon', 'armor', 'accessory'];
+    if (equipmentTypes.includes(item.type)) {
+        return [item.id, item.rarity || '', item.score ?? '', item.atk ?? '', item.def ?? '', item.agi ?? ''].join('::');
+    }
+    if (isLimbInventoryItem(item)) return getItemStackKey(item);
+    return [getItemStackKey(item), item.effect || '', item.value ?? ''].join('::');
+}
+
+function groupInventoryEntries(items) {
+    const groups = [];
+    const byKey = new Map();
+    items.forEach(item => {
+        const key = getInventoryEntryStackKey(item);
+        let group = byKey.get(key);
+        if (!group) {
+            group = { key, item, count: 0 };
+            byKey.set(key, group);
+            groups.push(group);
+        }
+        group.count++;
+    });
+    return groups;
+}
+
 function renderInventoryEntries(items, emptyText) {
     if (!items || items.length === 0) return `<div class="detail-empty detail-empty--compact">${emptyText}</div>`;
     let html = `<div class="inventory-grid">`;
-    items.forEach(item => {
+    groupInventoryEntries(items).forEach(({ item, key, count }) => {
         const displayName = getInventoryDisplayName(item);
         const itemType = getItemTypeName(item.type);
-        html += `<div class="inventory-entry" onclick="examineItemFromPanel('${item.id}')"><span class="inventory-entry__icon">${getItemEmoji(item)}</span><span class="inventory-entry__name">${displayName}</span><small>${itemType}</small></div>`;
+        const stackKey = encodeURIComponent(key).replace(/'/g, '%27');
+        const countLabel = count > 1 ? `<span class="inventory-entry__count">×${count}</span>` : '';
+        html += `<div class="inventory-entry" onclick="examineItemFromPanel('${item.id}','${stackKey}')"><span class="inventory-entry__icon">${getInventoryItemVisual(item)}</span><span class="inventory-entry__name">${displayName}${countLabel}</span><small>${itemType}</small></div>`;
     });
     return html + `</div>`;
+}
+
+function getInventoryItemVisual(item) {
+    if (item && item.thumbnail) {
+        const scaleStyle = item.thumbnailScale ? ` style="--item-thumbnail-scale:${item.thumbnailScale}"` : '';
+        return `<img class="inventory-entry__thumbnail" src="${item.thumbnail}" alt="" loading="lazy"${scaleStyle}${item.thumbnailCutout ? ` onload="applyCutoutThumbnail(this)"` : ''}>`;
+    }
+    return getItemEmoji(item);
+}
+
+function getItemDetailHeading(item, displayName) {
+    const scaleStyle = item && item.thumbnailScale ? ` style="--item-thumbnail-scale:${item.thumbnailScale}"` : '';
+    const visual = item && item.thumbnail
+        ? `<img class="item-detail-heading__thumbnail" src="${item.thumbnail}" alt="" loading="lazy"${scaleStyle}${item.thumbnailCutout ? ` onload="applyCutoutThumbnail(this)"` : ''}>`
+        : `<span class="item-detail-heading__emoji">${getItemEmoji(item)}</span>`;
+    return `<span class="item-detail-heading">${visual}<span>${displayName}</span></span>`;
 }
 
 function generateInventoryCategoryMenu(active = 'all') {
@@ -34,6 +111,7 @@ function generateInventoryCategoryMenu(active = 'all') {
 }
 
 function showInventoryCategory(category) {
+    if (category === 'limb') { showInventoryLimbCategory(); return; }
     const categoryName = category === 'consumable' ? '消耗品' : category === 'important' ? '重要道具' : category === 'limb' ? '肢体' : '杂物';
     let html = makeTitle(`行囊物品 - ${categoryName}`);
     html += generateInventoryCategoryMenu(category);
@@ -50,6 +128,27 @@ function showInventoryCategory(category) {
     UI.setDetail(html); currentPanel = 'inventory';
 }
 
+function showInventoryLimbCategory(activeOwnerId = '') {
+    const limbItems = gameState.player.inventory.filter(isLimbInventoryItem);
+    const groups = getOwnedLimbGroups(limbItems);
+    let html = makeTitle('行囊物品 - 肢体') + generateInventoryCategoryMenu('limb');
+    if (groups.length === 0) {
+        html += `<div class="detail-empty detail-empty--compact">尚未获得任何肢体或尸体。</div>`;
+    } else {
+        const activeGroup = groups.find(group => group.id === activeOwnerId) || groups[0];
+        html += `<div class="limb-browser"><nav class="limb-browser__owners"><div class="limb-browser__label">角色目录</div>`;
+        groups.forEach(group => {
+            const activeClass = group.id === activeGroup.id ? ' limb-owner--active' : '';
+            html += `<button type="button" class="limb-owner${activeClass}" onclick="showInventoryLimbCategory('${group.id}')"><span>${group.name}</span><small>${group.items.length}</small></button>`;
+        });
+        html += `</nav><section class="limb-browser__items"><div class="limb-browser__heading"><b>${activeGroup.name}</b><small>拥有 ${activeGroup.items.length} 件</small></div>`;
+        html += renderInventoryEntries(activeGroup.items, '该角色名下没有肢体。');
+        html += `</section></div>`;
+    }
+    html += makePanelFooter('showInventoryPanel()', '返回物品栏', '←');
+    UI.setDetail(html); currentPanel = 'inventory';
+}
+
 function showInventoryAll() {
     let html = makeTitle('行囊物品'); html += generateInventoryCategoryMenu('all');
     const inv = gameState.player.inventory;
@@ -58,11 +157,16 @@ function showInventoryAll() {
     UI.setDetail(html); currentPanel = 'inventory';
 }
 
-function examineItemFromPanel(itemId) {
-    const item = findItemById(itemId); if (!item) { print("物品不存在。"); return; }
+function examineItemFromPanel(itemId, encodedStackKey = '') {
+    const stackKey = encodedStackKey ? decodeURIComponent(encodedStackKey) : '';
+    const item = stackKey
+        ? gameState.player.inventory.find(candidate => candidate.id === itemId && getInventoryEntryStackKey(candidate) === stackKey)
+        : findItemById(itemId);
+    if (!item) { print("物品不存在。"); return; }
     const nameDisplay = getInventoryDisplayName(item);
-    const meta = item.rarity ? `${getItemTypeName(item.type)} · ${getQualityName(item.rarity)}` : getItemTypeName(item.type);
-    let html = makeTitle('物品详情') + `<div class="detail-card"><div class="detail-card__header"><span>${getItemEmoji(item)} ${nameDisplay}</span><span class="detail-card__badge">${meta}</span></div>`;
+    const meta = item.rarity ? `${getItemTypeName(item.type)} · ${item.qualityLabel || getQualityName(item.rarity)}` : getItemTypeName(item.type);
+    let html = makeTitle('物品详情') + `<div class="detail-card ${item.detailImage ? 'detail-card--with-image' : ''}"><div class="detail-card__header">${getItemDetailHeading(item, nameDisplay)}<span class="detail-card__badge">${meta}</span></div>`;
+    if (item.detailImage) html += `<button class="item-detail-visual" type="button" title="点击查看大图" onclick="openNPCPortrait(this.querySelector('img'))"><img src="${item.detailImage}" alt="${nameDisplay}细节图" loading="eager"><span>点击查看大图</span></button>`;
     if (item.desc) html += `<div class="detail-card__desc">${item.desc}</div>`;
     if (item.score !== undefined || item.atk || item.def || item.agi) {
         html += `<div class="equipment-summary"><div>评分<b>${item.score !== undefined ? item.score : '—'}</b></div><div>攻击<b>${item.atk ? '+' + item.atk : '—'}</b></div><div>防御/灵巧<b>${item.def ? '+' + item.def : (item.agi ? '+' + item.agi : '—')}</b></div></div>`;
@@ -113,6 +217,7 @@ function showEquipmentPanel() {
         html += `</div>`;
     });
     html += `</div><div class="equipment-summary"><div>攻击<b>${getCharacterAttack(gameState.player)}</b></div><div>防御<b>${getCharacterDefense(gameState.player)}</b></div><div>灵巧<b>${getCharacterAgility(gameState.player)}</b></div></div>`;
+    if (typeof renderMagicDollInterface === 'function') html += renderMagicDollInterface();
     html += makePanelFooter('showEquipmentPanel()', '关闭装备栏');
     UI.setDetail(html); currentPanel = 'equipment';
 }

@@ -179,6 +179,106 @@ const WORLD_TEMPLATE_1 = {
         npcs: ["coachman"]
     },
 
+    // ========== 驿车离开卡伦镇后的荒地 ==========
+    wasteland: {
+        name: "荒地",
+        desc: "卡伦镇已经被甩在身后，四周只剩起伏的荒草与被风磨平的碎石。驿车歪斜地停在路边，一匹牵引马倒在车辕前，身体已经冷透；断裂的皮带拖在泥地上，车轮也陷进了一处浅坑。东边有一条被灌木遮掩的小径，不知通向何处。",
+        exits: { east: "wasteland_trail" },
+        items: ["broken_carriage", "dead_carriage_horse"],
+        npcs: []
+    },
+    wasteland_trail: {
+        name: "隐秘小径",
+        desc: "低矮的灌木与齐腰荒草遮住了大半路面，只有几块磨损的石板证明这里曾有人通行。小径在荒风中向东西两侧延伸。",
+        exits: { west: "wasteland", east: "wasteland_hollow" },
+        items: [],
+        npcs: []
+    },
+    wasteland_hollow: {
+        name: "隐秘小径",
+        desc: "小径钻入一片乱石与枯灌木之间，风声被石壁削弱，只剩枝叶偶尔擦过衣角的窸窣声。道路继续向东延伸。",
+        exits: { west: "wasteland_trail", east: "hidden_path_3" },
+        items: [],
+        npcs: []
+    },
+    hidden_path_3: {
+        name: "隐秘小径",
+        desc: "荒草在道路两旁纠缠成墙，脚下隐约可见年代久远的石屑。东西方向都有被踩踏过的狭窄痕迹。",
+        exits: { west: "wasteland_hollow", east: "hidden_path_4" },
+        items: [],
+        npcs: []
+    },
+    hidden_path_4: {
+        name: "隐秘小径",
+        desc: "几株扭曲的老树遮住天空，小径在这里形成一个不起眼的岔口。主路向东西延伸，北面的荆棘后还藏着一条更窄的路。",
+        exits: { west: "hidden_path_3", east: "hidden_path_5", north: "hidden_path_n1" },
+        items: [],
+        npcs: []
+    },
+    hidden_path_5: {
+        name: "隐秘小径",
+        desc: "这里几乎看不见完整的路面，只有倒伏方向一致的草茎指向东西。远处的荒风被林木挡住，四周显得异常安静。",
+        exits: { west: "hidden_path_4", east: "hidden_path_6" },
+        items: [],
+        npcs: []
+    },
+    hidden_path_6: {
+        name: "隐秘小径",
+        desc: "小径穿过最后一片纠缠的荒草，东面隐约透出一片较为开阔的天光。西边可以返回岔口。",
+        exits: { west: "hidden_path_5", east: "quiet_clearing" },
+        items: [],
+        npcs: []
+    },
+    hidden_path_n1: {
+        name: "隐秘小径",
+        desc: "北行的小路夹在两片荆棘之间，湿冷空气从前方缓缓涌来。南边通往东西向的岔口，北面仍有路。",
+        exits: { south: "hidden_path_4", north: "hidden_path_n2" },
+        items: [],
+        npcs: []
+    },
+    hidden_path_n2: {
+        name: "隐秘小径",
+        desc: "两侧岩壁逐渐收拢，路面上散落着带有人工凿痕的黑色石块。北方雾气深处，隐约能看见高大的轮廓。",
+        exits: { south: "hidden_path_n1", north: "mysterious_stone_gate" },
+        items: [],
+        npcs: []
+    },
+    mysterious_stone_gate: {
+        name: "神秘的石门",
+        desc: "山壁在这里向内凹陷，一座巨大石门嵌在阴影中。门面爬满枯藤与苔痕，褪色的学院纹章仍依稀可辨；门缝后不断渗出寒冷而陈旧的空气。南边是来时的隐秘小径。",
+        exits: { south: "hidden_path_n2" },
+        items: ["academy_stone_gate"],
+        npcs: []
+    },
+    quiet_clearing: {
+        name: "幽静的空地",
+        desc: "密林与荒草在这里向四周退开，围出一片安静得近乎异常的空地。柔和天光落在中央一座古老木屋上，木墙、斜顶与虚掩的门都和远方悬崖边的那座木屋极为相似。西边通回隐秘小径，东边还能看见一座马厩。",
+        exits: { west: "hidden_path_6", east: "quiet_stable" },
+        items: ["quiet_wooden_hut"],
+        npcs: []
+    },
+    quiet_hut_floor1: {
+        name: "木屋一层",
+        desc: "一座古老木屋的内部，空气中弥漫着陈旧的木头气味。\n屋内陈设简陋，只有一张木桌和几把椅子。\n墙上挂着一些奇怪的符号和草药，角落里堆着一些破旧的行李。\n房间角落有一个通往二层的木质楼梯。\n落地窗前站着一位紫发女子，她背对着门口，淡紫色长发在天光下微微浮动。\n门口可以回到幽静的空地。",
+        exits: { out: "quiet_clearing", up: "quiet_hut_floor2" },
+        items: ["quiet_stairs_to_hut_floor2", "quiet_hut_door"],
+        npcs: ["serena_quiet"]
+    },
+    quiet_hut_floor2: {
+        name: "木屋二层",
+        desc: "木屋的二层，比一层更加简陋。\n斜顶的天花板让人不得不低头，一张简陋的床铺靠在墙边，床上铺着破旧的被褥。\n墙角放着一个满是灰尘的书架，上面散落着几本泛黄的书籍。\n一扇小窗户透进微弱的天光，照亮了空气中飘浮的尘埃。\n下方是回到一层的楼梯。",
+        exits: { down: "quiet_hut_floor1" },
+        items: ["quiet_stairs_to_hut_floor1"],
+        npcs: []
+    },
+    quiet_stable: {
+        name: "马厩",
+        desc: "一座打理得十分干净的木制马厩坐落在空地东侧。草料槽里仍有新鲜干草，木栏内站着一匹毛色雪白、体态匀称的马。它安静地注视着来人，银灰色鬃毛在风里轻轻晃动。西边回到幽静的空地。",
+        exits: { west: "quiet_clearing" },
+        items: ["beautiful_white_horse"],
+        npcs: []
+    },
+
     // ========== 广场北侧街道（3个） ==========
     square_n1: {
         name: "中心街道",
@@ -337,10 +437,10 @@ const WORLD_TEMPLATE_1 = {
     },
     dungeon_3: {
         name: "地牢",
-        desc: "这间牢房比别处稍微干燥一些，墙角堆着发霉的稻草席。\n一名鬓发散乱的女子蜷在栅栏后，听见动静，缓缓抬起头来。\n东边是来时的路，西边还有最后一间牢房。",
+        desc: "这间牢房比别处稍微干燥一些，墙角堆着发霉的稻草席。锈蚀的铁栅后空无一人，只有一截断开的镣铐丢在泥地里。\n东边是来时的路，西边还有最后一间牢房。",
         exits: { east: "dungeon_2", west: "dungeon_4" },
         items: ["dungeon_straw_mat"],
-        npcs: ["huasha"]
+        npcs: []
     },
     dungeon_4: {
         name: "地牢",

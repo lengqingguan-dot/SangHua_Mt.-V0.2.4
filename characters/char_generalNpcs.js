@@ -29,7 +29,7 @@ Object.assign(CHARACTER_TEMPLATES, {
         hostile: false,
         drops: [],
         exp: 40,
-        level: 5
+        level: 6
     },
     castle_guard_2: {
         id: "castle_guard_2",
@@ -53,7 +53,7 @@ Object.assign(CHARACTER_TEMPLATES, {
         hostile: false,
         drops: [],
         exp: 35,
-        level: 4
+        level: 6
     },
 
     // ==================== 弩手 ====================
@@ -68,6 +68,7 @@ Object.assign(CHARACTER_TEMPLATES, {
         repeatDialogue: [
             "「守好你的位置。上面交代了，一只苍蝇都不能放进来。」"
         ],
+        level: 6,
         hp: 40,
         maxHp: 40,
         atk: 15,
@@ -92,6 +93,7 @@ Object.assign(CHARACTER_TEMPLATES, {
         repeatDialogue: [
             "「把你的眼睛放老实点。这里不是你能随意进出的地方。」"
         ],
+        level: 9,
         hp: 90,
         maxHp: 90,
         atk: 22,
@@ -116,6 +118,7 @@ Object.assign(CHARACTER_TEMPLATES, {
         repeatDialogue: [
             "「没有伯爵的命令，任何人不得靠近。」"
         ],
+        level: 8,
         hp: 70,
         maxHp: 70,
         atk: 20,
@@ -141,6 +144,7 @@ Object.assign(CHARACTER_TEMPLATES, {
         repeatDialogue: [
             "「既然到了这里，就别想再活着出去了。」"
         ],
+        level: 12,
         hp: 150,
         maxHp: 150,
         atk: 30,
@@ -165,6 +169,7 @@ Object.assign(CHARACTER_TEMPLATES, {
         repeatDialogue: [
             "「别打什么歪主意。钥匙在我这儿。」"
         ],
+        level: 6,
         hp: 55,
         maxHp: 55,
         atk: 14,
@@ -183,13 +188,15 @@ Object.assign(CHARACTER_TEMPLATES, {
         name: "华沙",
         type: "npc",
         gender: "female",
-        desc: "一名被关押在牢房里的女子，鬓发散乱，衣着虽有些破损却仍能看出曾是体面的驿站老板。她抬头看向你时，眼里带着疲惫与一丝不易察觉的希冀。",
+        portrait: "assets/portraits/huasha.png",
+        desc: "一名被关押在牢房里的年轻少女，尚显稚嫩的脸庞沾着牢狱留下的疲惫，鼻梁与脸颊散落着浅淡雀斑。她将栗色长发编成一条麻花辫，衣着虽有些破损，却仍能看出曾是体面的驿站老板。她抬头看向你时，眼里藏着惊惶，也闪动着一丝不肯熄灭的希冀。",
         dialogue: [
             "「……你是来救我的吗？我叫华沙，卡伦镇驿站就是我在打理。」"
         ],
         repeatDialogue: [
             "「他们把我关在这里……说我知道得太多。」"
         ],
+        level: 3,
         hp: 30,
         maxHp: 30,
         atk: 2,
@@ -214,6 +221,7 @@ Object.assign(CHARACTER_TEMPLATES, {
         repeatDialogue: [
             "「只要给够路费，天南海北都能去。」"
         ],
+        level: 3,
         hp: 40,
         maxHp: 40,
         atk: 6,
@@ -239,6 +247,7 @@ Object.assign(CHARACTER_TEMPLATES, {
         repeatDialogue: [
             "「打！把他们赶出去！」"
         ],
+        level: 3,
         hp: 35,
         maxHp: 35,
         atk: 8,
@@ -290,7 +299,7 @@ Object.assign(CHARACTER_TEMPLATES, {
             "「退回去！没有通行证禁止通行！」",
             "「这是骑士团的命令，不要挑战我们的耐心！」"
         ],
-        level: 2,
+        level: 4,
         hp: 50,
         maxHp: 50,
         atk: 15,

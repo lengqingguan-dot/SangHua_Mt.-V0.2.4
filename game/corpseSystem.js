@@ -34,6 +34,7 @@ function _lootCorpseCore(item, source) {
     print(`${prefix}「${item.name}」，获得了：`);
     item.loot.forEach(lootId => { const loot = createItemFromTemplate(lootId); if (loot) { gameState.player.inventory.push(loot); print(`✨ ${loot.name}`); } });
     item.loot = []; print(`「${item.name}」已被搜刮完毕。`);
+    if (typeof StoryEngine !== 'undefined') StoryEngine.check();
     if (source === 'ground') updateSceneInfo(); else showInventoryPanel();
 }
 

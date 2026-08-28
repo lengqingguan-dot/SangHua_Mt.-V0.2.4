@@ -5,6 +5,8 @@
 Object.assign(ITEM_TEMPLATES, {
     isabella_head: {
         id: "isabella_head", name: "伊莎贝拉的头颅", type: "limb", usable: true, customAction: true, cookable: true, ingredientType: "head", resultDish: "isabella_head_dish",
+        thumbnail: "assets/items/isabella-head-thumb.png",
+        detailImage: "assets/items/isabella-head-detail.png",
         desc: "一颗充满成熟诱惑的女性头颅，属于伯爵夫人伊莎贝拉·冯·兰德尔。金色波浪长发被鲜血浸湿，凌乱地贴在脸颊和脖颈上，散发着浓烈的香水味。脸型妩媚，五官精致而性感，嘴唇丰满红润，微微张开，露出湿润的舌尖。蓝色瞳孔还残留着临死前的震惊与不甘。脖颈断面整齐，鲜血从细嫩的颈部血管喷溅后凝固成黏腻的暗红层，皮肤白皙中带着十九岁少女特有的光泽。",
         story: [
             "你拎起伊莎贝拉沉重的、金色长发的头颅，将那张妩媚的脸蛋朝下，露出脖颈处那一圈还带着黏腻血迹、白皙肉感的断面。",
@@ -19,6 +21,8 @@ Object.assign(ITEM_TEMPLATES, {
     },
     isabella_torso: {
         id: "isabella_torso", name: "伊莎贝拉的躯干", type: "limb", usable: true, customAction: true, cookable: true, ingredientType: "torso", resultDish: "isabella_torso_dish",
+        thumbnail: "assets/items/isabella-torso-thumb.png",
+        thumbnailScale: 0.76,
         desc: "这个被切断的躯干丰满而充满肉欲，属于伯爵夫人伊莎贝拉·冯·兰德尔。腰肢柔软却不失曲线，小腹平坦光滑，下身最醒目的是她那对极度丰满圆润的臀部——被黑色包臀裙残片紧紧勒住，臀肉饱满肥厚，像两团被长期压抑却随时想被男人狠狠揉捏的雪白蜜桃。臀瓣又圆又翘，皮肤细腻光滑，死亡后仍保持着惊人的弹性和重量。她的阴部同样丰满诱人：金色阴毛修剪得整整齐齐，覆盖在饱满肥厚的阴唇上方。阴唇厚实多汁，颜色呈深粉色，因为正在自慰而微微肿胀张开，阴道口狭窄却湿润得过分，能清楚看到内壁粉嫩的褶皱和一层厚厚的透明淫水——尽管仍是处女，那股被压抑多年的渴望却让大量黏滑的液体不断从穴口溢出。阴蒂小巧却挺立着，像一颗急于被吮吸的珍珠。",
         story: [
             "你将伊莎贝拉那具失去了头颅与四肢的、如同一块丰满白肉般的躯干横放在膝盖上。臀瓣由于失去了四肢的支撑而显得更加肥厚晃动，散发着浓郁的蜂蜜香水味与成熟女性特有的体香。",
@@ -31,9 +35,11 @@ Object.assign(ITEM_TEMPLATES, {
             "你拔出肉棒，看着精液混从那两个并列的孔穴中同时流出，顺着她那肥厚雪白的臀缝滴落，曾经高不可攀的伯爵夫人，此刻只剩下一块被你彻底灌满、玩弄的丰满肉块。"
         ]
     },
-    isabella_leg: { id: "isabella_leg", name: "伊莎贝拉的腿", type: "limb", cookable: true, ingredientType: "leg", resultDish: "isabella_leg_steak", desc: "一条修长丰满的腿，属于伯爵夫人伊莎贝拉·冯·兰德尔。被黑色丝袜紧紧包裹，大腿饱满圆润，小腿线条流畅，充满弹性。丝袜被鲜血浸透后贴在皮肤上，勾勒出诱人的曲线。断面露出粗壮的腿骨与丰厚的粉红肌肉，鲜血顺着大腿根部缓缓流下，把黑色丝袜染成妖艳的红黑。" },
+    isabella_leg: { id: "isabella_leg", name: "伊莎贝拉的腿", type: "limb", cookable: true, ingredientType: "leg", resultDish: "isabella_leg_steak", thumbnail: "assets/items/isabella-leg-thumb.png", thumbnailScale: 0.84, desc: "一条修长丰满的腿，属于伯爵夫人伊莎贝拉·冯·兰德尔。被黑色丝袜紧紧包裹，大腿饱满圆润，小腿线条流畅，充满弹性。丝袜被鲜血浸透后贴在皮肤上，勾勒出诱人的曲线。断面露出粗壮的腿骨与丰厚的粉红肌肉，鲜血顺着大腿根部缓缓流下，把黑色丝袜染成妖艳的红黑。" },
     isabella_foot: {
         id: "isabella_foot", name: "伊莎贝拉的脚", type: "limb", usable: true, customAction: true, cookable: true, ingredientType: "foot", resultDish: "isabella_foot_dish",
+        thumbnail: "assets/items/isabella-foot-thumb.png",
+        thumbnailScale: 0.84,
         desc: "一只被黑色薄丝袜包裹、穿着黑色高跟鞋的性感嫩脚，属于伯爵夫人伊莎贝拉·冯·兰德尔。脚掌丰满，脚趾圆润，脚背弧度优美，脚踝纤细却肉感十足。黑色丝袜被鲜血浸湿后紧紧裹住脚背，脚底因长期穿高跟鞋而微微发红。断面露出粉嫩的脚踝骨与肌腱，周围包裹着的高级黑丝也整齐地断开。",
         story: [
             "你脱下断脚上那只性感的黑色高跟鞋，把脱出的一只裹着黑色薄丝袜的丰满玉足托在掌心。",
@@ -48,9 +54,11 @@ Object.assign(ITEM_TEMPLATES, {
             "伴随着黏腻的“吧唧”声，白色的精液从黑色高跟鞋与黑丝断脚之间的空隙大量挤出，顺着高跟鞋的边缘滴落，你在手上把玩揉搓着这只被彻底弄脏的贵妇之脚，欣赏着这件充满肉欲的艺术品。"
         ]
     },
-    isabella_arm: { id: "isabella_arm", name: "伊莎贝拉的手臂", type: "limb", cookable: true, ingredientType: "arm", resultDish: "isabella_arm_dish", desc: "一条圆润丰满的手臂，属于伯爵夫人伊莎贝拉·冯·兰德尔。皮肤白皙紧致，线条柔美却带着成熟女性的肉感。手臂内侧特别细嫩。由于长期被紧身衣物包裹，这条手臂保留着一种被精心养护的奢靡质感，摸上去软弹而温暖，仿佛随时能溢出成熟女性的甜腻。断面露出粉红的肌肉层与白色臂骨，这条曾经只用来拥抱伯爵或在丝绸床单上自慰的手臂，现在只是一个淫靡的残肢。" },
+    isabella_arm: { id: "isabella_arm", name: "伊莎贝拉的手臂", type: "limb", cookable: true, ingredientType: "arm", resultDish: "isabella_arm_dish", thumbnail: "assets/items/isabella-arm-thumb.png", thumbnailScale: 0.84, desc: "一条圆润丰满的手臂，属于伯爵夫人伊莎贝拉·冯·兰德尔。皮肤白皙紧致，线条柔美却带着成熟女性的肉感。手臂内侧特别细嫩。由于长期被紧身衣物包裹，这条手臂保留着一种被精心养护的奢靡质感，摸上去软弹而温暖，仿佛随时能溢出成熟女性的甜腻。断面露出粉红的肌肉层与白色臂骨，这条曾经只用来拥抱伯爵或在丝绸床单上自慰的手臂，现在只是一个淫靡的残肢。" },
     isabella_hand: {
         id: "isabella_hand", name: "伊莎贝拉的手", type: "limb", usable: true, customAction: true, cookable: true, ingredientType: "hand", resultDish: "isabella_hand_dish",
+        thumbnail: "assets/items/isabella-hand-thumb.png",
+        thumbnailScale: 0.88,
         desc: "一只丰满柔软的手，属于伯爵夫人伊莎贝拉·冯·兰德尔。手指修长，指甲涂着深红色指甲油，仍然沾着自慰时产生的粘腻液体。掌心温暖细腻，没有一丝老茧。手背皮肤光滑，能看到淡淡的青色血管。断口露出粉嫩的肌肉与细小的手骨，鲜血缓慢渗出，让这双曾渴望抚摸男人身体的手现在只剩血润的色情光泽。",
         story: [
             "你拿起伊莎贝拉被切下的右手。这只手还带着她死前一刻自慰时留下的温度和黏腻。中指、无名指的指尖上沾满了她自己透明而浓稠的淫水，在深红色的指甲油映衬下闪着淫靡的光泽。",
@@ -64,6 +72,8 @@ Object.assign(ITEM_TEMPLATES, {
     },
     isabella_breast: {
         id: "isabella_breast", name: "伊莎贝拉的乳房", type: "limb", cookable: true, ingredientType: "breast", resultDish: "isabella_breast_dish",
+        thumbnail: "assets/items/isabella-breast-thumb.png",
+        thumbnailScale: 0.90,
         milkItem: "isabella_milk", maxMilkCount: 4, driedBreastId: "isabella_breast_dried",
         desc: "一只饱满挺拔的D罩杯乳房，属于伯爵夫人伊莎贝拉·冯·兰德尔。皮肤白皙细腻，乳晕呈诱人的浅褐色，乳头较大而敏感，像两颗随时等待被吮吸的熟透肉珠。乳房手感如同棉花一样软弹，沉甸甸的，充满成熟女性的重量与弹性。断面露出丰厚的脂肪层与粉嫩乳腺，鲜血从切口渗出，让这对被黑色包臀裙紧勒了许久的丰乳显得更加淫靡。",
         milkStory: [

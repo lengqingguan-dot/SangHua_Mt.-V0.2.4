@@ -68,6 +68,9 @@ function clearOutputWindow() {
 // 初始化游戏
 function initializeGame() {
     gameState = getDefaultGameState();
+    if (typeof resetElaineAppearance === 'function') resetElaineAppearance();
+    if (typeof resetMandorolaIdentity === 'function') resetMandorolaIdentity();
+    if (typeof resetCoachmanState === 'function') resetCoachmanState();
     if (typeof battleState !== 'undefined') {
         battleState = JSON.parse(JSON.stringify(DEFAULT_BATTLE_STATE));
     }

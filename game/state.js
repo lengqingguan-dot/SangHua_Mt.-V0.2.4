@@ -5,7 +5,7 @@
 
 // 默认游戏状态工厂函数
 function getDefaultGameState() {
-    return {
+    const state = {
         player: {
             name: "散华",
             hp: 18,
@@ -17,7 +17,7 @@ function getDefaultGameState() {
             agi: 3,
             level: 1,
             exp: 0,
-            maxExp: 10,
+            maxExp: 20,
             gold: 0,
             location: "mine_deep",
             inventory: [],
@@ -26,6 +26,22 @@ function getDefaultGameState() {
                 weapon: createItemFromTemplate('pickaxe'),
                 armor: createItemFromTemplate('miners_cloth'),
                 accessory: null
+            },
+            magicDoll: {
+                slots: {
+                    head: null,
+                    torso: null,
+                    leftArm: null,
+                    rightArm: null,
+                    leftHand: null,
+                    rightHand: null,
+                    leftLeg: null,
+                    rightLeg: null,
+                    leftFoot: null,
+                    rightFoot: null,
+                    leftBreast: null,
+                    rightBreast: null
+                }
             }
         },
         world: getWorldData(),
@@ -47,6 +63,8 @@ function getDefaultGameState() {
         backgroundBattles: {},
         gameFlags: {}
     };
+    if (typeof applyPlayerLevelBalance === 'function') applyPlayerLevelBalance(state.player, false);
+    return state;
 }
 
 // 主游戏状态（可变）

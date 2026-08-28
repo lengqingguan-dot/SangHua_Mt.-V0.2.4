@@ -10,3 +10,8 @@ Object.assign(ITEM_TEMPLATES, {
     serena_corpse: { id: "serena_corpse", name: "瑟蕾娜的尸体", type: "misc", usable: true, customAction: true, dismemberable: true, desc: "瑟蕾娜的尸体倒在血泊中，那张极度优雅的脸庞上还残留着一丝错愕。淡紫色长发失去了往日的光泽，深紫色长袍下的身躯已经冰冷。可以拾取后在背包中搜刮或肢解。", corpseStory: ["【占位符：瑟蕾娜尸体互动剧情尚未开发】"] },
     serena_milk: { id: "serena_milk", name: "瑟蕾娜的奶", type: "consumable", desc: "从瑟蕾娜乳房中挤出的乳汁，泛着淡淡的紫色荧光，蕴含着微弱的魔力。饮用后可恢复大量生命值。", effect: "heal", value: 30 }
 });
+
+// 早期版本把瑟蕾娜肢体归在杂物中；统一为肢体后可参与魔偶组装。
+['head', 'torso', 'leg', 'foot', 'arm', 'hand', 'breast'].forEach(part => {
+    ITEM_TEMPLATES[`serena_${part}`].type = 'limb';
+});

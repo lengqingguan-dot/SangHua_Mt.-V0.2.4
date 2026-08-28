@@ -33,6 +33,10 @@ const PORTAL_DEFS = {
     // === 入口类 ===
     wooden_hut:               { targetRoom: "hut_floor1",           travelText: "你推开木门，陈旧的木头气味扑面而来..." },
     hut_door:                 { targetRoom: "cliff",                travelText: "你推开门，清新的空气扑面而来..." },
+    quiet_wooden_hut:         { targetRoom: "quiet_hut_floor1",     travelText: "你推开木门，陈旧的木头气味扑面而来..." },
+    quiet_hut_door:           { targetRoom: "quiet_clearing",       travelText: "你推开门，幽静空地的微风迎面吹来..." },
+    quiet_stairs_to_hut_floor2:{ targetRoom: "quiet_hut_floor2",    travelText: "你踏上木质楼梯，吱呀作响..." },
+    quiet_stairs_to_hut_floor1:{ targetRoom: "quiet_hut_floor1",    travelText: "你走下楼梯，回到木屋一层..." },
     slum_hut:                 { targetRoom: "slum_hut_inside",      travelText: "你掀开破布门帘，猫腰钻进了低矮的窝棚..." },
     slum_trapdoor:            { targetRoom: "slum_tunnel",          travelText: "你掀开地板下的活板门，跳进了黑暗的地道..." },
     slum_trapdoor_exit:       { targetRoom: "slum_hut_inside",      travelText: "你推开头顶的活板门，爬回了窝棚..." },

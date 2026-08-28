@@ -4,6 +4,65 @@
 //  触发条件 + 剧情文本 + 完成条件 + 回调
 // ============================================================
 
+const ELAINE_DEFAULT_DESC = "艾琳·维斯特是抄写员的女儿。褐色齐肩短发，发尾微翘，褐色瞳孔又圆又满，只是眼眶常常红得透彻。白色衬衫的领口皱巴巴的，格子短裙上沾着一小片灰，棕色小皮鞋的鞋尖有块暗色湿痕。";
+const ELAINE_REBEL_DESC = "艾琳·维斯特是个很好看的年轻女孩。她留着蓬松的褐色齐肩短发，微翘的发尾让清秀的脸庞显得格外轻快，侧发常用一根红色细绳束在耳后。她的眼睛大而圆，澄澈的褐色瞳孔里总亮着温暖而专注的光；笑起来时眉梢会先扬起一点，神情坦率又富有感染力。她穿着洗得干净的白色衬衫，袖口利落地卷到手肘，格子短裙下是一双轻快灵活的腿，棕色小皮鞋总被擦得整整齐齐。她习惯把记录、传单和新画好的旗帜图样抱在胸前，说话时语速稍快，想到新的主意便会不自觉向前探身。她热情、聪慧，对未来怀着近乎固执的信心，仿佛任何沉重的消息到了她手里，都能被重新写成点燃人心的火种。";
+
+function resetElaineAppearance() {
+    const elaine = CHARACTER_TEMPLATES['elaine'];
+    if (elaine) elaine.desc = ELAINE_DEFAULT_DESC;
+}
+
+function applyElaineRebelAppearance() {
+    const elaine = CHARACTER_TEMPLATES['elaine'];
+    if (elaine) elaine.desc = ELAINE_REBEL_DESC;
+}
+
+const COACHMAN_DEFAULT_DESC = "一个皮肤黝黑的车夫，穿着耐磨的粗布短褐，手里攥着一根赶车的长鞭。他靠着驿车，懒洋洋地打量着进进出出的旅人。";
+const COACHMAN_DEFAULT_DIALOGUE = ["「嘿，客官，要出远门吗？我的车可稳当得很。」"];
+const COACHMAN_DEFAULT_REPEAT_DIALOGUE = ["「只要给够路费，天南海北都能去。」"];
+
+function resetCoachmanState() {
+    const coachman = CHARACTER_TEMPLATES['coachman'];
+    if (!coachman) return;
+    coachman.desc = COACHMAN_DEFAULT_DESC;
+    coachman.dialogue = [...COACHMAN_DEFAULT_DIALOGUE];
+    coachman.repeatDialogue = [...COACHMAN_DEFAULT_REPEAT_DIALOGUE];
+}
+
+function applyCoachmanStrandedState() {
+    const coachman = CHARACTER_TEMPLATES['coachman'];
+    if (!coachman) return;
+    coachman.desc = "车夫跪在死去的牵引马旁，脸上的血色几乎褪尽。那根平时从不离手的长鞭被丢在泥里，他一遍遍检查没有伤口的马身，又茫然地望向陷住的车轮，像是还无法接受眼前的事实。";
+    coachman.dialogue = [
+        "「不……不该这样。刚才还好好的，它怎么会突然就死了？」",
+        "车夫用发抖的手摸了摸马颈，又立刻缩了回来。",
+        "「没有伤口，也没有中毒的样子。马没了，车也坏了……我们会被困死在这片荒地上的。」"
+    ];
+    coachman.repeatDialogue = [
+        "「怎么办……没有马，这辆车一步也走不了。」",
+        "「天黑之前要是还想不出办法，我们恐怕都走不出这片荒地。」"
+    ];
+}
+
+const HUASHA_CELL_EMPTY_DESC = "这间牢房比别处稍微干燥一些，墙角堆着发霉的稻草席。锈蚀的铁栅后空无一人，只有一截断开的镣铐丢在泥地里。\n东边是来时的路，西边还有最后一间牢房。";
+const HUASHA_CELL_OCCUPIED_DESC = "这间牢房比别处稍微干燥一些，墙角堆着发霉的稻草席。\n一名鬓发散乱的女子蜷在栅栏后，听见动静，缓缓抬起头来。\n东边是来时的路，西边还有最后一间牢房。";
+const HUASHA_CELL_DEAD_DESC = "这间牢房比别处稍微干燥一些，墙角堆着发霉的稻草席。栅栏后的泥地留下了拖拽与挣扎的痕迹，空气中弥漫着久久不散的死亡气息。\n东边是来时的路，西边还有最后一间牢房。";
+
+function spawnHuashaInDungeon() {
+    if (!gameState.gameFlags) gameState.gameFlags = {};
+    if (gameState.gameFlags.huashaRescued || gameState.gameFlags.huashaDead) return;
+    const cell = gameState.world && gameState.world['dungeon_3'];
+    if (!cell) return;
+    if (!cell.npcs) cell.npcs = [];
+    if (!cell.npcs.includes('huasha')) cell.npcs.push('huasha');
+    cell.desc = HUASHA_CELL_OCCUPIED_DESC;
+}
+
+function setHuashaDungeonCellDescription(description) {
+    const cell = gameState.world && gameState.world['dungeon_3'];
+    if (cell) cell.desc = description;
+}
+
 const STORIES = {
 
     // ==================== 剧情事件 ====================
@@ -143,12 +202,19 @@ const STORIES = {
         }
     },
 
-    // 主线任务3 - 初入卡伦镇
+    // 主线任务3 - 初入卡伦镇（解锁条件：完成主线2并进入马路）
     quest_karen_town: {
         id: 'quest_karen_town',
         type: 'main',
         name: '主线任务3：初入卡伦镇',
-        trigger: { type: 'enter_room', room: 'road' },
+        trigger: {
+            type: 'composite_trigger',
+            operator: 'all',
+            triggers: [
+                { type: 'enter_room', room: 'road' },
+                { type: 'quest_complete', quest: 'quest_night_escape' }
+            ]
+        },
         conditions: {
             type: 'single',
             condType: 'enter_room',
@@ -243,7 +309,11 @@ const STORIES = {
             label: '阅读"加急密令"'
         },
         description: '看看密令内容。',
-        rewards: { exp: 40 }
+        rewards: { exp: 40 },
+        onComplete() {
+            spawnHuashaInDungeon();
+            if (typeof updateSceneInfo === 'function') updateSceneInfo();
+        }
     },
 
     // 支线3 - 这是谁的秘密基地
@@ -268,14 +338,43 @@ const STORIES = {
         type: 'side',
         name: '支线任务：你是敌人，还是朋友？',
         trigger: { type: 'enter_room', room: 'hut_floor1' },
-        conditions: {
-            type: 'single',
-            condType: 'first_talk',
-            condValue: 'serena',
-            label: '首次与瑟蕾娜·紫雾对话'
-        },
-        description: '木屋中的神秘法师似乎对你很感兴趣，和她聊聊吧。',
-        rewards: { item: 'magic_mirror' }  // 魔镜
+        stages: [
+            {
+                questNpc: 'serena',
+                conditions: {
+                    type: 'single', condType: 'quest_talk', condValue: 'serena',
+                    label: '与悬崖木屋中的瑟蕾娜进行任务对话'
+                },
+                questDialogue: [
+                    '落地窗前的女子没有回头。淡紫色长发无风自动，几缕薄雾正绕着她的指尖缓慢游动。',
+                    '「站在那里就好。你一路从桑华山走到这里，身上的血腥味和石粉味，已经替你做过自我介绍了。」',
+                    '她侧过脸，青紫色的眼瞳在昏暗的木屋里泛着微光。那目光并不敌视，却像早已看过你尚未经历的许多道路。',
+                    '「我是瑟蕾娜·紫雾。至于我是敌人还是朋友——这个问题不该由第一次见面决定。」',
+                    '「你挣脱了矿场，却还没有真正摆脱那里。仇恨会让人认得方向，也会让人看不见脚下。等你知道自己究竟要去哪里，再来回答我。」',
+                    '她将一面镶着紫色宝石的古朴手镜放在桌沿。幽蓝微光从镜面深处荡开，映出的不是你的脸，而是你曾经走过的道路。',
+                    '「拿去吧。魔镜会记住你亲自抵达过的传送点；未经你双脚丈量的地方，它不会替你打开道路。」',
+                    '「今天我既不帮助你，也不阻拦你。等我们再次见面时，也许你已经有资格决定我们之间的关系了。」'
+                ],
+                description: '木屋中的神秘法师似乎对你很感兴趣，和她聊聊吧。',
+                rewards: { item: 'magic_mirror' }
+            },
+            {
+                questNpc: 'serena_quiet',
+                conditions: {
+                    type: 'single', condType: 'quest_talk', condValue: 'serena_quiet',
+                    label: '与幽静空地木屋中的瑟蕾娜进行任务对话'
+                },
+                questDialogue: [
+                    '瑟蕾娜站在落地窗前。听见你的脚步，她没有回头，只抬起一只手，让几缕淡紫色雾气在指间缓慢盘旋。',
+                    '「你果然找到了这里。魔镜只能让你看见道路，接下来这件东西，才会让你拥有真正能够同行的帮手。」',
+                    '她转过身，将一枚仍在搏动的紫金色结晶心脏放入你掌中。结晶内部密布着细小的灵魂术式，触碰皮肤时传来近似脉搏的震动。',
+                    '「为它准备完整的身体——头颅、躯干、双臂、双手、双腿、双脚，以及成对的乳房。缺少任何一件，它都无法在战斗中苏醒。」',
+                    '「至于那些身体曾经属于谁……魔偶之心会记住。以后，你会听见她们留下的声音。」'
+                ],
+                description: '魔镜已经交到你手中，但瑟蕾娜似乎仍在别处等待着下一次见面。',
+                rewards: { exp: 50, item: 'magic_doll_heart' }
+            }
+        ]
     },
 
     // 支线5-1 - 兰德尔家族雕像重建工作（触发+与索菲对话）
@@ -576,6 +675,7 @@ const STORIES = {
                 onComplete() {
                     if (!gameState.gameFlags) gameState.gameFlags = {};
                     gameState.gameFlags.rebelAlliesEnabled = true;
+                    applyElaineRebelAppearance();
                 }
             },
             {
@@ -629,12 +729,19 @@ const STORIES = {
         ]
     },
 
-    // 主线任务4 - 终究会离开（解锁条件：首次到达卡伦镇驿站）
+    // 主线任务4 - 终究会离开（解锁条件：完成主线3并到达卡伦镇驿站）
     quest_depart: {
         id: 'quest_depart',
         type: 'main',
         name: '主线任务4：终究会离开',
-        trigger: { type: 'enter_room', room: 'karen_relay_station' },
+        trigger: {
+            type: 'composite_trigger',
+            operator: 'all',
+            triggers: [
+                { type: 'enter_room', room: 'karen_relay_station' },
+                { type: 'quest_complete', quest: 'quest_karen_town' }
+            ]
+        },
         questNpc: 'coachman',
         conditions: {
             type: 'single',
@@ -650,22 +757,111 @@ const STORIES = {
         description: '通往其他城市的驿站，摆脱旧身份，开始新生活。',
         rewards: { exp: 300 },
         onComplete() {
-            // 若非通过营救华沙完成（即直接与车夫对话离开），华沙便死在地牢深处
-            const rescueDone = StoryEngine.completedQuests.includes('quest_rescue_huasha');
-            if (rescueDone) return;
+            // 同时参考任务记录、明确状态和本次实际对话对象，避免已由华沙
+            // 完成任务时因状态恢复/执行顺序误入死亡分支。
+            if (!gameState.gameFlags) gameState.gameFlags = {};
+            const purgeDone = StoryEngine.completedQuests.includes('quest_purge_order');
+            const rescueDone = StoryEngine.completedQuests.includes('quest_rescue_huasha') ||
+                gameState.gameFlags.huashaRescued === true || this.questNpc === 'huasha';
+            if (purgeDone && !rescueDone) {
+                gameState.gameFlags.huashaDead = true;
+                if (typeof removeNpcEverywhere === 'function') removeNpcEverywhere('huasha');
+                const dungeon3 = gameState.world && gameState.world['dungeon_3'];
+                if (dungeon3 && typeof generateHuashaCorpse === 'function') {
+                    if (!dungeon3.items) dungeon3.items = [];
+                    const corpse = generateHuashaCorpse();
+                    if (corpse) dungeon3.items.push(corpse.id);
+                }
+                setHuashaDungeonCellDescription(HUASHA_CELL_DEAD_DESC);
+                print(`<span style="color:#888;">你并未回地牢去救华沙。那个被囚在牢道深处的驿站老板，大概再也等不到来人了。</span>`);
+            } else {
+                if (rescueDone) {
+                    gameState.gameFlags.huashaRescued = true;
+                    gameState.gameFlags.huashaDead = false;
+                }
+            }
+            if (typeof moveNpcToRoom === 'function') moveNpcToRoom('coachman', 'wasteland');
+            relocateTo('wasteland', {
+                skipCheck: true,
+                travelText: '驿车驶出卡伦镇，沿着荒凉的道路一路向远方颠簸而去。',
+                callback: () => { if (typeof StoryEngine !== 'undefined') StoryEngine.check(); }
+            });
+        }
+    },
 
-            if (typeof removeNpcEverywhere === 'function') {
-                removeNpcEverywhere('huasha');
+    // 主线任务5 - 阴影中的城堡（解锁条件：完成主线4并到达荒地）
+    quest_shadow_castle: {
+        id: 'quest_shadow_castle',
+        type: 'main',
+        name: '主线任务5：阴影中的城堡',
+        trigger: {
+            type: 'composite_trigger',
+            operator: 'all',
+            triggers: [
+                { type: 'enter_room', room: 'wasteland' },
+                { type: 'quest_complete', quest: 'quest_depart' }
+            ]
+        },
+        startStoryIsTitle: true,
+        startStoryColor: '#e6d5a8',
+        startStory: [
+            '主线任务5-阴影中的城堡',
+            '驿车驶入荒地后不久，前方的牵引马忽然发出一声短促的嘶鸣。',
+            '它的前腿毫无征兆地一软，沉重的身体向侧面倒下。车辕猛地歪斜，车轮陷进路旁的浅坑，整辆车在刺耳的木料摩擦声中停了下来。',
+            '车夫跳下车检查了很久。马身上没有箭伤，没有刀口，也看不出中毒的痕迹；它就像被某种看不见的东西突然夺走了生命。',
+            '车夫跪在马旁反复呼唤，声音从急促逐渐变得沙哑。荒风吹过停摆的车厢，没有任何回应。',
+            '马车已经无法继续前进。若想离开这里，必须在别处找到一匹能够牵引马车的马，再设法修复车辆。'
+        ],
+        afterStartStory() {
+            if (!gameState.gameFlags) gameState.gameFlags = {};
+            gameState.gameFlags.carriageStranded = true;
+            applyCoachmanStrandedState();
+        },
+        questNpc: 'coachman',
+        conditions: {
+            type: 'composite',
+            operator: 'all',
+            subConditions: [
+                { type: 'flag', flag: 'carriageHorseFound', label: '找到可用于牵引马车的马匹' },
+                { type: 'quest_talk', condValue: 'coachman', label: '与车夫交谈并修复马车' }
+            ]
+        },
+        questDialogue: [
+            '车夫看见你带回一匹能够牵引马车的马，呆滞的眼神终于恢复了一点光亮。',
+            '「好家伙，真让你找回来了。帮我扶住轮子——这根轮轴还能用。」',
+            '你们把陷入浅坑的车轮撬回路面，又用皮革重新接好断裂的挽具。',
+            '车夫将马套上车辕，反复检查了几遍绳扣，才长长吐出一口气。',
+            '「马车修好了。不过这地方不对劲，我们最好尽快离开。」'
+        ],
+        description: '该死，是谁敢杀我的马？',
+        rewards: { exp: 300 },
+        onComplete() {
+            const room = gameState.world['wasteland'];
+            if (room) {
+                room.items = (room.items || []).filter(id => !['broken_carriage', 'dead_carriage_horse', 'led_white_horse'].includes(id));
+                if (!room.items.includes('repaired_carriage')) room.items.push('repaired_carriage');
+                room.desc = '荒风卷过低矮的草坡，修复好的驿车重新停稳在道路中央。漂亮的白马已经套上挽具，车轮和皮带也都固定妥当；只有路旁被拖乱的泥土，还提醒着你那场毫无征兆的死亡。';
             }
-            const dungeon3 = gameState.world && gameState.world['dungeon_3'];
-            if (dungeon3 && typeof generateHuashaCorpse === 'function') {
-                if (!dungeon3.items) dungeon3.items = [];
-                const corpse = generateHuashaCorpse();
-                if (corpse) dungeon3.items.push(corpse.id);
-            }
-            print(`<span style="color:#888;">你并未回地牢去救华沙。那个被囚在牢道深处的驿站老板，大概再也等不到来人了。</span>`);
+            gameState.gameFlags.carriageStranded = false;
+            resetCoachmanState();
             if (typeof updateSceneInfo === 'function') { updateSceneInfo(); updateMinimap(); }
         }
+    },
+
+    // 支线任务9 - 地下城与勇士
+    quest_dungeon_warriors: {
+        id: 'quest_dungeon_warriors',
+        type: 'side',
+        name: '支线任务9：地下城与勇士',
+        trigger: { type: 'enter_room', room: 'mysterious_stone_gate' },
+        conditions: {
+            type: 'single',
+            condType: 'flag',
+            condValue: 'academyDungeonEntered',
+            label: '首次进入地下城功能'
+        },
+        description: '调查神秘石门后的遗迹，并首次进入地下城。',
+        rewards: { exp: 200 }
     },
 
     // 支线任务8 - 拯救桑华山的幻想
@@ -697,9 +893,13 @@ const STORIES = {
         description: '驿站老板华沙被关进了城堡的地牢。前往地牢，救出华沙。',
         rewards: { exp: 150 },
         onComplete() {
+            if (!gameState.gameFlags) gameState.gameFlags = {};
+            gameState.gameFlags.huashaRescued = true;
+            gameState.gameFlags.huashaDead = false;
             if (typeof moveNpcToRoom === 'function') {
                 moveNpcToRoom('huasha', 'karen_relay_station');
             }
+            setHuashaDungeonCellDescription(HUASHA_CELL_EMPTY_DESC);
             // 华沙获救后，由她接手带你离开
             const depart = StoryEngine.registry.get('quest_depart');
             if (depart) {

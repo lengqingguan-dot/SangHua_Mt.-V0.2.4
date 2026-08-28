@@ -44,6 +44,8 @@ Object.assign(ITEM_TEMPLATES, {
     },
     liana_head: {
         id: "liana_head", name: "莉娅娜的头颅", type: "limb",
+        thumbnail: "assets/items/liana-head-thumb.png",
+        detailImage: "assets/items/liana-head-detail.png",
         desc: "一颗英气却充满诱惑的女性头颅，属于女骑士莉娅娜·冯·斯特兰。栗色长发被鲜血浸得湿漉漉，凌乱地贴在脸颊和脖颈断面上。红色的瞳孔睁得很大，残留着临死前的冷厉与一丝隐秘的惊恐。薄唇微微张开，露出湿润的舌尖，脖颈断面整齐有力，鲜血从粗壮的颈动脉喷溅后凝固成黏腻的暗红层，蜜色皮肤与血迹形成强烈的视觉刺激。",
         usable: true, customAction: true, cookable: true, ingredientType: "head", resultDish: "liana_head_dish",
         story: [
@@ -58,6 +60,8 @@ Object.assign(ITEM_TEMPLATES, {
     },
     liana_torso: {
         id: "liana_torso", name: "莉娅娜的躯干", type: "limb",
+        thumbnail: "assets/items/liana-torso-thumb.png",
+        thumbnailScale: 0.76,
         desc: "这个切断的躯干强健而充满肉欲，属于女骑士莉娅娜·冯·斯特兰。腰肢紧实有力，小腹平坦却能看到清晰的腹肌线条。阴道口覆盖着浓密卷曲的深红色阴毛，阴唇厚实饱满，颜色呈暗粉色，阴道口紧闭，掰开后内壁粉嫩湿润，能看到一层薄薄的透明黏液残留，仿佛她在战斗中因剧烈动作而分泌。会阴处裂开深深的伤痕，鲜血混合着阴道分泌物缓缓流出，散发出浓烈汗水、铁锈与女性淫液混合的强烈气味。",
         usable: true, customAction: true, cookable: true, ingredientType: "torso", resultDish: "liana_torso_dish",
         story: [
@@ -73,10 +77,14 @@ Object.assign(ITEM_TEMPLATES, {
     },
     liana_leg: {
         id: "liana_leg", name: "莉娅娜的腿", type: "limb", cookable: true, ingredientType: "leg", resultDish: "liana_leg_steak",
+        thumbnail: "assets/items/liana-leg-thumb.png",
+        thumbnailScale: 0.84,
         desc: "一条修长强健的腿，属于女骑士莉娅娜·冯·斯特兰。肌肉饱满有力，大腿内侧皮肤特别细嫩，覆盖着极细的淡金色汗毛。断面露出粗大的腿骨与发达的粉红肌肉组织，鲜血大量涌出，顺着大腿根部缓缓流下，染湿了浓密的阴毛区域，留下黏腻的血痕。"
     },
     liana_hand: {
         id: "liana_hand", name: "莉娅娜的手", type: "limb", usable: true, customAction: true, cookable: true, ingredientType: "hand", resultDish: "liana_hand_dish",
+        thumbnail: "assets/items/liana-hand-thumb.png",
+        thumbnailScale: 0.86,
         desc: "一只强健却性感的手，属于女骑士莉娅娜·冯·斯特兰。手指粗壮有力，指关节突出，手指上涂着的亮红色指甲油表明了断手主人少女的身份。掌心布满厚厚的剑茧，摸上去依旧带着粗糙的摩擦感。手背青筋凸起，皮肤紧致。断口露出白色的掌骨与发达的粉红肌肉，鲜血缓慢渗出，让这双曾握剑的手现在只剩淫靡的血润光泽。",
         story: [
             "你拿起莉娅娜那只被切下的强健右手，本想随意把她的手掌按在自己的肉棒上撸动，谁知当她的掌心刚一接触到滚烫的阴茎，就如同活过来一样，突然五指猛地收紧，死死抓住你的肉棒。",
@@ -90,6 +98,7 @@ Object.assign(ITEM_TEMPLATES, {
     },
     liana_foot: {
         id: "liana_foot", name: "莉娅娜的脚", type: "limb", usable: true, customAction: true, cookable: true, ingredientType: "foot", resultDish: "liana_foot_dish",
+        thumbnail: "assets/items/liana-foot-thumb.png",
         desc: "一只强壮却诱人的脚，属于女骑士莉娅娜·冯·斯特兰。脚掌宽厚，脚底布满厚茧，脚趾有力而性感，脚背青筋明显。脚踝粗壮有力，断面露出脚踝骨与坚韧的粉色肌腱，残留的血迹混着汗渍，让这只曾踏遍战场的脚现在沾满淫靡的血光。",
         story: [
             "你抓起莉娅娜被切下的那只强壮有力的右脚，仰面躺在冰冷的地面上，把莉娅娜的这只断脚举到自己胯间。",
@@ -103,6 +112,8 @@ Object.assign(ITEM_TEMPLATES, {
     },
     liana_breast: {
         id: "liana_breast", name: "莉娅娜的乳房", type: "limb", cookable: true, ingredientType: "breast", resultDish: "liana_breast_dish",
+        thumbnail: "assets/items/liana-breast-thumb.png",
+        thumbnailScale: 0.88,
         milkItem: "liana_milk", maxMilkCount: 3, driedBreastId: "liana_breast_dried",
         desc: "一只被铠甲长期压迫却依然饱满挺拔的C杯乳房，属于女骑士莉娅娜·冯·斯特兰。没什么弹性，手感偏硬。蜜色皮肤光滑紧致，乳晕呈暗褐色，乳头小巧而坚挺，因死亡刺激而收缩，像两颗被晒干后微微硬起的葡萄。乳房形状圆润有力，断面露出乳腺组织与少量脂肪，鲜血从切口渗出。",
         milkStory: [
@@ -117,6 +128,8 @@ Object.assign(ITEM_TEMPLATES, {
     },
     liana_arm: {
         id: "liana_arm", name: "莉娅娜的手臂", type: "limb", cookable: true, ingredientType: "arm", resultDish: "liana_arm_dish",
+        thumbnail: "assets/items/liana-arm-thumb.png",
+        thumbnailScale: 0.84,
         desc: "一条肌肉发达而充满力量感的手臂，属于女骑士莉娅娜·冯·斯特兰。皮肤呈现健康的蜜色，线条硬朗却带着女性特有的柔韧。小臂布满细小战斗伤痕，肱二头肌结实隆起。断面露出粗壮的臂骨与层层深粉色湿润肌肉，鲜血混着汗水流下，散发着战场上强烈的汗液与血腥混合的腥臊气息。"
     },
     liana_milk: {

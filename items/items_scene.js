@@ -338,6 +338,36 @@ Object.assign(ITEM_TEMPLATES, {
         usable: true,
         customAction: true
     },
+    quiet_wooden_hut: {
+        id: "quiet_wooden_hut", name: "木屋", type: "misc",
+        desc: "一座古老的木屋立在幽静空地中央，外观和悬崖边的木屋几乎完全相同。木门虚掩着，可以进入。",
+        usable: true, customAction: true, notPickable: true
+    },
+    quiet_hut_door: {
+        id: "quiet_hut_door", name: "木屋门", type: "misc",
+        desc: "一扇老旧的木门，通向幽静的空地。",
+        usable: true, customAction: true, notPickable: true
+    },
+    quiet_stairs_to_hut_floor2: {
+        id: "quiet_stairs_to_hut_floor2", name: "楼梯（上行）", type: "misc",
+        desc: "一个通往木屋二层的木质楼梯，楼梯有些老旧，踩上去会发出吱呀的声响。",
+        usable: true, customAction: true, notPickable: true
+    },
+    quiet_stairs_to_hut_floor1: {
+        id: "quiet_stairs_to_hut_floor1", name: "楼梯（下行）", type: "misc",
+        desc: "一个通往木屋一层的木质楼梯，楼梯有些老旧，踩上去会发出吱呀的声响。",
+        usable: true, customAction: true, notPickable: true
+    },
+    beautiful_white_horse: {
+        id: "beautiful_white_horse", name: "漂亮的白马", type: "scene",
+        desc: "一匹成年白马，毛色干净得像新雪，银灰色鬃毛柔顺地垂在颈侧。它体格健壮、性情温顺，足以承担牵引马车的工作。",
+        usable: true, customAction: true, notPickable: true
+    },
+    led_white_horse: {
+        id: "led_white_horse", name: "带回的白马", type: "scene",
+        desc: "从隐秘马厩带回来的白马安静地站在损坏的驿车旁，等待车夫重新装好挽具。",
+        notPickable: true
+    },
     slum_hut: {
         id: "slum_hut",
         name: "窝棚",
@@ -558,6 +588,40 @@ Object.assign(ITEM_TEMPLATES, {
         usable: true,
         customAction: true,
         notPickable: true
+    },
+    broken_carriage: {
+        id: "broken_carriage", name: "损坏的驿车", type: "scene",
+        desc: "一辆歪斜陷在浅坑里的驿车。车身本身还算完整，但牵引皮带已经断裂，左侧车轮也偏离了轮轴；没有新的牵引马，它无法继续上路。",
+        notPickable: true
+    },
+    dead_carriage_horse: {
+        id: "dead_carriage_horse", name: "死去的牵引马", type: "scene",
+        desc: "牵引驿车的马倒在车辕前，身体已经冷透。它身上看不见明显伤口，口鼻也没有血迹，死亡来得突然且毫无征兆。",
+        notPickable: true
+    },
+    repaired_carriage: {
+        id: "repaired_carriage", name: "修复好的驿车", type: "scene",
+        desc: "车轮被重新扶正，断裂的皮带也用备用皮革接牢。找回的马已经套上挽具，驿车随时可以再次出发。",
+        notPickable: true
+    },
+    academy_stone_gate: {
+        id: "academy_stone_gate", name: "大石门", type: "scene",
+        desc: "一扇嵌入山壁的古老石门。门上的学院纹章已经被岁月磨平，厚重门扇之间却留着一道足以让人侧身通过的缝隙。",
+        usable: true, customAction: true, notPickable: true
+    },
+    academy_dungeon_exit: {
+        id: "academy_dungeon_exit", name: "离开的通道", type: "scene",
+        desc: "密室尽头的石壁已经打开，通道中吹来属于外界的风。沿着它前进，可以返回神秘石门。",
+        usable: true, customAction: true, notPickable: true
+    },
+    academy_dungeon_return_gate: {
+        id: "academy_dungeon_return_gate", name: "身后的石门", type: "scene",
+        desc: "进入遗址时经过的石门仍未闭合。若暂时不想深入，可以由此退回外面的神秘石门。",
+        usable: true, customAction: true, notPickable: true
+    },
+    mage_crystal: {
+        id: "mage_crystal", name: "魔法师结晶", type: "misc", rarity: "epic", score: 90,
+        desc: "疯魔女魔法师消散后留下的紫色结晶。内部封存着缓慢旋转的雾状魔力，触碰时会传来极轻的脉动。它是史诗级道具，但不能作为装备佩戴。"
     },
     ruins_burned: {
         id: "ruins_burned",

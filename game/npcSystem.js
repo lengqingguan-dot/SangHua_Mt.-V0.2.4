@@ -4,8 +4,41 @@
 // ============================================================
 
 function getCharacterInfo(templateId) {
-    return (typeof CHARACTER_TEMPLATES !== 'undefined') ? (CHARACTER_TEMPLATES[templateId] || null) : null;
+    if (typeof CHARACTER_TEMPLATES === 'undefined') return null;
+    const npc = CHARACTER_TEMPLATES[templateId] || null;
+    return (npc && typeof applyNpcLevelBalance === 'function') ? applyNpcLevelBalance(npc) : npc;
 }
+
+function openNPCPortrait(image) {
+    if (!image || !image.src) return;
+    let viewer = document.getElementById('npc-portrait-viewer');
+    if (!viewer) {
+        viewer = document.createElement('div');
+        viewer.id = 'npc-portrait-viewer';
+        viewer.className = 'npc-portrait-viewer';
+        viewer.setAttribute('role', 'dialog');
+        viewer.setAttribute('aria-modal', 'true');
+        viewer.innerHTML = `<button class="npc-portrait-viewer__close" type="button" aria-label="关闭立绘大图" onclick="closeNPCPortrait()">×</button><img class="npc-portrait-viewer__image" alt=""><div class="npc-portrait-viewer__caption"></div>`;
+        viewer.addEventListener('click', event => {
+            if (event.target === viewer) closeNPCPortrait();
+        });
+        document.body.appendChild(viewer);
+    }
+    viewer.querySelector('.npc-portrait-viewer__image').src = image.src;
+    viewer.querySelector('.npc-portrait-viewer__image').alt = image.alt || '人物立绘大图';
+    viewer.querySelector('.npc-portrait-viewer__caption').textContent = image.alt || '人物立绘';
+    viewer.classList.add('npc-portrait-viewer--open');
+    viewer.querySelector('.npc-portrait-viewer__close').focus();
+}
+
+function closeNPCPortrait() {
+    const viewer = document.getElementById('npc-portrait-viewer');
+    if (viewer) viewer.classList.remove('npc-portrait-viewer--open');
+}
+
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') closeNPCPortrait();
+});
 
 // 显示NPC详情
 function showNPCInfo(npcId) {
@@ -14,8 +47,13 @@ function showNPCInfo(npcId) {
 
     const isHostile = npc.hostile || npc.type === 'enemy' || npc.type === 'boss';
     let html = makeTitle('人物详情');
-    html += `<div class="detail-card"><div class="detail-card__header"><span>👤 ${npc.name}</span><span class="detail-card__badge">${getCharacterTypeName(npc.type)}</span></div>`;
-    html += `<div class="detail-card__desc">${npc.desc || '这个人物没有留下更多可供观察的信息。'}</div></div>`;
+    html += `<div class="detail-card"><div class="detail-card__header"><span>👤 ${npc.name}</span><span class="detail-card__badge">${getCharacterTypeName(npc.type)} · Lv.${npc.level || 1}</span></div>`;
+    const description = npc.desc || '这个人物没有留下更多可供观察的信息。';
+    if (npc.portrait) {
+        html += `<div class="npc-profile"><div class="npc-profile__portrait"><img src="${npc.portrait}" alt="${npc.name}全身立绘" loading="eager" role="button" tabindex="0" title="点击放大立绘" onclick="openNPCPortrait(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openNPCPortrait(this);}"></div><div class="detail-card__desc npc-profile__desc">${description}</div></div></div>`;
+    } else {
+        html += `<div class="detail-card__desc">${description}</div></div>`;
+    }
     html += `<div class="panel-section-label">可用行动</div><div class="detail-action-grid">`;
 
     if (npc.canTalk && npc.dialogue) {
@@ -69,14 +107,18 @@ function talkToNPCAction(npcId) {
 
     if (isFirstTime) {
         StoryEngine.checkFirstTalk(npcId);
-        StoryEngine.markConditionProgress('first_talk', npcId);
-        gameState.talkedNPCs[npcId] = true;
     }
 
     StoryEngine.playLines({
         lines: dialogues, color: '#ff8844', useNextBtn: true,
         onEachLine: () => { print("<br>"); },
-        onComplete: () => { StoryEngine.check(); }
+        onComplete: () => {
+            if (isFirstTime) {
+                gameState.talkedNPCs[npcId] = true;
+                StoryEngine.markConditionProgress('first_talk', npcId);
+            }
+            StoryEngine.check();
+        }
     });
 }
 

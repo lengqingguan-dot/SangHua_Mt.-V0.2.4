@@ -54,6 +54,31 @@ function getItemEmoji(item) {
     return '📦';
 }
 
+// 将生成器烘焙的中性棋盘底在浏览器中转为真实透明像素，仅供标记过的缩略图使用。
+function applyCutoutThumbnail(image) {
+    if (!image || image.dataset.cutoutProcessed === 'true') return;
+    image.dataset.cutoutProcessed = 'true';
+    try {
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        context.drawImage(image, 0, 0);
+        const frame = context.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = frame.data;
+        for (let i = 0; i < pixels.length; i += 4) {
+            const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2];
+            const darkest = Math.min(r, g, b);
+            const lightest = Math.max(r, g, b);
+            if (darkest >= 225 && lightest - darkest <= 10) pixels[i + 3] = 0;
+        }
+        context.putImageData(frame, 0, 0);
+        image.src = canvas.toDataURL('image/png');
+    } catch (error) {
+        console.warn('缩略图透明化处理失败：', error);
+    }
+}
+
 const RARITY_COLORS = {
     normal:    '#c0c0c0',
     good:      '#66cc66',
@@ -67,7 +92,7 @@ const RARITY_NAMES = {
     normal:    '普通',
     good:      '优良',
     rare:      '稀有',
-    epic:      '罕见',
+    epic:      '史诗',
     legendary: '珍品',
     mythic:    '神品'
 };
@@ -100,6 +125,7 @@ function getLimbDisplayName(item) {
 // 列表显示名：肢体按品质着色（无前缀），其余沿用装备前缀规则
 function getInventoryDisplayName(item) {
     if (!item) return '';
+    if (item.id === 'red_banner') return `<span class="item-name--red">${item.name}</span>`;
     if (item.type === 'limb') return getLimbDisplayName(item);
     return item.rarity ? getEquipmentDisplayName(item) : item.name;
 }
@@ -119,7 +145,7 @@ function getEquipmentDisplayName(item) {
     if (!item || !item.rarity) return item ? item.name : '';
     const color = getRarityColor(item.rarity);
     const prefix = item.crafted ? '<span style="color:' + color + ';">★</span>' : '';
-    const rarityLabel = RARITY_NAMES[item.rarity] || '';
+    const rarityLabel = item.qualityLabel || RARITY_NAMES[item.rarity] || '';
     return prefix + '<span style="color:' + color + ';">【' + rarityLabel + '】' + item.name + '</span>';
 }
 
@@ -167,23 +193,16 @@ function isMine4Area(roomId) {
 
 function checkLevelUp() {
     const player = gameState.player;
+    player.maxExp = getExpRequiredForLevel(player.level);
     while (player.exp >= player.maxExp) {
         player.exp -= player.maxExp;
         player.level++;
-        const multiplier = 1.2;
-        player.maxHp = Math.floor(player.maxHp * multiplier);
-        player.hp = player.maxHp;
-        player.atk = player.atk * multiplier;
-        player.def = player.def * multiplier;
-        player.agi = player.agi * multiplier;
-        player.maxSp = Math.floor(player.maxSp + 2);
-        player.sp = player.maxSp;
-        player.maxExp = Math.floor(player.maxExp * multiplier);
+        applyPlayerLevelBalance(player, false);
         print("");
         print(`<span style="color: #ffdd44;">═══════════════════════════</span>`);
         print(`<span style="color: #ffdd44; font-weight: bold;">【升级！】等级提升至 ${player.level}！</span>`);
-        print(`<span style="color: #aaffaa;">生命值上限: ${player.maxHp}  |  攻击力: ${Math.floor(player.atk)}  |  防御力: ${Math.floor(player.def)}</span>`);
-        print(`<span style="color: #aaffaa;">技力上限: ${player.maxSp}  |  灵巧: ${Math.floor(player.agi)}</span>`);
+        print(`<span style="color: #aaffaa;">生命值上限: ${player.maxHp}  |  攻击力: ${player.atk}  |  防御力: ${player.def}</span>`);
+        print(`<span style="color: #aaffaa;">技力上限: ${player.maxSp}  |  灵巧: ${player.agi}</span>`);
         print(`<span style="color: #ffdd44;">下一级所需经验: ${player.maxExp}</span>`);
         print(`<span style="color: #ffdd44;">═══════════════════════</span>`);
     }
@@ -191,26 +210,53 @@ function checkLevelUp() {
 }
 
 const MIRROR_TELEPORT_DESTINATIONS = [
-    { id: 'mine_gate', name: '矿场大门', roomName: '矿场大门' }
+    { id: 'mine_gate', name: '矿场大门', roomName: '矿场大门', unlockRoom: 'mine_gate' },
+    { id: 'town_square', name: '卡伦镇', roomName: '镇中广场', unlockRoom: 'town_square' },
+    { id: 'mysterious_stone_gate', name: '学院遗址', roomName: '神秘的石门', unlockRoom: 'mysterious_stone_gate' }
 ];
 
+function getMirrorDestinationState() {
+    if (!gameState.gameFlags) gameState.gameFlags = {};
+    if (!gameState.gameFlags.mirrorDestinations) gameState.gameFlags.mirrorDestinations = {};
+    return gameState.gameFlags.mirrorDestinations;
+}
+
+function hasMagicMirror() {
+    return gameState.player.inventory.some(item => item && item.id === 'magic_mirror') ||
+        !!(gameState.player.equipment.accessory && gameState.player.equipment.accessory.id === 'magic_mirror');
+}
+
+function recordMirrorDestinationVisit(roomId) {
+    const destination = MIRROR_TELEPORT_DESTINATIONS.find(dest => dest.unlockRoom === roomId);
+    if (!destination) return;
+    const unlocked = getMirrorDestinationState();
+    if (unlocked[destination.id]) return;
+    unlocked[destination.id] = true;
+    if (hasMagicMirror()) {
+        print(`<span style="color:#8aa4ff;">🌀 魔镜记录了新的传送点：「${destination.name}」。</span>`);
+    }
+}
+
+function isMirrorDestinationUnlocked(destination) {
+    return !!getMirrorDestinationState()[destination.id];
+}
+
 function useMagicMirror() {
-    const mirror = findItemById('magic_mirror');
-    if (!mirror) {
-        if (!(gameState.player.equipment.accessory && gameState.player.equipment.accessory.id === 'magic_mirror')) {
-            print(`<span style="color: #ffaaaa;">你没有魔镜！</span>`);
-            return;
-        }
+    if (!hasMagicMirror()) {
+        print(`<span style="color: #ffaaaa;">你没有魔镜！</span>`);
+        return;
     }
     clearDetailPanel();
     currentPanel = null;
     let html = makeTitle('🌀 魔镜传送');
-    html += `<div style="color: #888; margin-bottom: 8px;">选择要传送的目的地：</div>\n`;
-    MIRROR_TELEPORT_DESTINATIONS.forEach(dest => {
+    html += `<div style="color: #888; margin-bottom: 8px;">魔镜只会回应你亲自抵达过的传送点：</div>\n`;
+    const unlockedDestinations = MIRROR_TELEPORT_DESTINATIONS.filter(isMirrorDestinationUnlocked);
+    unlockedDestinations.forEach(dest => {
         const room = gameState.world[dest.id];
-        const roomName = room ? room.name : dest.roomName;
-        html += `<div style="margin: 4px 0;"><span style="color: #6688ff; text-decoration: underline; cursor: pointer;" onclick="teleportViaMirror('${dest.id}')">📍 ${roomName}</span></div>\n`;
+        const arrivalName = room ? room.name : dest.roomName;
+        html += `<div style="margin: 4px 0;"><span style="color: #6688ff; text-decoration: underline; cursor: pointer;" onclick="teleportViaMirror('${dest.id}')">📍 ${dest.name}</span><small style="color:#718096; margin-left:8px;">${arrivalName}</small></div>\n`;
     });
+    if (unlockedDestinations.length === 0) html += `<div style="color:#718096;">尚未记录任何传送点。</div>\n`;
     html += centerLine();
     html += `<div><span style="color: #aaa; cursor: pointer;" onclick="clearDetailPanel()">↩️ 关闭</span></div>`;
     UI.setDetail(html);
@@ -218,6 +264,11 @@ function useMagicMirror() {
 }
 
 function teleportViaMirror(roomId) {
+    const destination = MIRROR_TELEPORT_DESTINATIONS.find(dest => dest.id === roomId);
+    if (!destination || !isMirrorDestinationUnlocked(destination)) {
+        print(`<span style="color: #ffaaaa;">魔镜尚未记录这个传送点。</span>`);
+        return;
+    }
     const room = gameState.world[roomId];
     if (!room) {
         print(`<span style="color: #ffaaaa;">传送失败：目的地不存在。</span>`);

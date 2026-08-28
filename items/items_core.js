@@ -7,6 +7,7 @@ const ITEM_TEMPLATES = {
     bread: { id: "bread", name: "干粮", type: "consumable", desc: "一块硬邦邦的黑面包。", effect: "heal", value: 5 },
     herb: { id: "herb", name: "止血草", type: "consumable", desc: "矿工们常用的草药。", effect: "heal", value: 10 },
     magic_mirror: { id: "magic_mirror", name: "魔镜", type: "misc", desc: "一面边框镶嵌紫色宝石的古朴手镜，镜面泛着幽蓝色的微光。点击传送可以瞬间移动到曾经到过的地点。", usable: true, customAction: true },
+    magic_doll_heart: { id: "magic_doll_heart", name: "魔偶之心", type: "misc", rarity: "legendary", qualityLabel: "传说", desc: "一枚仍在缓慢搏动的紫金色结晶心脏。瑟蕾娜将复杂的灵魂术式封存在其中；只要它留在物品栏中，便能把收集到的肢体组装成协助战斗的魔偶。", usable: false, customAction: true },
     statue_obedient: { id: "statue_obedient", name: "雕像【顺从】", type: "exhibit", desc: "这是一座以肉体欲望为蓝图，用死亡砌成的纪念碑。\n雕像的基座是艾莲娜那双跪倒的腿。黑色的高跟鞋将足弓绷成一道惊心动魄的弧线，脚踝纤细，向上延伸出紧实的小腿肌理。\n上半身属于伊莎贝拉。那对被精心保存并重新归位的乳房，在托举的姿态下微微上提，呈现出完美的圆形。底缘的缝合线将这对柔软的器官固定在胸前，成为一个专供审视的、永不衰垂的展品。\n伊莎贝拉冰冷的双手托举着银盘，盘中，塞西莉亚那双穿着白色厚丝袜的小巧脚掌，被摆放在头颅两侧。黑色的玛丽珍皮鞋与纯白的丝袜包裹着僵硬的脚踝和足背，散发着一种少女独有的、混合着纯真与诱惑的气息，那颗沾满干涸精液的头颅，是这篇矿场献给你的最终礼物。\n也许在未来的家园中可以展示它..." },
     black_stockings: { id: "black_stockings", name: "黑丝", type: "misc", desc: "一双黑色薄丝袜，触感丝滑细腻。这是伊莎贝拉生前最爱的穿着，上面似乎还残留着她肌肤的温度和淡淡的香水味。" },
     black_high_heels: { id: "black_high_heels", name: "黑色高跟鞋", type: "misc", desc: "一双黑色细跟高跟鞋，鞋面光滑，鞋跟细长优雅。伊莎贝拉生前最喜欢穿着这双高跟鞋在宅邸中走动，鞋底还残留着些许磨损痕迹。" },

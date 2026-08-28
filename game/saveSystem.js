@@ -26,7 +26,8 @@ const DEPRECATED_ROOM_ITEM_IDS = new Set([
     'old_furniture', 'wooden_boxes',
     'pink_bed', 'bookshelf', 'dressing_table',
     'wicker_chairs', 'tea_table_terrace',
-    'medium_wooden_door_countess'
+    'medium_wooden_door_countess',
+    'lost_carriage_horse', 'recovered_carriage_horse'
 ]);
 
 function cleanupDeprecatedWorldContent(state) {
@@ -48,6 +49,79 @@ function cleanupDeprecatedWorldContent(state) {
         state.player.location = 'second_floor_3';
     }
     delete state.world.secret_storage;
+}
+
+// 兼容旧存档：补齐 272 → 山路尽头 → 147 的主线路线。
+function repairKarenTownMainRoute(state, latestWorld) {
+    if (!state || !state.world || !latestWorld) return;
+
+    if (!state.world.mountain_path_13 && latestWorld.mountain_path_13) {
+        state.world.mountain_path_13 = latestWorld.mountain_path_13;
+    }
+    if (!state.world.mountain_path_14 && latestWorld.mountain_path_14) {
+        state.world.mountain_path_14 = latestWorld.mountain_path_14;
+    }
+
+    const room272 = state.world.mountain_path_13;
+    const endingRoom = state.world.mountain_path_14;
+    if (room272) {
+        if (!room272.exits) room272.exits = {};
+        room272.exits.south = 'mountain_path_14';
+    }
+    if (endingRoom) {
+        if (!endingRoom.exits) endingRoom.exits = {};
+        endingRoom.exits.north = 'mountain_path_13';
+        if (!Array.isArray(endingRoom.items)) endingRoom.items = [];
+        if (!endingRoom.items.includes('karen_town')) endingRoom.items.push('karen_town');
+        endingRoom.isEnding = true;
+    }
+}
+
+// 兼容旧存档：覆盖备用马版本的荒地支路，并补齐 325—333 号新路线。
+function repairHiddenPathRoute(state, latestWorld) {
+    if (!state || !state.world || !latestWorld) return;
+    const routeRoomIds = [
+        'wasteland_trail', 'wasteland_hollow',
+        'hidden_path_3', 'hidden_path_4', 'hidden_path_5', 'hidden_path_6',
+        'hidden_path_n1', 'hidden_path_n2', 'mysterious_stone_gate',
+        'quiet_clearing', 'quiet_hut_floor1', 'quiet_hut_floor2', 'quiet_stable'
+    ];
+    const preserveAfterCreation = new Set(['quiet_clearing', 'quiet_hut_floor1', 'quiet_hut_floor2', 'quiet_stable']);
+    routeRoomIds.forEach(roomId => {
+        if (latestWorld[roomId] && (!preserveAfterCreation.has(roomId) || !state.world[roomId])) {
+            state.world[roomId] = JSON.parse(JSON.stringify(latestWorld[roomId]));
+        }
+    });
+
+    if (state.gameFlags && state.gameFlags.carriageHorseFound && state.world.quiet_stable) {
+        state.world.quiet_stable.items = (state.world.quiet_stable.items || []).filter(id => id !== 'beautiful_white_horse');
+    }
+
+    const wasteland = state.world.wasteland;
+    if (wasteland) {
+        if (!(wasteland.items || []).includes('repaired_carriage')) wasteland.desc = latestWorld.wasteland.desc;
+        wasteland.exits = { ...latestWorld.wasteland.exits };
+        wasteland.items = (wasteland.items || []).filter(id => !['lost_carriage_horse', 'recovered_carriage_horse'].includes(id));
+    }
+}
+
+function migrateFriendOrFoeQuest(state) {
+    if (!state || typeof StoryEngine === 'undefined') return;
+    const questId = 'quest_friend_or_foe';
+    const completedIndex = StoryEngine.completedQuests.indexOf(questId);
+    const wasCompleted = completedIndex !== -1;
+    const alreadyMetFirstSerena = !!(state.talkedNPCs && state.talkedNPCs.serena);
+    const alreadyMetQuietSerena = !!(state.talkedNPCs && state.talkedNPCs.serena_quiet);
+    // 新版中完成两次对话的存档保持完成状态；只修复旧版在首次对话后便提前完成的记录。
+    if (wasCompleted && alreadyMetQuietSerena) return;
+    if (wasCompleted) StoryEngine.completedQuests.splice(completedIndex, 1);
+    if (alreadyMetFirstSerena) {
+        if (!StoryEngine.activeQuests.includes(questId)) StoryEngine.activeQuests.push(questId);
+        StoryEngine.questStages[questId] = 1;
+        StoryEngine.questProgress[questId] = {};
+        const story = StoryEngine.registry.get(questId);
+        if (story && story.stages) StoryEngine._applyStage(questId, story);
+    }
 }
 
 // 判断是否为动态物品ID
@@ -158,6 +232,16 @@ async function loadGame() {
 
         // 恢复游戏状态
         gameState = loaded;
+        if (gameState.player?.equipment?.body) {
+            const legacyBodyArmor = gameState.player.equipment.body;
+            if (!gameState.player.equipment.armor) gameState.player.equipment.armor = legacyBodyArmor;
+            else gameState.player.inventory.push(legacyBodyArmor);
+            delete gameState.player.equipment.body;
+        }
+        if (typeof applyPlayerLevelBalance === 'function') applyPlayerLevelBalance(gameState.player, true);
+        if (typeof resetElaineAppearance === 'function') resetElaineAppearance();
+        if (typeof resetMandorolaIdentity === 'function') resetMandorolaIdentity();
+        if (typeof resetCoachmanState === 'function') resetCoachmanState();
 
         // 兼容旧存档：补默认势力/悬赏状态
         if (!gameState.factions) gameState.factions = {};
@@ -174,6 +258,38 @@ async function loadGame() {
             if (!gameState.world[roomId]) {
                 gameState.world[roomId] = latestWorld[roomId];
             }
+        }
+        repairKarenTownMainRoute(gameState, latestWorld);
+        repairHiddenPathRoute(gameState, latestWorld);
+        if (typeof repairLoadedAcademyDungeon === 'function') repairLoadedAcademyDungeon();
+        migrateFriendOrFoeQuest(gameState);
+
+        // 兼容新增主线5前已经完成主线4、但仍停在驿站的存档。
+        const departDone = typeof StoryEngine !== 'undefined' && StoryEngine.completedQuests.includes('quest_depart');
+        const shadowStarted = typeof StoryEngine !== 'undefined' &&
+            (StoryEngine.activeQuests.includes('quest_shadow_castle') || StoryEngine.completedQuests.includes('quest_shadow_castle'));
+        if (departDone && !shadowStarted && gameState.player.location === 'karen_relay_station') {
+            if (typeof moveNpcToRoom === 'function') moveNpcToRoom('coachman', 'wasteland');
+            gameState.player.location = 'wasteland';
+        }
+
+        // 恢复由任务进度改变的人物身份与外观（兼容旧存档）。
+        const mandorolaMoved = Object.entries(gameState.world).some(([roomId, room]) =>
+            roomId !== 'slum_tunnel' && room && Array.isArray(room.npcs) && room.npcs.includes('slum_girl')
+        );
+        if (typeof revealMandorolaIdentity === 'function' &&
+            ((gameState.gameFlags && gameState.gameFlags.mandorolaIntroduced) || mandorolaMoved)) {
+            revealMandorolaIdentity();
+        }
+        const hasRedBanner = gameState.player.inventory.some(item => item && item.id === 'red_banner');
+        const elaineChanged = gameState.gameFlags && (gameState.gameFlags.rebelAlliesEnabled || gameState.gameFlags.redFlagPlanted);
+        if (typeof applyElaineRebelAppearance === 'function' && (hasRedBanner || elaineChanged)) {
+            applyElaineRebelAppearance();
+        }
+        const shadowActive = typeof StoryEngine !== 'undefined' && StoryEngine.activeQuests.includes('quest_shadow_castle');
+        if (typeof applyCoachmanStrandedState === 'function' &&
+            ((gameState.gameFlags && gameState.gameFlags.carriageStranded) || shadowActive)) {
+            applyCoachmanStrandedState();
         }
 
         // 重新注册地面物品到ITEM_TEMPLATES（兼容旧存档）
@@ -224,6 +340,9 @@ function resetGame() {
     currentPanel = null;
     if (confirm('一切将重新开始，确定吗？')) {
         gameState = getDefaultGameState();
+        if (typeof resetElaineAppearance === 'function') resetElaineAppearance();
+        if (typeof resetMandorolaIdentity === 'function') resetMandorolaIdentity();
+        if (typeof resetCoachmanState === 'function') resetCoachmanState();
         clearOutput();
         waitingForName = false;
         UI.elements.cmdInput.placeholder = "输入命令 (如 look, n, i)...";

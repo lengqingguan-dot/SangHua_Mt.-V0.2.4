@@ -4,6 +4,10 @@
 
 const GROUND_ITEM_ACTIONS = [
     { match(itemId, item) { return itemId === 'bounty_board'; }, actions(itemId, item, html) { html.push(`<div><span style="color: #cc9966; text-decoration: underline; cursor: pointer;" onclick="showBountyBoard()">📜 查看悬赏</span></div>`); }, earlyReturn: true },
+    { match(itemId, item) { return itemId === 'academy_stone_gate'; }, actions(itemId, item, html) { html.push(`<div><span style="color: #aaffaa; text-decoration: underline; cursor: pointer;" onclick="enterAcademyRuins()">🚪 进入</span></div>`); }, earlyReturn: true },
+    { match(itemId, item) { return itemId === 'academy_dungeon_exit'; }, actions(itemId, item, html) { html.push(`<div><span style="color: #aaffaa; text-decoration: underline; cursor: pointer;" onclick="leaveAcademyDungeon()">🚪 离开</span></div>`); }, earlyReturn: true },
+    { match(itemId, item) { return itemId === 'academy_dungeon_return_gate'; }, actions(itemId, item, html) { html.push(`<div><span style="color: #cc9966; text-decoration: underline; cursor: pointer;" onclick="leaveAcademyDungeon()">↩ 返回石门</span></div>`); }, earlyReturn: true },
+    { match(itemId, item) { return itemId === 'beautiful_white_horse'; }, actions(itemId, item, html) { html.push(`<div><span style="color: #aaffaa; text-decoration: underline; cursor: pointer;" onclick="takeBeautifulWhiteHorse('${itemId}')">🐴 带离</span></div>`); }, earlyReturn: true },
     { match(itemId, item) { return itemId === 'dungeon_door' || itemId === 'dungeon_exit'; }, actions(itemId, item, html) { html.push(`<div><span style="color: #cc9966; text-decoration: underline; cursor: pointer;" onclick="usePortal('${itemId}')">🚪 进入</span></div>`); }, earlyReturn: true },
     { match(itemId, item) { return itemId === 'dungeon_straw_mat_special'; }, actions(itemId, item, html) { html.push(`<div><span style="color: #cc9966; text-decoration: underline; cursor: pointer;" onclick="liftDungeonStrawMat('${itemId}')">🧹 掀开</span></div>`); }, earlyReturn: true },
     { match(itemId, item) { return itemId === 'strange_mound'; }, actions(itemId, item, html) { html.push(`<div><span style="color: #cc9966; text-decoration: underline; cursor: pointer;" onclick="digStrangeMound('${itemId}')">⛏️ 挖开</span></div>`); }, earlyReturn: true },
@@ -31,10 +35,49 @@ const GROUND_ITEM_ACTIONS = [
     { match(itemId, item) { return itemId === 'stone_wall'; }, actions(itemId, item, html) { html.push(`<div><span style="color: #ffaa66; text-decoration: underline; cursor: pointer;" onclick="mineStoneWall('${itemId}')">⛏️ 挖掘</span></div>`); } },
     { match(itemId, item) { return itemId === 'karen_church_door'; }, actions(itemId, item, html) { if (gameState.player.location === 'church_porch') { html.push(`<div><span style="color: #aaffaa; text-decoration: underline; cursor: pointer;" onclick="leaveChurchToGate()">🚪 离开教堂</span></div>`); } else { html.push(`<div><span style="color: #aaffaa; text-decoration: underline; cursor: pointer;" onclick="enterChurchPorch()">🚪 进入教堂</span></div>`); } }, earlyReturn: true },
     { match(itemId, item) { return itemId === 'karen_church_back_door'; }, actions(itemId, item, html) { if (gameState.player.location === 'church_back_door') { html.push(`<div><span style="color: #aaffaa; text-decoration: underline; cursor: pointer;" onclick="enterChurchAltar()">🚪 进入教堂</span></div>`); } else { html.push(`<div><span style="color: #aaffaa; text-decoration: underline; cursor: pointer;" onclick="leaveChurchToBackDoor()">🚪 离开教堂</span></div>`); } }, earlyReturn: true },
-    { match(itemId, item) { return itemId === 'karen_town'; }, actions(itemId, item, html) { html.push(`<div><span style="color: #aaffaa; text-decoration: underline; cursor: pointer;" onclick="StoryEngine.triggerUseItem('${itemId}')">🚶 进入</span></div>`); }, earlyReturn: true },
+    { match(itemId, item) { return itemId === 'karen_town'; }, actions(itemId, item, html) { html.push(`<div><span style="color: #aaffaa; text-decoration: underline; cursor: pointer;" onclick="enterKarenTown()">🚶 进入</span></div>`); }, earlyReturn: true },
     { match(itemId, item) { return itemId === 'sanghuashan_mine'; }, actions(itemId, item, html) { html.push(`<div><span style="color: #ff8844; text-decoration: underline; cursor: pointer;" onclick="enterSanghuashanMine()">🚶 进入</span></div>`); }, earlyReturn: true },
     { match(itemId, item) { return itemId.includes('corpse'); }, actions(itemId, item, html) { if (item.corpseStory || item.usable) html.push(`<div><span style="color: #ff66aa; text-decoration: underline; cursor: pointer;" onclick="useCorpseOnGround('${itemId}')">🔞 互动</span></div>`); if (item.loot && item.loot.length > 0) html.push(`<div><span style="color: #ffdd44; text-decoration: underline; cursor: pointer;" onclick="lootCorpse('${itemId}')">✨ 搜刮</span></div>`); if (item.dismemberable) html.push(`<div><span style="color: #ff6b6b; text-decoration: underline; cursor: pointer;" onclick="dismemberItem('${itemId}')">🔪 肢解</span></div>`); if (!item.notPickable) { html.push(`<div><span style="color: #aaffaa; text-decoration: underline; cursor: pointer;" onclick="pickupItem('${itemId}')">📦 拾取</span></div>`); const sameCount = countSameItemsOnGround(item); if (sameCount > 1) html.push(`<div><span style="color: #aaffaa; text-decoration: underline; cursor: pointer;" onclick="pickupAllSameItems('${itemId}')">📥 全部拾取(${sameCount}个)</span></div>`); } } }
 ];
+
+function takeBeautifulWhiteHorse(itemId) {
+    const room = gameState.world[gameState.player.location];
+    if (!room || !room.items || !room.items.includes(itemId)) {
+        print(`<span style="color:#888;">白马已经被带走了。</span>`);
+        return;
+    }
+    room.items.splice(room.items.indexOf(itemId), 1);
+    if (!gameState.gameFlags) gameState.gameFlags = {};
+    gameState.gameFlags.carriageHorseFound = true;
+    const wasteland = gameState.world.wasteland;
+    if (wasteland) {
+        if (!wasteland.items) wasteland.items = [];
+        if (!wasteland.items.includes('led_white_horse')) wasteland.items.push('led_white_horse');
+    }
+    clearDetailPanel();
+    currentPanel = null;
+    relocateTo('wasteland', {
+        travelText: '你解开栏门与缰绳。白马温顺地跟随你穿过隐秘小径，最终回到停摆的驿车旁。',
+        callback: () => { if (typeof StoryEngine !== 'undefined') StoryEngine.check(); }
+    });
+}
+
+// 从山路尽头进入 147 号房间。首次进入走剧情事件；事件已完成时仍允许再次通行。
+function enterKarenTown() {
+    if (typeof StoryEngine !== 'undefined' && StoryEngine.triggerUseItem('karen_town')) return;
+
+    clearDetailPanel();
+    currentPanel = null;
+    UI.setOverlay(true);
+    gameState.player.location = 'road';
+    if (!gameState.gameFlags) gameState.gameFlags = {};
+    gameState.gameFlags.roadEntered = true;
+    UI.setOverlay(false);
+    look();
+    updateMinimap();
+    updateSceneInfo();
+    if (typeof StoryEngine !== 'undefined') StoryEngine.check();
+}
 
 // 挖开墓地中怪异的小土堆：播放剧情，获得「抄写员的手稿」
 function digStrangeMound(itemId) {
@@ -194,7 +237,8 @@ function showGroundItemInfo(itemId) {
     const typeName = getItemTypeName(item.type);
     const meta = item.rarity ? `${typeName} · ${getQualityName(item.rarity)}` : typeName;
     let html = makeTitle(item.notPickable ? '场景设施详情' : '物品详情');
-    html += `<div class="detail-card"><div class="detail-card__header"><span>${getItemEmoji(item)} ${nameDisplay}</span><span class="detail-card__badge">${meta}</span></div>`;
+    html += `<div class="detail-card ${item.detailImage ? 'detail-card--with-image' : ''}"><div class="detail-card__header">${getItemDetailHeading(item, nameDisplay)}<span class="detail-card__badge">${meta}</span></div>`;
+    if (item.detailImage) html += `<button class="item-detail-visual" type="button" title="点击查看大图" onclick="openNPCPortrait(this.querySelector('img'))"><img src="${item.detailImage}" alt="${nameDisplay}细节图" loading="eager"><span>点击查看大图</span></button>`;
     html += `<div class="detail-card__desc">${item.desc || '没有更多可以观察到的信息。'}</div>`;
     if (item.score !== undefined || item.atk || item.def) {
         html += `<div class="equipment-summary"><div>评分<b>${item.score !== undefined ? item.score : '—'}</b></div><div>攻击<b>${item.atk ? '+' + item.atk : '—'}</b></div><div>防御<b>${item.def ? '+' + item.def : '—'}</b></div></div>`;

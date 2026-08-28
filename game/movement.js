@@ -53,15 +53,8 @@ function move(direction) {
     const dirChinese = { north: '北', south: '南', east: '东', west: '西' };
     print(`你向${dirChinese[fullDir]}方走去……`);
 
-    // 结局检查
-    if (targetRoomId === 'mountain_path_14') {
-        if (!gameState.gameFlags) gameState.gameFlags = {};
-        if (!gameState.gameFlags.endingPlayed) {
-            StoryEngine.check();
-            return;
-        }
-    }
-
+    // 山路尽头也按普通房间完成渲染；look() 会触发任务2的完成剧情。
+    // 不在这里提前返回，否则玩家位置已经改变，小地图却仍停留在272号房间。
     look();
 
     // 进入房间若恢复了后台战斗（含仇恨恢复），则停止后续普通渲染
@@ -129,7 +122,10 @@ function checkHostileNPCs(roomId) {
     const newRoom = gameState.world[roomId];
     if (!newRoom || !newRoom.npcs) return;
 
-    const hostileNPCs = newRoom.npcs.filter(npcId => npcId === 'mad_miner' || npcId === 'mad_supervisor');
+    const hostileNPCs = newRoom.npcs.filter(npcId => {
+        const npc = typeof getCharacterInfo === 'function' ? getCharacterInfo(npcId) : null;
+        return npc && npc.hostile && npc.canFight;
+    });
     if (hostileNPCs.length === 0) return;
 
     UI.setOverlay(true);
@@ -144,8 +140,11 @@ function checkHostileNPCs(roomId) {
             msg = `${madMiners.length}个发狂矿工和${madSupervisors.length}个发狂监工发现了你，发出野兽般的嘶吼，挥舞着武器冲了上来！`;
         } else if (madSupervisors.length > 0) {
             msg = madSupervisors.length === 1 ? '发狂的监工发现了你...' : `${madSupervisors.length}个发狂的监工发现了你...`;
-        } else {
+        } else if (madMiners.length > 0) {
             msg = madMiners.length === 1 ? '发狂矿工发现了你...' : `${madMiners.length}个发狂矿工发现了你...`;
+        } else {
+            const names = hostileNPCs.map(id => getCharacterInfo(id)?.name || id);
+            msg = `${names.join('、')}察觉到你的闯入，立即向你发动攻击！`;
         }
         print(`<span style="color: #ff6666;">${msg}</span>`);
         startMultiBattle(hostileNPCs);

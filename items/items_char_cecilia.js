@@ -5,6 +5,9 @@
 Object.assign(ITEM_TEMPLATES, {
     cecilia_head: {
         id: "cecilia_head", name: "塞西莉亚的头颅", type: "limb",
+        thumbnail: "assets/items/cecilia-head-thumb.png",
+        thumbnailCutout: true,
+        detailImage: "assets/items/cecilia-head-detail.png",
         desc: "一颗精致娇小的少女头颅，属于伯爵女儿塞西莉亚·冯·兰德尔。乌黑的长发如瀑布般散乱，被鲜血浸湿后粘在苍白细腻的脸颊上。脸型小巧，眼睛大而圆润，睫毛又长又翘，嘴唇粉嫩薄薄地微微张开。脖颈断面细小整齐，鲜血从细嫩的颈部血管处喷溅后凝固成薄薄的暗红层，皮肤白得几乎透明，带着十八岁少女特有的稚嫩光泽。",
         usable: true, customAction: true, cookable: true, ingredientType: "head", resultDish: "cecilia_head_dish",
         onUseDestroy: true, onUseSpawn: ["cecilia_head_broken", "cecilia_tongue"],
@@ -41,9 +44,15 @@ Object.assign(ITEM_TEMPLATES, {
             "躯干的小腹处鼓胀起来，你用手轻轻一按，白色的精液立马从阴道口喷射了出来。"
         ]
     },
-    cecilia_leg: { id: "cecilia_leg", name: "塞西莉亚的腿", type: "limb", cookable: true, ingredientType: "leg", resultDish: "cecilia_leg_steak", desc: "一条娇小纤细的腿，属于伯爵女儿塞西莉亚·冯·兰德尔。长度适中却非常瘦弱，大腿圆润柔软，小腿细直。皮肤白皙细嫩，覆盖着几乎看不见的细软绒毛。大腿根部干净白嫩，断面露出细小的腿骨与柔软的粉红肌肉，鲜血顺着大腿根部缓缓流下，显得脆弱而诱人。" },
+    cecilia_leg: {
+        id: "cecilia_leg", name: "塞西莉亚的腿", type: "limb", cookable: true, ingredientType: "leg", resultDish: "cecilia_leg_steak",
+        thumbnail: "assets/items/cecilia-leg-thumb.png",
+        desc: "一条娇小纤细的腿，属于伯爵女儿塞西莉亚·冯·兰德尔。长度适中却非常瘦弱，大腿圆润柔软，小腿细直。皮肤白皙细嫩，覆盖着几乎看不见的细软绒毛。大腿根部干净白嫩，断面露出细小的腿骨与柔软的粉红肌肉，鲜血顺着大腿根部缓缓流下，显得脆弱而诱人。"
+    },
     cecilia_foot: {
         id: "cecilia_foot", name: "塞西莉亚的脚", type: "limb", usable: true, customAction: true, cookable: true, ingredientType: "foot", resultDish: "cecilia_foot_dish",
+        thumbnail: "assets/items/cecilia-foot-thumb.png",
+        thumbnailScale: 0.74,
         desc: "一只小巧可爱的脚，属于伯爵女儿塞西莉亚·冯·兰德尔。脚掌小而精致，脚趾匀称整齐，脚背弧度柔美。脚上还穿着白色厚丝袜与黑色小皮鞋。被切下时丝袜与骨肉一齐应声而断，没有丝毫阻碍。丝袜被鲜血浸透后紧紧贴在皮肤上，脚底部分因穿小皮鞋而微微发红。断面露出细嫩的脚踝骨与粉色肌腱，就像一件精美的艺术品。",
         story: [
             "你脱下断脚上还穿着的小皮鞋，把脱出的一只裹着白色厚丝袜的小脚并拢捧在手里。",
@@ -57,9 +66,16 @@ Object.assign(ITEM_TEMPLATES, {
             "\u201c吱呀\u201d一声，精液从小皮鞋与断脚之间的空隙流出，沾满了小皮鞋和丝袜，把整只脚变得色情淫荡，你在手上把玩揉搓着这只小脚，欣赏着由你创作的又一件艺术品。"
         ]
     },
-    cecilia_arm: { id: "cecilia_arm", name: "塞西莉亚的手臂", type: "limb", cookable: true, ingredientType: "arm", resultDish: "cecilia_arm_dish", desc: "一条纤细柔弱的手臂，属于伯爵女儿塞西莉亚·冯·兰德尔。皮肤白嫩如瓷，几乎没有一丝肌肉线条。手臂内侧特别细腻，能看到淡淡的蓝色血管。断面露出细小的臂骨与薄薄的粉色肌肉层，鲜血从切口轻轻流下，染红了原本洁白的皮肤。" },
+    cecilia_arm: {
+        id: "cecilia_arm", name: "塞西莉亚的手臂", type: "limb", cookable: true, ingredientType: "arm", resultDish: "cecilia_arm_dish",
+        thumbnail: "assets/items/cecilia-arm-thumb.png",
+        thumbnailScale: 0.90,
+        desc: "一条纤细柔弱的手臂，属于伯爵女儿塞西莉亚·冯·兰德尔。皮肤白嫩如瓷，几乎没有一丝肌肉线条。手臂内侧特别细腻，能看到淡淡的蓝色血管。断面露出细小的臂骨与薄薄的粉色肌肉层，鲜血从切口轻轻流下，染红了原本洁白的皮肤。"
+    },
     cecilia_hand: {
         id: "cecilia_hand", name: "塞西莉亚的手", type: "limb", usable: true, customAction: true, cookable: true, ingredientType: "hand", resultDish: "cecilia_hand_dish",
+        thumbnail: "assets/items/cecilia-hand-thumb.png",
+        thumbnailScale: 1.12,
         desc: "一只非常娇小细嫩的手，属于伯爵女儿塞西莉亚·冯·兰德尔。手指纤细如玉，指甲修剪得圆润整齐，涂着淡淡的白色指甲油。掌心柔软无茧，皮肤白皙细腻。断口露出细小的手骨与粉嫩的肌肉，鲜血缓慢渗出，让这双曾优雅拿扇子或裙摆的手现在沾满血迹，显得格外脆弱。",
         story: [
             "你将断手相对合拢，把已经完全勃起的肉棒塞进这对冰冷滑腻的掌心中，感受贵族少女从未干过重活的娇嫩手肉。",
@@ -73,6 +89,8 @@ Object.assign(ITEM_TEMPLATES, {
     },
     cecilia_breast: {
         id: "cecilia_breast", name: "塞西莉亚的乳房", type: "limb", cookable: true, ingredientType: "breast", resultDish: "cecilia_breast_dish",
+        thumbnail: "assets/items/cecilia-breast-thumb.png",
+        thumbnailScale: 0.90,
         milkItem: "cecilia_milk", maxMilkCount: 1, driedBreastId: "cecilia_breast_dried",
         desc: "一只非常娇小的A罩杯乳房，属于伯爵女儿塞西莉亚·冯·兰德尔。形状小巧挺拔，像两颗未完全成熟的嫩果，皮肤白皙细腻，乳晕呈浅粉色，乳头小而粉嫩，像两粒小小的樱桃。断面露出薄薄的脂肪层与粉嫩的乳腺组织，鲜血从切口渗出，让这只小小的乳房显得更加脆弱可怜。",
         milkStory: [[
