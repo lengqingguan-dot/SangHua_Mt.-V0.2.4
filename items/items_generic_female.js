@@ -1,6 +1,6 @@
 // ============================================================
 //  items/items_generic_female.js - 普通女贫民随机肢体系统
-//  品质随机（白40/绿30/蓝15/紫10/橙5）
+//  评分采用截断正态分布（均值50、标准差18、范围0~100）
 //  脚码随机（36/37/38各25%、35 15%、39 5%、34/40各2.5%）
 //  罩杯随机（A/B各30%、C25%、D10%、E5%）
 //  成对肢体（腿/手臂/手/脚/乳房）同品质、同尺寸
@@ -26,7 +26,25 @@ function _weightedRoll(table) {
     return table[table.length - 1][0];
 }
 
-function rollGenericScore() { return Math.floor(Math.random() * 101); }
+const GENERIC_SCORE_MEAN = 50;
+const GENERIC_SCORE_STD_DEV = 18;
+
+function _rollStandardNormal() {
+    let u = 0;
+    let v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+// 超出0~100时重新抽取，避免截断边界在0分和100分形成额外堆积。
+function rollGenericScore() {
+    let score;
+    do {
+        score = Math.round(GENERIC_SCORE_MEAN + _rollStandardNormal() * GENERIC_SCORE_STD_DEV);
+    } while (score < 0 || score > 100);
+    return score;
+}
 function rollGenericFootSize() { return _weightedRoll(GENERIC_FOOT_SIZES); }
 function rollGenericCup() { return _weightedRoll(GENERIC_CUPS); }
 
@@ -92,32 +110,41 @@ const GENERIC_FEMALE_DESCRIPTIONS = {
     }
 };
 
-const GENERIC_LIMB_NAMES = {
-    head: '女贫民的头',
-    torso: '女贫民的躯干',
-    leg: '女贫民的腿',
-    arm: '女贫民的手臂',
-    hand: '女贫民的手',
-    foot: '女贫民的脚',
-    breast: '女贫民的乳房'
+const GENERIC_LIMB_PART_NAMES = {
+    head: '头', torso: '躯干', leg: '腿', arm: '手臂',
+    hand: '手', foot: '脚', breast: '乳房'
 };
 
+const GENERIC_FEMALE_SOURCE_IDS = {
+    '女贫民': 'generic',
+    '女农奴': 'female_serf',
+    '女法师': 'female_mage'
+};
+
+function _addGenericFemaleSource(desc, sourceLabel) {
+    const firstStop = desc.indexOf('。');
+    if (firstStop === -1) return `${desc}，来自一名${sourceLabel}。`;
+    return `${desc.slice(0, firstStop)}，来自一名${sourceLabel}${desc.slice(firstStop)}`;
+}
+
 // 根据部位/评分/脚码/罩杯构建一个肢体模板
-function buildGenericFemaleLimb(part, score, footSize, cup) {
+function buildGenericFemaleLimb(part, score, footSize, cup, sourceLabel = '女贫民') {
     const quality = scoreToQuality(score);
     const pool = (GENERIC_FEMALE_DESCRIPTIONS[part] || {})[quality]
         || GENERIC_FEMALE_DESCRIPTIONS[part].normal;
     let desc = pool[Math.floor(Math.random() * pool.length)];
     if (part === 'foot') desc = desc.replace(/\{size\}/g, footSize || '未知');
     if (part === 'breast') desc = desc.replace(/\{cup\}/g, cup || '未知');
+    desc = _addGenericFemaleSource(desc, sourceLabel);
 
     // 名称直接附带码数/罩杯，避免同名堆叠
-    let limbName = GENERIC_LIMB_NAMES[part];
+    let limbName = `${sourceLabel}的${GENERIC_LIMB_PART_NAMES[part]}`;
     if (part === 'foot') limbName = `${limbName}（${footSize || '未知码'}）`;
     if (part === 'breast') limbName = `${limbName}（${cup || '未知罩杯'}）`;
+    const idPrefix = GENERIC_FEMALE_SOURCE_IDS[sourceLabel] || 'generic';
 
     return {
-        id: `generic_${part}_${quality}`,
+        id: `${idPrefix}_${part}_${quality}`,
         name: limbName,
         type: 'limb',
         rarity: quality,
@@ -138,13 +165,13 @@ function generateGenericFemaleCorpse(ownerName) {
 
     // 成对部位：先掷一次评分，再复制两份 → 保证品质/尺寸一致
     const pair = (part) => {
-        const base = buildGenericFemaleLimb(part, rollGenericScore(), footSize, cup);
+        const base = buildGenericFemaleLimb(part, rollGenericScore(), footSize, cup, ownerName);
         return [base, _clone(base)];
     };
 
     const generatedLimbs = {
-        head: [buildGenericFemaleLimb('head', rollGenericScore(), footSize, cup)],
-        torso: [buildGenericFemaleLimb('torso', rollGenericScore(), footSize, cup)],
+        head: [buildGenericFemaleLimb('head', rollGenericScore(), footSize, cup, ownerName)],
+        torso: [buildGenericFemaleLimb('torso', rollGenericScore(), footSize, cup, ownerName)],
         leg: pair('leg'),
         arm: pair('arm'),
         hand: pair('hand'),

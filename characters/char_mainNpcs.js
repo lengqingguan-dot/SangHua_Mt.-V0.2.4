@@ -27,7 +27,7 @@ Object.assign(CHARACTER_TEMPLATES, {
         assaultedDialogue: ["莉娅娜悲愤地看着你，眼角蓄着泪水，强忍着没让泪水落下。","「你……你达到目的了……还想怎样？」"]
     },
 
-    liana_wounded: { id: "liana_wounded", name: "伤痕累累的莉娅娜", type: "npc", gender: "female", portrait: "assets/portraits/liana.png",
+    liana_wounded: { id: "liana_wounded", name: "伤痕累累的莉娅娜", type: "npc", gender: "female", portrait: "assets/portraits/liana_wounded.png",
         desc: "莉娅娜瘫坐在冰冷的岩壁边，沉重的喘息在死寂的隧道里回荡。曾经坚固的银色板甲甲已被疯狂的矿工用铁镐生生撕裂，露出下方因剧烈搏杀而充血膨胀、紧致如绸缎般的健美肌肉。最为惨烈的是，她的整个右臂已经齐肩断裂，断口处血肉模糊，白色的断骨茬在昏暗的火光下触目惊心，大量鲜血顺着她那满是抓痕与淤青的侧腹滚落，将她腰间残存的皮甲染成了暗黑色。\n她那头凌乱的深红长发被汗水和血浆糊在紧致的颈部，尽管身受重伤，那双赤色的眸子依然死死盯着你，倔强中带着一丝绝望的涣散。随着粗重的呼吸，她那对几乎要从破碎衬衣中挤出的丰满乳房剧烈起伏着。",
         dialogue: ["咳咳……你……你怎么会在这里……","那些怪物……太多了……我尽力了……","王国……骑士团……不会放过……","杀了我……或者……走吧……"],
         repeatDialogue: ["……","莉娅娜不再说话，只是垂着头。"],

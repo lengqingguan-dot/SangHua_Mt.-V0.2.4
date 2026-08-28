@@ -13,7 +13,7 @@ Object.assign(ITEM_TEMPLATES, {
         type: "limb",
         rarity: MANDOROLA_QUALITY,
         score: 68,
-        desc: "曼德罗拉的头颅。黑色长发散乱地贴在脸颊上，金色瞳孔已经涣散，像两枚将要熄灭的灯。她的脸很年轻，下巴却绷得很紧，像死后仍不肯放松戒备。断颈处血已经凉透。"
+        desc: "一颗轮廓清晰锐利的女性头颅，来自曼德罗拉。极长的黑发披散在脸侧，金色瞳孔与苍白皮肤形成醒目的反差；五官冷峻而比例协调，细看之下只有少量不易察觉的瑕疵。"
     },
 
     mandorola_torso: {
@@ -22,7 +22,7 @@ Object.assign(ITEM_TEMPLATES, {
         type: "limb",
         rarity: MANDOROLA_QUALITY,
         score: 68,
-        desc: "曼德罗拉的躯干。瘦小的身体上还穿着裹了灰尘的黑衣，布料被匕首划开几道口子，露出下面薄而紧实的肌肉。断口处露出肋骨的轮廓，血已经凝成暗红。"
+        desc: "一截纤细紧实的女性躯干，来自曼德罗拉。腰腹与背部覆盖着为潜行和短促爆发形成的薄实肌肉，黑衣之下的身体没有多余赘肉，整体比例干净利落。"
     },
 
     mandorola_leg: {
@@ -31,7 +31,7 @@ Object.assign(ITEM_TEMPLATES, {
         type: "limb",
         rarity: MANDOROLA_QUALITY,
         score: 68,
-        desc: "曼德罗拉的腿。细长而有力，小腿的形状像踩惯狭窄地道的人磨出来的。脚踝纤细，裹着灰扑扑的绑腿。断面露出肌肉束与白森森的腿骨。"
+        desc: "一条细长有力的女性腿，来自曼德罗拉。大腿与小腿的肌肉分布极为利落，兼具爆发力与灵活性；长期在狭窄地道中移动也没有破坏流畅而出众的比例。"
     },
 
     mandorola_arm: {
@@ -40,7 +40,7 @@ Object.assign(ITEM_TEMPLATES, {
         type: "limb",
         rarity: MANDOROLA_QUALITY,
         score: 68,
-        desc: "曼德罗拉的手臂。细瘦，指节分明，虎口有一层常年握刀磨出的薄茧。这条手臂曾用极快的速度把刀刃递进出，此刻却软软地垂着，指尖还沾着一点没干的血。"
+        desc: "一条纤细而富有力量的女性手臂，来自曼德罗拉。肩、肘与腕部比例精准，薄薄的肌肉足以迅速完成挥刀、格挡与攀爬动作；除训练痕迹外，几乎找不到影响轮廓的缺点。"
     },
 
     mandorola_hand: {
@@ -49,7 +49,7 @@ Object.assign(ITEM_TEMPLATES, {
         type: "limb",
         rarity: MANDOROLA_QUALITY,
         score: 68,
-        desc: "曼德罗拉的手。手指细长，掌心有淡淡的薄茧，指甲剪得很短。这只手握住匕首时从不犹豫。断面处腕骨短促，血顺着指缝淌成几道细线。"
+        desc: "一只精巧灵活的女性手，来自曼德罗拉。手指细长，掌形窄小，指甲修剪得极短；掌心只有一层不影响触感的持刀薄茧，兼具美观与实用性。"
     },
 
     mandorola_foot: {
@@ -58,7 +58,7 @@ Object.assign(ITEM_TEMPLATES, {
         type: "limb",
         rarity: MANDOROLA_QUALITY,
         score: 68,
-        desc: "曼德罗拉的脚，36码。脚型窄小，脚背微微拱起，脚底是在地道湿泥里磨出的薄茧。脚趾蜷着，断踝处的血已经发黑，凝在趾缝之间。"
+        desc: "一只窄小而轮廓出众的女性脚，来自曼德罗拉。它是36码，足弓清晰，脚趾整齐而抓地有力；长期潜行只在脚底留下均匀薄茧，没有破坏整体形态。"
     },
 
     mandorola_breast: {
@@ -67,7 +67,7 @@ Object.assign(ITEM_TEMPLATES, {
         type: "limb",
         rarity: MANDOROLA_QUALITY,
         score: 68,
-        desc: "曼德罗拉的乳房，A罩杯。小而紧实，像尚未完全长开的少女。皮肤苍白，乳晕是浅褐色，断面露出淡黄的脂肪与暗红的肌理。"
+        desc: "一只小巧紧实的女性乳房，来自曼德罗拉。它是A罩杯，轮廓贴合不妨碍行动的纤细身形；外观整洁、比例自然，但没有特别醒目的特征。"
     }
 
 });
